@@ -2,17 +2,19 @@
     <head>
         <title>Provando pb-test</title>
         <style>
-            pb-test {
+            pb-clipboard {
                 margin-bottom: 20px;
             }
         </style>
-        <script type="module" src="https://esm.sh/@teipublisher/pb-components/src/pb-page.js"></script>
+        <script type="module" src="./node_modules/@teipublisher/pb-components/src/pb-page.js"></script>
         <script type="module" src="./src/pb-test.js"></script>
     </head>
     <body>
         <h1>Provando pb-test</h1>
 
-        <pb-test />
+        <pb-page locales="./i18n/{{ns}}/{{lng}}.json">
+            <pb-test name="Kalo"></pb-test>
+        </pb-page>
 
     </body>
 </html>

@@ -1,5 +1,10 @@
 {
     "pb-clipboard": {
         "demo/pb-clipboard.html": "Clipboard Demo"
+    },
+
+    "pb-test": {
+        "demo/pb-test.html": "Componente di test"
     }
+
 }
