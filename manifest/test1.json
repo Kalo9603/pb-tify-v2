@@ -1,0 +1,236 @@
+{
+  "@context": "http://iiif.io/api/presentation/2/context.json",
+  "@id": "https://api.cultural.jp/iiif/metmuseum-39799/manifest",
+  "@type": "sc:Manifest",
+  "label": [
+    {
+      "@language": "ja",
+      "@value": "「富嶽三十六景　神奈川沖浪裏」"
+    },
+    {
+      "@language": "en",
+      "@value": "Under the Wave off Kanagawa (Kanagawa oki nami ura), or The Great Wave, from the series Thirty-six Views of Mount Fuji (Fugaku sanjūrokkei)"
+    },
+    {
+      "@language": "ja-x-mt",
+      "@value": "富嶽三十六景（富嶽三十六景）シリーズの神奈川沖の波の下（神奈川沖波浦）、または大波"
+    }
+  ],
+  "description": [
+    "Classification: Prints",
+    "Culture: Japan",
+    "Medium: Woodblock print; ink and color on paper",
+    "Credit Line: The Howard Mansfield Collection, Purchase, Rogers Fund, 1936",
+    "Department: Asian Art",
+    "Dimensions: 10 x 15 in. (25.4 x 38.1 cm)",
+    "Period: Edo period (1615–1868)",
+    "Object Name: Woodblock print"
+  ],
+  "attribution": [
+    {
+      "@value": "メトロポリタン美術館",
+      "@language": "ja"
+    },
+    {
+      "@value": "「メトロポリタン美術館オープンアクセスCSV」の画像をIIIFビューアで閲覧できるように(https://www.metmuseum.org/art/collection/search/39799)に基づいて作成",
+      "@language": "ja"
+    },
+    {
+      "@value": "Metropolitan Museum of Art",
+      "@language": "en"
+    },
+    {
+      "@value": "Created by \"The Metropolitan Museum of Art Open Access CSV\" (https://www.metmuseum.org/art/collection/search/39799)",
+      "@language": "en"
+    }
+  ],
+  "metadata": [
+    {
+      "label": [
+        {
+          "@value": "収録DB",
+          "@language": "ja",
+          "@id": "https://jpsearch.go.jp/term/property#sourceInfo"
+        },
+        {
+          "@value": "Database",
+          "@language": "en",
+          "@id": "https://jpsearch.go.jp/term/property#sourceInfo"
+        }
+      ],
+      "value": [
+        {
+          "@value": "メトロポリタン美術館オープンアクセスCSV",
+          "@language": "ja"
+        },
+        {
+          "@value": "The Metropolitan Museum of Art Open Access CSV",
+          "@language": "en"
+        }
+      ]
+    },
+    {
+      "label": [
+        {
+          "@value": "基本区分",
+          "@language": "ja",
+          "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+        },
+        {
+          "@value": "Type",
+          "@language": "en",
+          "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+        }
+      ],
+      "value": [
+        {
+          "@value": "版画",
+          "@language": "ja"
+        },
+        {
+          "@value": "Print",
+          "@language": "en"
+        }
+      ]
+    },
+    {
+      "label": [
+        {
+          "@value": "キーワード",
+          "@language": "ja",
+          "@id": "http://schema.org/about"
+        },
+        {
+          "@value": "Keyword",
+          "@language": "en",
+          "@id": "http://schema.org/about"
+        }
+      ],
+      "value": [
+        {
+          "@value": "舟",
+          "@language": "ja"
+        },
+        {
+          "@value": "波",
+          "@language": "ja"
+        },
+        {
+          "@value": "山",
+          "@language": "ja"
+        },
+        {
+          "@value": "舟",
+          "@language": "en"
+        },
+        {
+          "@value": "Wave",
+          "@language": "en"
+        },
+        {
+          "@value": "Wind wave",
+          "@language": "en"
+        },
+        {
+          "@value": "Waves",
+          "@language": "en"
+        },
+        {
+          "@value": "Mountain",
+          "@language": "en"
+        },
+        {
+          "@value": "Mountains",
+          "@language": "en"
+        }
+      ]
+    },
+    {
+      "label": [
+        {
+          "@value": "人物",
+          "@language": "ja",
+          "@id": "https://jpsearch.go.jp/term/property#agential"
+        },
+        {
+          "@value": "People",
+          "@language": "en",
+          "@id": "https://jpsearch.go.jp/term/property#agential"
+        }
+      ],
+      "value": [
+        {
+          "@value": "葛飾北斎",
+          "@language": "ja"
+        },
+        {
+          "@value": "Katsushika, Hokusai",
+          "@language": "en"
+        }
+      ]
+    },
+    {
+      "label": [
+        {
+          "@value": "時間",
+          "@language": "ja",
+          "@id": "https://jpsearch.go.jp/term/property#temporal"
+        },
+        {
+          "@value": "Time",
+          "@language": "en",
+          "@id": "https://jpsearch.go.jp/term/property#temporal"
+        }
+      ],
+      "value": [
+        {
+          "@value": "1830～1832年",
+          "@language": "ja"
+        },
+        {
+          "@value": "1830-1832",
+          "@language": "en"
+        }
+      ]
+    }
+  ],
+  "seeAlso": "https://ld.cultural.jp/data/metmuseum-39799",
+  "related": "https://cultural.jp/item/metmuseum-39799",
+  "thumbnail": "https://images.metmuseum.org/CRDImages/as/web-thumb/DP141042.jpg",
+  "sequences": [
+    {
+      "@id": "https://api.cultural.jp/iiif/metmuseum-39799/sequence/normal",
+      "@type": "sc:Sequence",
+      "label": "Current order",
+      "viewingDirection": "left-to-right",
+      "canvases": [
+        {
+          "@id": "https://api.cultural.jp/iiif/metmuseum-39799/canvas/p1",
+          "@type": "sc:Canvas",
+          "height": 410,
+          "width": 600,
+          "images": [
+            {
+              "@id": "https://api.cultural.jp/iiif/metmuseum-39799/annotation/p1-image",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "on": "https://api.cultural.jp/iiif/metmuseum-39799/canvas/p1",
+              "resource": {
+                "@id": "https://images.metmuseum.org/CRDImages/as/web-large/DP141042.jpg",
+                "@type": "dctypes:Image",
+                "format": "image/jpeg",
+                "height": 410,
+                "width": 600
+              }
+            }
+          ],
+          "label": "[1] ",
+          "thumbnail": {
+            "@id": "https://images.metmuseum.org/CRDImages/as/web-thumb/DP141042.jpg"
+          }
+        }
+      ]
+    }
+  ],
+  "license": "http://creativecommons.org/publicdomain/mark/1.0/"
+}

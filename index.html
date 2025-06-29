@@ -1,18 +1,26 @@
 <html>
     <head>
+
         <title>Provando pb-test</title>
-        <style>
-            pb-test {
-                margin-bottom: 20px;
-            }
-        </style>
+
+        <script src="https://cdn.tailwindcss.com"></script>
         <script type="module" src="https://esm.sh/@teipublisher/pb-components/src/pb-page.js"></script>
+
+        <!-- Page Components -->
+
+        <script type="module" src="./src/components/header.js"></script>
+        <script type="module" src="./src/components/footer.js"></script>
+
         <script type="module" src="./src/pb-test.js"></script>
+
     </head>
     <body>
-        <h1>Provando pb-test</h1>
 
-        <pb-test />
+        <cp-header></cp-header>
+
+        <pb-test name="Kalito"></pb-test>
+
+        <cp-footer></cp-footer>
 
     </body>
 </html>

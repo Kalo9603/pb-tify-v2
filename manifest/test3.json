@@ -1,0 +1,368 @@
+{
+  "@context": "http://iiif.io/api/presentation/2/context.json",
+  "@id": "https://fragmentarium.ms/metadata/iiif/F-zvl4/manifest.json",
+  "@type": "sc:Manifest",
+  "label": "Frauenfeld, Kantonsbibliothek Thurgau, X 519",
+  "metadata": [
+    {
+      "label": "Location",
+      "value": "Frauenfeld"
+    },
+    {
+      "label": "Collection Name",
+      "value": "Kantonsbibliothek Thurgau"
+    },
+    {
+      "label": "Shelfmark",
+      "value": "X 519"
+    },
+    {
+      "label": "Title",
+      "value": "Biblia Sacra Vulgata"
+    },
+    {
+      "label": "Subtitle",
+      "value": "Jeremiah 35:15-38:4"
+    },
+    {
+      "label": "Fragmentarium ID",
+      "value": "F-zvl4"
+    },
+    {
+      "label": "Material",
+      "value": "Parchment"
+    },
+    {
+      "label": "Document Type",
+      "value": "Fragment"
+    },
+    {
+      "label": "Number of Fragment Items",
+      "value": "2 partial leaves"
+    },
+    {
+      "label": "Page/Folio Reference",
+      "value": "Flyleaves"
+    },
+    {
+      "label": "Current Dimensions (in mm)",
+      "value": "233 x 249 mm"
+    },
+    {
+      "label": "Online Since",
+      "value": "2025-05-23"
+    },
+    {
+      "label": "Reconstruction Summary",
+      "value": "\u003Cp\u003ETwo halves of a fragmented single leaf from a giant 11th-century Bible manuscript containing Jeremiah 35:15-38:4. Repurposed as flyleaves at the front and back of the incunabulum X 519, a \u003Cem\u003EMissale Caesaraugustanum\u003C/em\u003E from 1485. \u003C/p\u003E"
+    },
+    {
+      "label": "Reconstruction Summary Author",
+      "value": "Fergus Bovill (2025)"
+    },
+    {
+      "label": "Date of origin",
+      "value": "1001 – 1100 CE"
+    },
+    {
+      "label": "Places",
+      "value": "Switzerland"
+    },
+    {
+      "label": "Tags",
+      "value": "Topic: biblical"
+    },
+    {
+      "label": "Illuminated",
+      "value": "Yes"
+    },
+    {
+      "label": "Century",
+      "value": "11th century"
+    },
+    {
+      "label": "Text Language",
+      "value": "Latin"
+    },
+    {
+      "label": "Script Type",
+      "value": "Carolingian Minuscule"
+    },
+    {
+      "label": "Liturgica",
+      "value": "Bible"
+    },
+    {
+      "label": "Decoration",
+      "value": "Pen"
+    },
+    {
+      "label": "Decoration",
+      "value": "Initial"
+    },
+    {
+      "label": "Decoration",
+      "value": "Red"
+    }
+  ],
+  "description": [
+    {
+      "@value": "Two halves of a fragmented single leaf from a giant 11th-century Bible manuscript containing Jeremiah 35:15-38:4. Repurposed as flyleaves at the front and back of the incunabulum X 519, a Missale Caesaraugustanum from 1485. ",
+      "@language": "en"
+    }
+  ],
+  "license": "http://creativecommons.org/licenses/by-nc/4.0/",
+  "attribution": "Fragmentarium – International Digital Research Lab for Medieval Manuscript Fragments",
+  "logo": "https://fragmentarium.ms/img/fragmentarium-logo-sm-square.png",
+  "service": "https://fragmentarium.ms/search/",
+  "seeAlso": "https://fragmentarium.ms/overview/F-zvl4",
+  "within": "https://fragmentarium.ms/metadata/iiif/collection/C-p1jc.json",
+  "sequences": [
+    {
+      "@id": "https://fragmentarium.ms/metadata/iiif/F-zvl4/sequence/Sequence-10904.json",
+      "@type": "sc:Sequence",
+      "label": [
+        {
+          "@value": "Normal Sequence",
+          "@language": "en"
+        }
+      ],
+      "canvases": [
+        {
+          "@id": "https://fragmentarium.ms/metadata/iiif/F-zvl4/canvas/F-zvl4/kbt_frg_x519_0000_0001r.jp2.json",
+          "@type": "sc:Canvas",
+          "label": "front pastedown recto",
+          "height": 8034,
+          "width": 11507,
+          "images": [
+            {
+              "@id": "https://fragmentarium.ms/metadata/iiif/F-zvl4/annotation/F-zvl4/kbt_frg_x519_0000_0001r.jp2.json",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "on": "https://fragmentarium.ms/metadata/iiif/F-zvl4/canvas/F-zvl4/kbt_frg_x519_0000_0001r.jp2.json",
+              "resource": {
+                "@id": "https://fragmentarium.ms:443/loris/F-zvl4/kbt_frg_x519_0000_0001r.jp2/full/full/0/default.jpg",
+                "@type": "dctypes:Image",
+                "format": "image/jpeg",
+                "height": 8034,
+                "width": 11507,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://fragmentarium.ms:443/loris/F-zvl4/kbt_frg_x519_0000_0001r.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "@id": "https://fragmentarium.ms/metadata/iiif/F-zvl4/canvas/F-zvl4/kbt_frg_x519_0000_0001v.jp2.json",
+          "@type": "sc:Canvas",
+          "label": "front pastedown verso",
+          "height": 8034,
+          "width": 11507,
+          "images": [
+            {
+              "@id": "https://fragmentarium.ms/metadata/iiif/F-zvl4/annotation/F-zvl4/kbt_frg_x519_0000_0001v.jp2.json",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "on": "https://fragmentarium.ms/metadata/iiif/F-zvl4/canvas/F-zvl4/kbt_frg_x519_0000_0001v.jp2.json",
+              "resource": {
+                "@id": "https://fragmentarium.ms:443/loris/F-zvl4/kbt_frg_x519_0000_0001v.jp2/full/full/0/default.jpg",
+                "@type": "dctypes:Image",
+                "format": "image/jpeg",
+                "height": 8034,
+                "width": 11507,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://fragmentarium.ms:443/loris/F-zvl4/kbt_frg_x519_0000_0001v.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "@id": "https://fragmentarium.ms/metadata/iiif/F-zvl4/canvas/F-zvl4/kbt_frg_x519_9999_0002r.jp2.json",
+          "@type": "sc:Canvas",
+          "label": "rear pastedown recto",
+          "height": 8034,
+          "width": 11507,
+          "images": [
+            {
+              "@id": "https://fragmentarium.ms/metadata/iiif/F-zvl4/annotation/F-zvl4/kbt_frg_x519_9999_0002r.jp2.json",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "on": "https://fragmentarium.ms/metadata/iiif/F-zvl4/canvas/F-zvl4/kbt_frg_x519_9999_0002r.jp2.json",
+              "resource": {
+                "@id": "https://fragmentarium.ms:443/loris/F-zvl4/kbt_frg_x519_9999_0002r.jp2/full/full/0/default.jpg",
+                "@type": "dctypes:Image",
+                "format": "image/jpeg",
+                "height": 8034,
+                "width": 11507,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://fragmentarium.ms:443/loris/F-zvl4/kbt_frg_x519_9999_0002r.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "@id": "https://fragmentarium.ms/metadata/iiif/F-zvl4/canvas/F-zvl4/kbt_frg_x519_9999_0002v.jp2.json",
+          "@type": "sc:Canvas",
+          "label": "rear pastedown verso",
+          "height": 8034,
+          "width": 11507,
+          "images": [
+            {
+              "@id": "https://fragmentarium.ms/metadata/iiif/F-zvl4/annotation/F-zvl4/kbt_frg_x519_9999_0002v.jp2.json",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "on": "https://fragmentarium.ms/metadata/iiif/F-zvl4/canvas/F-zvl4/kbt_frg_x519_9999_0002v.jp2.json",
+              "resource": {
+                "@id": "https://fragmentarium.ms:443/loris/F-zvl4/kbt_frg_x519_9999_0002v.jp2/full/full/0/default.jpg",
+                "@type": "dctypes:Image",
+                "format": "image/jpeg",
+                "height": 8034,
+                "width": 11507,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://fragmentarium.ms:443/loris/F-zvl4/kbt_frg_x519_9999_0002v.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "@id": "https://fragmentarium.ms/metadata/iiif/F-zvl4/canvas/F-zvl4/kbt_frg_x519_ProfilS.jp2.json",
+          "@type": "sc:Canvas",
+          "label": "colour checker",
+          "height": 8034,
+          "width": 11507,
+          "images": [
+            {
+              "@id": "https://fragmentarium.ms/metadata/iiif/F-zvl4/annotation/F-zvl4/kbt_frg_x519_ProfilS.jp2.json",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "on": "https://fragmentarium.ms/metadata/iiif/F-zvl4/canvas/F-zvl4/kbt_frg_x519_ProfilS.jp2.json",
+              "resource": {
+                "@id": "https://fragmentarium.ms:443/loris/F-zvl4/kbt_frg_x519_ProfilS.jp2/full/full/0/default.jpg",
+                "@type": "dctypes:Image",
+                "format": "image/jpeg",
+                "height": 8034,
+                "width": 11507,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://fragmentarium.ms:443/loris/F-zvl4/kbt_frg_x519_ProfilS.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "structures": [
+    {
+      "@id": "https://fragmentarium.ms/metadata/iiif/F-zvl4/range/TopLevelRangeGroup.json",
+      "@type": "sc:Range",
+      "@viewingHint": "top",
+      "label": "F-zvl4",
+      "ranges": [
+        "https://fragmentarium.ms/metadata/iiif/F-zvl4/range/Range-5952.json",
+        "https://fragmentarium.ms/metadata/iiif/F-zvl4/range/Range-5953.json",
+        "https://fragmentarium.ms/metadata/iiif/F-zvl4/range/Range-5954.json",
+        "https://fragmentarium.ms/metadata/iiif/F-zvl4/range/Range-5955.json"
+      ]
+    },
+    {
+      "@id": "https://fragmentarium.ms/metadata/iiif/F-zvl4/range/Range-5952.json",
+      "@type": "sc:Range",
+      "within": "https://fragmentarium.ms/metadata/iiif/F-zvl4/range/TopLevelRangeGroup.json",
+      "label": "Physical structure",
+      "ranges": [
+        "https://fragmentarium.ms/metadata/iiif/F-zvl4/range/Range-5952-8786.json",
+        "https://fragmentarium.ms/metadata/iiif/F-zvl4/range/Range-5952-8787.json"
+      ]
+    },
+    {
+      "@id": "https://fragmentarium.ms/metadata/iiif/F-zvl4/range/Range-5953.json",
+      "@type": "sc:Range",
+      "within": "https://fragmentarium.ms/metadata/iiif/F-zvl4/range/TopLevelRangeGroup.json",
+      "label": "Physical structure",
+      "ranges": []
+    },
+    {
+      "@id": "https://fragmentarium.ms/metadata/iiif/F-zvl4/range/Range-5954.json",
+      "@type": "sc:Range",
+      "within": "https://fragmentarium.ms/metadata/iiif/F-zvl4/range/TopLevelRangeGroup.json",
+      "label": "Content structure",
+      "ranges": [
+        "https://fragmentarium.ms/metadata/iiif/F-zvl4/range/Range-5954-8788.json",
+        "https://fragmentarium.ms/metadata/iiif/F-zvl4/range/Range-5954-8789.json"
+      ]
+    },
+    {
+      "@id": "https://fragmentarium.ms/metadata/iiif/F-zvl4/range/Range-5955.json",
+      "@type": "sc:Range",
+      "within": "https://fragmentarium.ms/metadata/iiif/F-zvl4/range/TopLevelRangeGroup.json",
+      "label": "Reference images",
+      "ranges": [
+        "https://fragmentarium.ms/metadata/iiif/F-zvl4/range/Range-5955-8790.json"
+      ]
+    },
+    {
+      "@id": "https://fragmentarium.ms/metadata/iiif/F-zvl4/range/Range-5952-8786.json",
+      "@type": "sc:Range",
+      "within": "https://fragmentarium.ms/metadata/iiif/F-zvl4/range/Range-5952.json",
+      "label": "Front Pastedown",
+      "canvases": [
+        "https://fragmentarium.ms/metadata/iiif/F-zvl4/canvas/F-zvl4/kbt_frg_x519_0000_0001r.jp2.json",
+        "https://fragmentarium.ms/metadata/iiif/F-zvl4/canvas/F-zvl4/kbt_frg_x519_0000_0001v.jp2.json"
+      ]
+    },
+    {
+      "@id": "https://fragmentarium.ms/metadata/iiif/F-zvl4/range/Range-5952-8787.json",
+      "@type": "sc:Range",
+      "within": "https://fragmentarium.ms/metadata/iiif/F-zvl4/range/Range-5952.json",
+      "label": "Back Pastedown",
+      "canvases": [
+        "https://fragmentarium.ms/metadata/iiif/F-zvl4/canvas/F-zvl4/kbt_frg_x519_9999_0002r.jp2.json",
+        "https://fragmentarium.ms/metadata/iiif/F-zvl4/canvas/F-zvl4/kbt_frg_x519_9999_0002v.jp2.json"
+      ]
+    },
+    {
+      "@id": "https://fragmentarium.ms/metadata/iiif/F-zvl4/range/Range-5954-8788.json",
+      "@type": "sc:Range",
+      "within": "https://fragmentarium.ms/metadata/iiif/F-zvl4/range/Range-5954.json",
+      "label": "Recto",
+      "canvases": [
+        "https://fragmentarium.ms/metadata/iiif/F-zvl4/canvas/F-zvl4/kbt_frg_x519_0000_0001r.jp2.json",
+        "https://fragmentarium.ms/metadata/iiif/F-zvl4/canvas/F-zvl4/kbt_frg_x519_9999_0002v.jp2.json"
+      ]
+    },
+    {
+      "@id": "https://fragmentarium.ms/metadata/iiif/F-zvl4/range/Range-5954-8789.json",
+      "@type": "sc:Range",
+      "within": "https://fragmentarium.ms/metadata/iiif/F-zvl4/range/Range-5954.json",
+      "label": "Verso",
+      "canvases": [
+        "https://fragmentarium.ms/metadata/iiif/F-zvl4/canvas/F-zvl4/kbt_frg_x519_0000_0001v.jp2.json",
+        "https://fragmentarium.ms/metadata/iiif/F-zvl4/canvas/F-zvl4/kbt_frg_x519_9999_0002r.jp2.json"
+      ]
+    },
+    {
+      "@id": "https://fragmentarium.ms/metadata/iiif/F-zvl4/range/Range-5955-8790.json",
+      "@type": "sc:Range",
+      "within": "https://fragmentarium.ms/metadata/iiif/F-zvl4/range/Range-5955.json",
+      "label": "Colour checker",
+      "canvases": [
+        "https://fragmentarium.ms/metadata/iiif/F-zvl4/canvas/F-zvl4/kbt_frg_x519_ProfilS.jp2.json"
+      ]
+    }
+  ]
+}
