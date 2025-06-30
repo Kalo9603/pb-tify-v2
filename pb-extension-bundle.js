@@ -3,5 +3,9 @@
  */
 
 import './src/pb-test.js';
-import './src/components/header.js';
-import './src/components/footer.js';
+
+import './src/components/load/inputBar.js';
+
+import './src/components/main/mainText.js';
+import './src/components/main/header.js';
+import './src/components/main/footer.js';

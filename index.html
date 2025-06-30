@@ -1,26 +1,41 @@
 <html>
     <head>
-
         <title>Provando pb-test</title>
-
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script type="module" src="https://esm.sh/@teipublisher/pb-components/src/pb-page.js"></script>
-
-        <!-- Page Components -->
-
-        <script type="module" src="./src/components/header.js"></script>
-        <script type="module" src="./src/components/footer.js"></script>
-
-        <script type="module" src="./src/pb-test.js"></script>
-
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="./src/style/main.css">
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+            integrity="sha512-x..."
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+            />
     </head>
     <body>
 
         <cp-header></cp-header>
 
-        <pb-test name="Calogero"></pb-test>
+        <cp-main-text></cp-main-text>
+
+        <pb-test></pb-test>
 
         <cp-footer></cp-footer>
+
+
+        <!-- Script -->
+
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@teipublisher/pb-components/dist/pb-components-bundle.js"></script>
+
+        <!-- Page Components -->
+
+        <script type="module" src="./src/components/main/header.js"></script>
+        <script type="module" src="./src/components/main/footer.js"></script>
+        <script type="module" src="./src/components/main/mainText.js"></script>
+
+        <script type="module" src="./src/pb-test.js"></script>
+
 
     </body>
 </html>

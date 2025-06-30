@@ -1,5 +1,5 @@
 import { html } from "https://esm.sh/lit-element";
-import { UtBase } from "../utilities/base.js";
+import { UtBase } from "../../utilities/base.js";
 
 export class CpHeader extends UtBase {
 
