@@ -9,7 +9,7 @@ export class CpManifestImport extends UtBase {
 
   render() {
     return html`
-      <div class="flex items-center justify-center relative w-full max-w-64 mx-auto mt-8">
+      <div class="flex items-center justify-center relative w-full max-w-64 mx-auto">
       <span class="mr-4">or</span>
         <label
           for="manifest-upload"

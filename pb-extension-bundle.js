@@ -4,6 +4,8 @@
 
 import './src/pb-test.js';
 
+import './src/components/viewer/tifyWrapper.js';
+
 import './src/components/load/inputBar.js';
 
 import './src/components/main/mainText.js';

@@ -38,7 +38,8 @@ export class CpInputBar extends UtBase {
     return html`
       <form
         @submit="${this.handleSubmit}"
-        class="flex items-center bg-gray-100 rounded-full shadow-md w-full max-w-2xl mx-auto mt-10 h-12"
+        class="flex items-center bg-gray-100 rounded-full shadow-md w-full h-12"
+        style="line-height: 1; margin: 0;"
       >
         <input
           type="text"
@@ -46,11 +47,13 @@ export class CpInputBar extends UtBase {
           @input="${this.handleInput}"
           placeholder="Enter an URL..."
           class="flex-grow bg-transparent border-none text-gray-800 text-lg px-4 h-full rounded-l-full focus:outline-none placeholder-gray-400"
+          style="line-height: normal; margin: 0;"
         />
         <button
           type="submit"
-          class="bg-blue-600 text-white rounded-r-full px-5 h-full flex items-center text-base hover:bg-blue-900 transition duration-300"
+          class="bg-blue-600 text-white rounded-r-full px-5 h-full flex items-center justify-center text-base hover:bg-blue-900 transition duration-300"
           aria-label="Submit"
+          style="margin: 0;"
         >
           <i class="fa-solid fa-magnifying-glass mr-2"></i> Show
         </button>
