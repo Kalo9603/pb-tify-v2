@@ -1,16 +1,13 @@
 import { html } from "https://esm.sh/lit-element";
 import { UtBase } from "../../utilities/base.js";
-
-import {
-  detectIIIFVersion,
-  convertV3toV2,
-} from "../../utilities/lib/manifest.js";
+import { detectIIIFVersion, convertV3toV2 } from "../../utilities/lib/manifest.js";
 
 export class CpTifyWrapper extends UtBase {
   static get properties() {
     return {
       manifestUrl: { type: String },
       manifestObject: { type: Object },
+      canvasIndex: { type: Number },
       ...super.properties,
     };
   }
@@ -19,6 +16,8 @@ export class CpTifyWrapper extends UtBase {
     super();
     this.manifestUrl = "";
     this.manifestObject = null;
+    this.canvasIndex = 0;
+    this._viewer = null;
   }
 
   firstUpdated() {
@@ -26,24 +25,26 @@ export class CpTifyWrapper extends UtBase {
   }
 
   updated(changedProps) {
-    if (
-      changedProps.has("manifestUrl") ||
-      changedProps.has("manifestObject")
-    ) {
+    if (changedProps.has("manifestUrl") || changedProps.has("manifestObject")) {
       this.loadViewer();
+    }
+
+    if (changedProps.has("canvasIndex")) {
+      const newIndex = this.canvasIndex;
+      if (this._viewer && this._viewer._tify?.ready) {
+        this._viewer._tify.app?.setPage?.(newIndex + 1);
+      }
     }
   }
 
-async loadViewer() {
+  async loadViewer() {
     const container = this.renderRoot.querySelector("#container");
-    if (!container) {
-        console.warn("Container non trovato");
-        return;
-    }
+    if (!container) return;
 
     container.innerHTML = "";
+
     if (!this.manifestUrl && !this.manifestObject) {
-        return;
+      return;
     }
 
     await customElements.whenDefined("pb-tify");
@@ -51,69 +52,85 @@ async loadViewer() {
     const viewer = document.createElement("pb-tify");
     viewer.style.width = "100%";
     viewer.style.height = "100%";
-
     container.appendChild(viewer);
-
-    const trySetManifestObject = (manifestObj) => {
-        if (typeof viewer.setManifest === "function") {
-        viewer.setManifest(manifestObj);
-        return true;
-        }
-        return false;
-    };
+    this._viewer = viewer;
 
     if (this.manifestObject) {
-        const version = detectIIIFVersion(this.manifestObject);
-        if (version === "3") {
-        const converted = convertV3toV2(this.manifestObject);
-        if (!trySetManifestObject(converted)) {
-            const blob = new Blob([JSON.stringify(converted)], { type: "application/json" });
-            const blobUrl = URL.createObjectURL(blob);
-            viewer.setAttribute("manifest", blobUrl);
-        }
-        } else if (version === "2") {
-        if (this.manifestObject["@id"] && (this.manifestObject["@id"].startsWith("http://") || this.manifestObject["@id"].startsWith("https://"))) {
-            viewer.setAttribute("manifest", this.manifestObject["@id"]);
-        } else {
-            if (!trySetManifestObject(this.manifestObject)) {
-            const blob = new Blob([JSON.stringify(this.manifestObject)], { type: "application/json" });
-            const blobUrl = URL.createObjectURL(blob);
-            viewer.setAttribute("manifest", blobUrl);
-            }
-        }
-        } else {
-        if (!trySetManifestObject(this.manifestObject)) {
-            const blob = new Blob([JSON.stringify(this.manifestObject)], { type: "application/json" });
-            const blobUrl = URL.createObjectURL(blob);
-            viewer.setAttribute("manifest", blobUrl);
-        }
-        }
-    } else if (this.manifestUrl) {
-        if (this.manifestUrl.startsWith("blob:")) {
-        try {
-            const res = await fetch(this.manifestUrl);
-            if (!res.ok) throw new Error("Impossibile scaricare manifest da blob URL");
-            const manifest = await res.json();
-            if (!trySetManifestObject(manifest)) {
-            viewer.setAttribute("manifest", this.manifestUrl);
-            }
-        } catch (e) {
-            console.error("Errore caricando manifest da blob:", e);
-            viewer.setAttribute("manifest", this.manifestUrl);
-        }
-        } else {
-        viewer.setAttribute("manifest", this.manifestUrl);
-        }
-    }
+      const version = detectIIIFVersion(this.manifestObject);
+      const converted = version === "3" ? convertV3toV2(this.manifestObject) : this.manifestObject;
+
+      if (typeof viewer.setManifest === "function") {
+        viewer.setManifest(converted);
+      } else if (converted["@id"]?.startsWith("http")) {
+        viewer.setAttribute("manifest", converted["@id"]);
+      } else {
+        return;
+      }
+
+    } else if (this.manifestUrl.startsWith("http")) {
+      viewer.setAttribute("manifest", this.manifestUrl);
+    } else {
+      return;
     }
 
+    let attempts = 0;
+    while ((!viewer._tify || !viewer._tify.ready) && attempts < 100) {
+      await new Promise((r) => setTimeout(r, 50));
+      attempts++;
+    }
+
+    if (!viewer._tify || !viewer._tify.ready) {
+      return;
+    }
+
+    await viewer._tify.ready;
+
+    const app = viewer._tify.app;
+    const origSetPage = app.setPage?.bind(app);
+
+    if (origSetPage) {
+      app.setPage = (i) => {
+        const index = Array.isArray(i) ? i[0] : i;
+        this.dispatchEvent(new CustomEvent("canvaschange", {
+          detail: { canvasIndex: index - 1 },
+          bubbles: true,
+          composed: true,
+        }));
+        origSetPage(i);
+      };
+    }
+
+    viewer.addEventListener("pb-tify:canvasChange", (e) => {
+      const detail = e.detail;
+      if (typeof detail.index === "number") {
+        const logicalIndex = detail.index - 1;
+        this.dispatchEvent(new CustomEvent("canvaschange", {
+          detail: { canvasIndex: logicalIndex },
+          bubbles: true,
+          composed: true,
+        }));
+      }
+    });
+
+    if (typeof this.canvasIndex === "number" && this.canvasIndex >= 0) {
+      app.setPage(this.canvasIndex + 1);
+    } else {
+      const initialIndex = app?._currentPage;
+      if (typeof initialIndex === "number") {
+        this.dispatchEvent(new CustomEvent("canvaschange", {
+          detail: { canvasIndex: initialIndex - 1 },
+          bubbles: true,
+          composed: true,
+        }));
+      }
+    }
+  }
 
   render() {
     return html`
       <div id="container" class="w-full h-[80vh] border border-gray-300 rounded-lg overflow-hidden"></div>
     `;
   }
-  
 }
 
 customElements.define("cp-tf-wrapper", CpTifyWrapper);
