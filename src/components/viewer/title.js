@@ -74,7 +74,7 @@ export class CpTitle extends UtBase {
 
     return html`
             <div
-                class="text-center border-b-2 border-gray-300 pb-4 px-2 
+                class="text-center border-b-2 pb-4 px-2 
                     animate-fade-in">
                 <h1
                 class="${this.fontSizeClass} font-bold italic text-gray-800 drop-shadow-sm 

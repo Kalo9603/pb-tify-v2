@@ -8,7 +8,7 @@ import "./components/buttons/manifestExport.js";
 import "./components/buttons/manifestURLCopy.js";
 import "./components/buttons/close.js";
 import "./components/buttons/languageSelector.js";
-import "./components/buttons/snapshot.js";
+import "./components/buttons/snap/snapshot.js";
 
 import "./components/viewer/tifyWrapper.js";
 import "./components/viewer/metadata.js";
@@ -146,12 +146,13 @@ export class PbTest extends UtBase {
               ${this.isLocalManifest ? html`
                 <div class="relative group flex items-center justify-center w-12 h-12 text-blue-600">
                   <i class="fas fa-folder-open text-3xl"></i>
-                  <div class="absolute bottom-full mb-2 px-4 py-2 text-sm text-white bg-gray-800 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-all">
+                  <div class="absolute bottom-full mb-2 px-4 py-2 text-sm text-white bg-gray-800 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-all w-fit min-w-[16rem] text-center break-words">
                     This manifest has been imported locally.
                   </div>
                 </div>` : null}
               <cp-mexport .manifestObject=${this.manifestObject}></cp-mexport>
               <cp-url-copy .url=${this.manifestUrl}></cp-url-copy>
+              <cp-snap .manifestObject=${this.manifestObject} .canvasIndex=${this.currentCanvasIndex}></cp-snap>
             </div>
             <div class="flex items-center gap-4">
               ${showLangSelector ? html`<cp-lselector .availableLanguages=${this.availableLanguages} .selectedLanguage=${this.selectedLanguage}></cp-lselector>` : null}
