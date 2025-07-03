@@ -161,13 +161,24 @@ export class CpPreview extends UtBase {
     ctx.strokeRect(-w/2, -h/2, w, h);
 
     if (this.mirror) {
-      ctx.strokeStyle = "red";
-      ctx.lineWidth = 3;
+      ctx.strokeStyle = "#c00";
+      ctx.fillStyle = "#c00";
+      ctx.lineWidth = 2;
+
+      const arrowLength = 40;
+      const arrowHeadSize = 8;
+
       ctx.beginPath();
-      ctx.moveTo(-w/2 + 5, -h/2 + 5);
-      ctx.lineTo(-w/2 + 20, -h/2 + 5);
-      ctx.lineTo(-w/2 + 20, -h/2 + 20);
+      ctx.moveTo(0, 0);
+      ctx.lineTo(-arrowLength, 0);
       ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(-arrowLength, 0);
+      ctx.lineTo(-arrowLength + arrowHeadSize, -arrowHeadSize);
+      ctx.lineTo(-arrowLength + arrowHeadSize, arrowHeadSize);
+      ctx.closePath();
+      ctx.fill();
     }
 
     ctx.restore();
@@ -175,6 +186,7 @@ export class CpPreview extends UtBase {
 
   render() {
     return html`
+      <label for="regionCanvas">Preview</label>
       <canvas
         id="regionCanvas"
         width="300"
