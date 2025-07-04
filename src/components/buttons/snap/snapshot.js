@@ -26,6 +26,9 @@ export class CpSnap extends UtBase {
       coordY2: { type: Number },
       rotation: { type: Number },
       mirror: { type: Boolean },
+      quality: { type: String },
+      format: { type: String },
+      size: { type: String },
       ...super.properties,
     };
   }
@@ -43,6 +46,9 @@ export class CpSnap extends UtBase {
     this.coordY2 = 0;
     this.rotation = 0;
     this.mirror = false;
+    this.quality = "default";
+    this.format = "jpg";
+    this.size = "full";
   }
 
   toggleSnapshot() {
@@ -78,6 +84,7 @@ export class CpSnap extends UtBase {
     if (!ctx) return;
 
     setTimeout(() => {
+
       app.render();
 
       const W = canvasEl.width;
@@ -141,11 +148,11 @@ export class CpSnap extends UtBase {
       rotationStr = "!" + rotationStr;
     }
 
-    const newUrl = `${parts.prefix}/${parts.identifier}/${regionStr}/${parts.size}/${rotationStr}/${parts.quality}.${parts.format}`;
+    const newUrl = `${parts.prefix}/${parts.identifier}/${regionStr}/${this.size}/${rotationStr}/${this.quality}.${this.format}`;
 
     const dateStr = getCurrentDateYYYYMMDD();
     const safeTitle = sanitizeFilename(parts.identifier);
-    const filename = `${safeTitle}_${dateStr}_${regionStr}_${parts.size}_${rotationStr}_${parts.quality}.${parts.format}`;
+    const filename = `${safeTitle}_${dateStr}_${regionStr}_${this.size}_${rotationStr}_${this.quality}.${this.format}`;
 
     let regionWidth = 0;
     let regionHeight = 0;
@@ -261,6 +268,9 @@ export class CpSnap extends UtBase {
                     .coordY2="${this.coordY2}"
                     .rotation="${this.rotation}"
                     .mirror="${this.mirror}"
+                    .quality="${this.quality}"
+                    .format="${this.format}"
+                    .size="${this.size}"
 
                     @region-change="${e => {
 
@@ -272,6 +282,9 @@ export class CpSnap extends UtBase {
                     this.coordY2 = detail.coordY2;
                     this.rotation = detail.rotation;
                     this.mirror = detail.mirror;
+                    this.quality = detail.quality;
+                    this.format = detail.format; 
+                    this.size = detail.size;
                     this.requestUpdate();
                     }}"
                 ></cp-snapform>
