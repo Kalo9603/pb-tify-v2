@@ -29,6 +29,7 @@ export class CpSnap extends UtBase {
       quality: { type: String },
       format: { type: String },
       size: { type: String },
+      upscale: { type: Boolean },
       ...super.properties,
     };
   }
@@ -49,6 +50,7 @@ export class CpSnap extends UtBase {
     this.quality = "default";
     this.format = "jpg";
     this.size = "full";
+    this.upscale = false;
   }
 
   toggleSnapshot() {
@@ -179,7 +181,7 @@ export class CpSnap extends UtBase {
 
     win.document.write(`
       <html>
-        <head><title>Snapshot</title></head>
+        <head><title>Snapshot | ${filename}</title></head>
         <body style="margin:0; background:#000; display:flex; align-items:center; justify-content:center;">
           <img src="${newUrl}" width="${regionWidth}" height="${regionHeight}" style="display:block;" />
         </body>
@@ -271,6 +273,7 @@ export class CpSnap extends UtBase {
                     .quality="${this.quality}"
                     .format="${this.format}"
                     .size="${this.size}"
+                    .upscale="${this.upscale}"
 
                     @region-change="${e => {
 
@@ -285,6 +288,7 @@ export class CpSnap extends UtBase {
                     this.quality = detail.quality;
                     this.format = detail.format; 
                     this.size = detail.size;
+                    this.upscale = detail.upscale ?? false;
                     this.requestUpdate();
                     }}"
                 ></cp-snapform>

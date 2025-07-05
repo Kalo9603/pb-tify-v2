@@ -13,42 +13,19 @@ import "./form/size.js";
 export class CpSnapForm extends UtBase {
 	static get properties() {
 		return {
-			region: {
-				type: String
-			},
-			width: {
-				type: Number
-			},
-			height: {
-				type: Number
-			},
-			coordX1: {
-				type: Number
-			},
-			coordY1: {
-				type: Number
-			},
-			coordX2: {
-				type: Number
-			},
-			coordY2: {
-				type: Number
-			},
-			rotation: {
-				type: Number
-			},
-			mirror: {
-				type: Boolean
-			},
-			quality: {
-				type: String
-			},
-			format: {
-				type: String
-			},
-			size: {
-				type: String
-			},
+			region: { type: String },
+			width: { type: Number },
+			height: { type: Number },
+			coordX1: { type: Number },
+			coordY1: { type: Number },
+			coordX2: { type: Number },
+			coordY2: { type: Number },
+			rotation: { type: Number },
+			mirror: { type: Boolean },
+			quality: { type: String },
+			format: { type: String },
+			size: { type: String },
+			upscale: { type: Boolean }
 		};
 	}
 
@@ -66,6 +43,7 @@ export class CpSnapForm extends UtBase {
 		this.quality = "default";
 		this.format = "jpg";
 		this.size = "full";
+		this.upscale = false;
 	}
 
 	_emitChange() {
@@ -82,6 +60,7 @@ export class CpSnapForm extends UtBase {
 					quality: this.quality,
 					format: this.format,
 					size: this.size,
+					upscale: this.upscale
 				},
 				bubbles: true,
 				composed: true,
@@ -90,7 +69,7 @@ export class CpSnapForm extends UtBase {
 	}
 
 	render() {
-  return html`
+		return html`
     <div
       class="flex flex-col gap-4"
       style="min-width: 550px; margin: 0 auto; padding: 1rem;"
@@ -109,22 +88,23 @@ export class CpSnapForm extends UtBase {
           .coordX2="${this.coordX2}"
           .coordY2="${this.coordY2}"
           @region-updated="${(e) => {
-            const d = e.detail;
-            this.region = d.region;
-            this.coordX1 = d.coordX1;
-            this.coordY1 = d.coordY1;
-            this.coordX2 = d.coordX2;
-            this.coordY2 = d.coordY2;
-            this._emitChange();
-          }}"
+				const d = e.detail;
+				this.region = d.region;
+				this.coordX1 = d.coordX1;
+				this.coordY1 = d.coordY1;
+				this.coordX2 = d.coordX2;
+				this.coordY2 = d.coordY2;
+				this._emitChange();
+			}}"
         ></cp-spregion>
 
         <cp-spsize
           class="flex-grow min-w-[220px] max-w-full"
           @size-updated="${(e) => {
-            this.size = e.detail.size;
-            this._emitChange();
-          }}"
+				this.size = e.detail.size;
+				this.upscale = e.detail.upscale;
+				this._emitChange();
+			}}"
         ></cp-spsize>
 
         <cp-sprotation
@@ -132,10 +112,10 @@ export class CpSnapForm extends UtBase {
           .rotation="${this.rotation}"
           .mirror="${this.mirror}"
           @rotation-updated="${(e) => {
-            this.rotation = e.detail.rotation;
-            this.mirror = e.detail.mirror;
-            this._emitChange();
-          }}"
+				this.rotation = e.detail.rotation;
+				this.mirror = e.detail.mirror;
+				this._emitChange();
+			}}"
         ></cp-sprotation>
 
         <cp-spqltfrmt
@@ -143,10 +123,10 @@ export class CpSnapForm extends UtBase {
           .quality="${this.quality}"
           .format="${this.format}"
           @quality-updated="${(e) => {
-            this.quality = e.detail.quality;
-            this.format = e.detail.format;
-            this._emitChange();
-          }}"
+				this.quality = e.detail.quality;
+				this.format = e.detail.format;
+				this._emitChange();
+			}}"
         ></cp-spqltfrmt>
       </div>
 
@@ -167,7 +147,7 @@ export class CpSnapForm extends UtBase {
       </div>
     </div>
   `;
-}
+	}
 
 }
 

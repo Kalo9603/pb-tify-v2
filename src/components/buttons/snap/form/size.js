@@ -46,13 +46,18 @@ export class CpSnapFormSize extends UtBase {
         break;
     }
 
-    this.dispatchEvent(
-      new CustomEvent("size-updated", {
-        detail: { size },
-        bubbles: true,
-        composed: true
-      })
-    );
+    this.dispatchEvent(new CustomEvent("size-updated", {
+      detail: {
+        size,
+        upscale: this.upscale,
+        mode: this.mode,
+        width: this.width,
+        height: this.height,
+        percent: this.percent,
+      },
+      bubbles: true,
+      composed: true
+    }));
   }
 
   render() {
