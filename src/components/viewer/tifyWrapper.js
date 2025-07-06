@@ -128,7 +128,7 @@ export class CpTifyWrapper extends UtBase {
 
   render() {
     return html`
-      <div id="container" class="w-full h-[80vh] border border-gray-300 rounded-lg overflow-hidden"></div>
+      <div id="container" class="w-full h-[80vh] mb-4 border border-gray-300 rounded-lg overflow-hidden"></div>
     `;
   }
 }

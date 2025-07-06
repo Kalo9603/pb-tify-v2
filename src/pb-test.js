@@ -4,6 +4,9 @@ import { detectIIIFVersion, convertV3toV2, getLanguages } from "./utilities/lib/
 
 import "./components/load/inputBar.js";
 import "./components/load/manifestImport.js";
+
+import "./components/annotations/annotations.js";
+
 import "./components/buttons/manifestExport.js";
 import "./components/buttons/manifestURLCopy.js";
 import "./components/buttons/close.js";
@@ -16,6 +19,7 @@ import "./components/viewer/pageMetadata.js";
 import "./components/viewer/title.js";
 
 export class PbTest extends UtBase {
+
   static get properties() {
     return {
       manifestUrl: { type: String },
@@ -164,22 +168,35 @@ export class PbTest extends UtBase {
             <cp-title .manifestObject=${this.manifestObject} .selectedLanguage=${this.selectedLanguage}></cp-title>
           </div>
 
-          <div class="flex gap-6">
-            <div class="flex-1 max-w-[65%]">
+          <div class="grid grid-cols-[65%_35%] gap-6">
+
+            <div class="flex flex-col gap-6">
               <cp-tf-wrapper
                 .manifestObject=${this.manifestObject}
                 .canvasIndex=${this.currentCanvasIndex}
                 @canvaschange=${(e) => { this.currentCanvasIndex = e.detail.canvasIndex; }}
               ></cp-tf-wrapper>
+
+              <cp-annotations
+                .manifestObject=${this.manifestObject}
+                .canvasIndex=${this.currentCanvasIndex}
+              ></cp-annotations>
+
             </div>
-            <div class="w-[35%]">
-              <cp-mdata .manifestObject=${this.manifestObject} .selectedLanguage=${this.selectedLanguage}></cp-mdata>
+
+            <div class="flex flex-col gap-6">
+              <cp-mdata
+                .manifestObject=${this.manifestObject}
+                .selectedLanguage=${this.selectedLanguage}
+              ></cp-mdata>
+
               <cp-pgmdata
                 .manifestObject=${this.manifestObject}
                 .canvasIndex=${this.currentCanvasIndex}
               ></cp-pgmdata>
             </div>
           </div>
+
         </div>
       </div>
     `;

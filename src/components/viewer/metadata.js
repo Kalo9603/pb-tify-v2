@@ -31,17 +31,49 @@ export class CpMetadata extends UtBase {
   }
 
   loadMetadata() {
-    if (this.manifestObject && this.manifestObject.metadata) {
-      const rawEntries = this.manifestObject.metadata;
-      this.entries = rawEntries.map((entry) => ({
-        label: this.filterByLanguage(entry.label),
-        value: this.filterByLanguage(entry.value),
-      }));
-      this.error = null;
-    } else {
+    const m = this.manifestObject;
+    if (!m) {
       this.entries = [];
-      this.error = this.manifestObject ? null : "No manifest loaded";
+      this.error = "No manifest loaded";
+      return;
     }
+
+    const entryMap = new Map();
+
+    if (Array.isArray(m.metadata)) {
+      m.metadata.forEach((entry) => {
+        const label = this.filterByLanguage(entry.label);
+        const value = this.filterByLanguage(entry.value);
+
+        if (!label) return;
+
+        if (entryMap.has(label)) {
+          const prev = entryMap.get(label);
+          entryMap.set(label, prev + ", " + value);
+        } else {
+          entryMap.set(label, value);
+        }
+      });
+    }
+
+    const extras = {
+      Description: m.description,
+      Attribution: m.attribution,
+      License: m.license,
+      Logo: m.logo,
+      SeeAlso: m.seeAlso,
+      Related: m.related,
+      Within: m.within,
+      Rendering: m.rendering,
+    };
+
+    for (const [label, value] of Object.entries(extras)) {
+      const val = this.filterByLanguage(value);
+      if (val) entryMap.set(label, val);
+    }
+
+    this.entries = Array.from(entryMap, ([label, value]) => ({ label, value }));
+    this.error = null;
   }
 
   filterByLanguage(input) {
@@ -49,14 +81,12 @@ export class CpMetadata extends UtBase {
 
     if (typeof input === "string") return input;
     if (Array.isArray(input)) {
-
-      const filtered = input.find(
+      const matchLang = input.find(
         (el) =>
           el?.["@language"]?.toLowerCase() ===
           this.selectedLanguage?.toLowerCase()
       );
-
-      if (filtered) return filtered["@value"];
+      if (matchLang) return matchLang["@value"];
 
       const fallback = input.find((el) =>
         ["none", "und", "zxx"].includes(el?.["@language"]?.toLowerCase())
@@ -65,6 +95,8 @@ export class CpMetadata extends UtBase {
 
       return input[0]?.["@value"] ?? "";
     }
+
+    if (typeof input === "object" && "@value" in input) return input["@value"];
 
     return String(input);
   }
@@ -85,20 +117,12 @@ export class CpMetadata extends UtBase {
           <tbody>
             ${this.entries.map(
               (entry) => html`
-                <tr
-                  class="hover:bg-gray-100 transition border-b border-gray-200"
-                >
-                  <td
-                    class="py-2 pr-4 font-semibold text-gray-900 whitespace-nowrap w-1/3"
-                  >
-                    ${unsafeHTML(
-                      sanitizeHTML(getHTMLString(entry.label))
-                    )}
+                <tr class="hover:bg-gray-100 transition border-b border-gray-200">
+                  <td class="py-2 pr-4 font-semibold text-gray-900 whitespace-nowrap w-1/3">
+                    ${unsafeHTML(sanitizeHTML(getHTMLString(entry.label)))}
                   </td>
                   <td class="py-2 text-gray-600">
-                    ${unsafeHTML(
-                      sanitizeHTML(getHTMLString(entry.value))
-                    )}
+                    ${unsafeHTML(sanitizeHTML(getHTMLString(entry.value)))}
                   </td>
                 </tr>
               `
