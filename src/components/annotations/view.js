@@ -1,7 +1,6 @@
 import { html, css } from "https://esm.sh/lit-element";
 import { unsafeHTML } from "https://esm.sh/lit-html/directives/unsafe-html.js";
 import { UtBase } from "../../utilities/base.js";
-import "./tooltip.js";
 
 export class CpAnViewer extends UtBase {
   static get properties() {
@@ -12,6 +11,17 @@ export class CpAnViewer extends UtBase {
       activeAnnotationIndex: { type: Number },
       ...super.properties
     };
+  }
+
+  static get styles() {
+    return [
+      super.styles || [],
+      css`
+        li {
+          transition: background-color 0.3s ease-in-out;
+        }
+      `
+    ];
   }
 
   constructor() {
@@ -119,6 +129,26 @@ export class CpAnViewer extends UtBase {
       bubbles: true,
       composed: true
     }));
+
+    const canvas = this.manifestObject?.sequences?.[0]?.canvases?.[this.canvasIndex];
+    const resource = canvas?.images?.[0]?.resource;
+    const imageUrl = resource?.["@id"];
+
+    if (index === prev) {
+      this.dispatchEvent(new CustomEvent("hide-frame", {
+        bubbles: true,
+        composed: true,
+      }));
+    } else {
+      this.dispatchEvent(new CustomEvent("show-frame", {
+        detail: {
+          url: imageUrl,
+          x, y, w, h
+        },
+        bubbles: true,
+        composed: true,
+      }));
+    }
   }
 
   render() {
@@ -142,14 +172,11 @@ export class CpAnViewer extends UtBase {
                   ({ x, y, w, h } = this._parseXYWH(xywh));
                 }
 
-                if (isActive) {
-                  console.log("🟦 Tooltip props:", {
-                    imageUrl, x, y, w, h, imgWidth, imgHeight, show: isActive
-                  });
-                }
-
                 return html`
-                  <li class="text-sm text-gray-700 border-b pb-2 space-y-1 relative">
+                  <li
+                    class="text-sm text-gray-700 border-b pb-2 space-y-1 relative transition-colors duration-300 rounded-md px-2
+                      ${isActive ? 'bg-yellow-100' : 'hover:bg-gray-50'}"
+                  >
                     <div class="flex items-center justify-between">
                       <div><strong>#${i + 1}</strong></div>
                       <button
@@ -173,39 +200,11 @@ export class CpAnViewer extends UtBase {
                           </div>
                         `
                       : null}
-
-                    ${isActive && imageUrl
-                      ? html`
-                          <div class="relative group flex justify-end">
-                            <cp-antooltip
-                              class="absolute bottom-full mb-2 z-50"
-                              .url=${imageUrl}
-                              .x=${x}
-                              .y=${y}
-                              .w=${w}
-                              .h=${h}
-                              .visible=${true}
-                            ></cp-antooltip>
-                          </div>
-                        `
-                      : null}
                   </li>
                 `;
               })}
             </ul>
           `}
-    `;
-  }
-
-  static get styles() {
-    return css`
-      :host {
-        display: block;
-      }
-
-      .prose :where(p):not(:last-child) {
-        margin-bottom: 0.5rem;
-      }
     `;
   }
 }

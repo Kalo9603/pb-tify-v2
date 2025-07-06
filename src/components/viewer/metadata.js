@@ -30,6 +30,20 @@ export class CpMetadata extends UtBase {
     }
   }
 
+  extractValue(value) {
+
+    if (!value) return "";
+
+    if (Array.isArray(value)) {
+      const parts = value
+        .map(v => this.filterByLanguage(v))
+        .filter(str => str && str.length > 0);
+      return parts.join(", ");
+    } else {
+      return this.filterByLanguage(value);
+    }
+  }
+
   loadMetadata() {
     const m = this.manifestObject;
     if (!m) {
@@ -42,8 +56,8 @@ export class CpMetadata extends UtBase {
 
     if (Array.isArray(m.metadata)) {
       m.metadata.forEach((entry) => {
-        const label = this.filterByLanguage(entry.label);
-        const value = this.filterByLanguage(entry.value);
+        const label = this.extractValue(entry.label);
+        const value = this.extractValue(entry.value);
 
         if (!label) return;
 
@@ -60,15 +74,13 @@ export class CpMetadata extends UtBase {
       Description: m.description,
       Attribution: m.attribution,
       License: m.license,
-      Logo: m.logo,
       SeeAlso: m.seeAlso,
       Related: m.related,
       Within: m.within,
-      Rendering: m.rendering,
     };
 
     for (const [label, value] of Object.entries(extras)) {
-      const val = this.filterByLanguage(value);
+      const val = this.extractValue(value);
       if (val) entryMap.set(label, val);
     }
 

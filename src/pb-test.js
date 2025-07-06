@@ -6,6 +6,7 @@ import "./components/load/inputBar.js";
 import "./components/load/manifestImport.js";
 
 import "./components/annotations/annotations.js";
+import "./components/annotations/frame.js";
 
 import "./components/buttons/manifestExport.js";
 import "./components/buttons/manifestURLCopy.js";
@@ -28,6 +29,7 @@ export class PbTest extends UtBase {
       selectedLanguage: { type: String },
       availableLanguages: { type: Array },
       currentCanvasIndex: { type: Number },
+      frameData: { type: Object },
       ...super.properties,
     };
   }
@@ -41,6 +43,15 @@ export class PbTest extends UtBase {
     this.availableLanguages = [];
     this.currentCanvasIndex = 0;
 
+    this.frameData = {
+      url: "",
+      x: 0,
+      y: 0,
+      w: 0,
+      h: 0,
+      visible: false,
+    };
+
     this.handleURLSubmit = this.handleURLSubmit.bind(this);
     this.handleManifestLoad = this.handleManifestLoad.bind(this);
     this.handleLanguageChange = this.handleLanguageChange.bind(this);
@@ -53,6 +64,8 @@ export class PbTest extends UtBase {
     this.addEventListener("manifestload", this.handleManifestLoad);
     this.addEventListener("languagechange", this.handleLanguageChange);
     this.addEventListener("canvaschange", this._onCanvasChange);
+    this.addEventListener("show-frame", this.showFrame);
+    this.addEventListener("hide-frame", this.hideFrame);
   }
   disconnectedCallback() {
     super.disconnectedCallback();
@@ -60,6 +73,8 @@ export class PbTest extends UtBase {
     this.removeEventListener("manifestload", this.handleManifestLoad);
     this.removeEventListener("languagechange", this.handleLanguageChange);
     this.removeEventListener("canvaschange", this._onCanvasChange);
+    this.removeEventListener("show-frame", this.showFrame);
+    this.removeEventListener("hide-frame", this.hideFrame);
   }
 
   async handleURLSubmit(e) {
@@ -82,6 +97,29 @@ export class PbTest extends UtBase {
 
   handleLanguageChange(e) {
     this.selectedLanguage = e.detail.language;
+  }
+
+  showFrame(e) {
+    const detail = e.detail || {};
+    this.frameData = {
+      url: detail.url || "",
+      x: detail.x || 0,
+      y: detail.y || 0,
+      w: detail.w || 0,
+      h: detail.h || 0,
+      visible: true,
+    };
+  }
+
+  hideFrame() {
+    this.frameData = {
+      url: "",
+      x: 0,
+      y: 0,
+      w: 0,
+      h: 0,
+      visible: false,
+    };
   }
 
   _onCanvasChange(e) {
@@ -143,45 +181,54 @@ export class PbTest extends UtBase {
           <cp-input-bar class="flex-grow max-w-[60%]" @URLsubmit></cp-input-bar>
           <cp-mimport></cp-mimport>
         </div>
-      
+
         <div class=${isLoaded ? "w-[85%] mx-auto my-8" : "hidden"}>
           <div class="mb-4 border rounded p-2 flex items-center justify-between">
             <div class="flex items-center gap-4">
-              ${this.isLocalManifest ? html`
-                <div class="relative group flex items-center justify-center w-12 h-12 text-blue-600">
-                  <i class="fas fa-folder-open text-3xl"></i>
-                  <div class="absolute bottom-full mb-2 px-4 py-2 text-sm text-white bg-gray-800 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-all w-fit min-w-[16rem] text-center break-words">
-                    This manifest has been imported locally.
-                  </div>
-                </div>` : null}
+              ${this.isLocalManifest
+                ? html`<div class="relative group flex items-center justify-center w-12 h-12 text-blue-600">
+                    <i class="fas fa-folder-open text-3xl"></i>
+                    <div class="absolute bottom-full mb-2 px-4 py-2 text-sm text-white bg-gray-800 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-all w-fit min-w-[16rem] text-center break-words">
+                      This manifest has been imported locally.
+                    </div>
+                  </div>`
+                : null}
               <cp-mexport .manifestObject=${this.manifestObject}></cp-mexport>
               <cp-url-copy .url=${this.manifestUrl}></cp-url-copy>
               <cp-snap .manifestObject=${this.manifestObject} .canvasIndex=${this.currentCanvasIndex}></cp-snap>
             </div>
             <div class="flex items-center gap-4">
-              ${showLangSelector ? html`<cp-lselector .availableLanguages=${this.availableLanguages} .selectedLanguage=${this.selectedLanguage}></cp-lselector>` : null}
+              ${showLangSelector
+                ? html`<cp-lselector
+                    .availableLanguages=${this.availableLanguages}
+                    .selectedLanguage=${this.selectedLanguage}
+                  ></cp-lselector>`
+                : null}
               <cp-close @close=${this.handleClose}></cp-close>
             </div>
           </div>
 
           <div class="flex items-center justify-center mb-4">
-            <cp-title .manifestObject=${this.manifestObject} .selectedLanguage=${this.selectedLanguage}></cp-title>
+            <cp-title
+              .manifestObject=${this.manifestObject}
+              .selectedLanguage=${this.selectedLanguage}
+            ></cp-title>
           </div>
 
           <div class="grid grid-cols-[65%_35%] gap-6">
-
             <div class="flex flex-col gap-6">
               <cp-tf-wrapper
                 .manifestObject=${this.manifestObject}
                 .canvasIndex=${this.currentCanvasIndex}
-                @canvaschange=${(e) => { this.currentCanvasIndex = e.detail.canvasIndex; }}
+                @canvaschange=${(e) => {
+                  this.currentCanvasIndex = e.detail.canvasIndex;
+                }}
               ></cp-tf-wrapper>
 
               <cp-annotations
                 .manifestObject=${this.manifestObject}
                 .canvasIndex=${this.currentCanvasIndex}
               ></cp-annotations>
-
             </div>
 
             <div class="flex flex-col gap-6">
@@ -194,9 +241,17 @@ export class PbTest extends UtBase {
                 .manifestObject=${this.manifestObject}
                 .canvasIndex=${this.currentCanvasIndex}
               ></cp-pgmdata>
+
+              <cp-anframe
+                .url=${this.frameData.url}
+                .x=${this.frameData.x}
+                .y=${this.frameData.y}
+                .w=${this.frameData.w}
+                .h=${this.frameData.h}
+                .visible=${this.frameData.visible}
+              ></cp-anframe>
             </div>
           </div>
-
         </div>
       </div>
     `;
