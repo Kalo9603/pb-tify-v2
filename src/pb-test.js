@@ -7,6 +7,7 @@ import "./components/load/manifestImport.js";
 
 import "./components/annotations/annotations.js";
 import "./components/annotations/frame.js";
+import "./components/annotations/buttons/form.js";
 
 import "./components/buttons/manifestExport.js";
 import "./components/buttons/manifestURLCopy.js";
@@ -20,7 +21,6 @@ import "./components/viewer/pageMetadata.js";
 import "./components/viewer/title.js";
 
 export class PbTest extends UtBase {
-
   static get properties() {
     return {
       manifestUrl: { type: String },
@@ -30,6 +30,7 @@ export class PbTest extends UtBase {
       availableLanguages: { type: Array },
       currentCanvasIndex: { type: Number },
       frameData: { type: Object },
+      annotationMode: { type: String },
       ...super.properties,
     };
   }
@@ -42,6 +43,7 @@ export class PbTest extends UtBase {
     this.selectedLanguage = "";
     this.availableLanguages = [];
     this.currentCanvasIndex = 0;
+    this.annotationMode = "";
 
     this.frameData = {
       url: "",
@@ -56,6 +58,7 @@ export class PbTest extends UtBase {
     this.handleManifestLoad = this.handleManifestLoad.bind(this);
     this.handleLanguageChange = this.handleLanguageChange.bind(this);
     this._onCanvasChange = this._onCanvasChange.bind(this);
+    this._handleModeToggle = this._handleModeToggle.bind(this);
   }
 
   connectedCallback() {
@@ -66,7 +69,12 @@ export class PbTest extends UtBase {
     this.addEventListener("canvaschange", this._onCanvasChange);
     this.addEventListener("show-frame", this.showFrame);
     this.addEventListener("hide-frame", this.hideFrame);
+    this.addEventListener("annotation-add", () => this.annotationMode = "add");
+    this.addEventListener("annotation-edit", () => this.annotationMode = "edit");
+    this.addEventListener("annotation-delete", () => this.annotationMode = "delete");
+    this.addEventListener("mode-toggle", this._handleModeToggle);
   }
+
   disconnectedCallback() {
     super.disconnectedCallback();
     this.removeEventListener("URLsubmit", this.handleURLSubmit);
@@ -75,6 +83,7 @@ export class PbTest extends UtBase {
     this.removeEventListener("canvaschange", this._onCanvasChange);
     this.removeEventListener("show-frame", this.showFrame);
     this.removeEventListener("hide-frame", this.hideFrame);
+    this.removeEventListener("mode-toggle", this._handleModeToggle);
   }
 
   async handleURLSubmit(e) {
@@ -99,6 +108,13 @@ export class PbTest extends UtBase {
     this.selectedLanguage = e.detail.language;
   }
 
+  _handleModeToggle(e) {
+  const newMode = e.detail.mode || "";
+  this.annotationMode = newMode;
+
+  if (!newMode) this.hideFrame();
+  }
+
   showFrame(e) {
     const detail = e.detail || {};
     this.frameData = {
@@ -108,6 +124,7 @@ export class PbTest extends UtBase {
       w: detail.w || 0,
       h: detail.h || 0,
       visible: true,
+      color: detail.color || "view",
     };
   }
 
@@ -229,6 +246,16 @@ export class PbTest extends UtBase {
                 .manifestObject=${this.manifestObject}
                 .canvasIndex=${this.currentCanvasIndex}
               ></cp-annotations>
+
+              ${this.annotationMode
+                ? html`
+                    <cp-anform
+                      .manifestObject=${this.manifestObject}
+                      .canvasIndex=${this.currentCanvasIndex}
+                      .mode=${this.annotationMode}
+                    ></cp-anform>
+                  `
+                : null}
             </div>
 
             <div class="flex flex-col gap-6">
@@ -249,7 +276,8 @@ export class PbTest extends UtBase {
                 .w=${this.frameData.w}
                 .h=${this.frameData.h}
                 .visible=${this.frameData.visible}
-              ></cp-anframe>
+                .color=${this.frameData.color}
+              />
             </div>
           </div>
         </div>

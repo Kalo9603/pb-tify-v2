@@ -2,6 +2,7 @@ import { html } from "https://esm.sh/lit-element";
 import { UtBase } from "../../utilities/base.js";
 
 export class CpAnFrame extends UtBase {
+  
   static get properties() {
     return {
       url: { type: String },
@@ -10,6 +11,7 @@ export class CpAnFrame extends UtBase {
       w: { type: Number },
       h: { type: Number },
       visible: { type: Boolean },
+      color: { type: String }, 
     };
   }
 
@@ -25,6 +27,7 @@ export class CpAnFrame extends UtBase {
     this.naturalHeight = 0;
     this.scaledWidth = 0;
     this.scaledHeight = 0;
+    this.color = "view";
   }
 
   willUpdate(changedProps) {
@@ -45,6 +48,11 @@ export class CpAnFrame extends UtBase {
         }
       });
     }
+
+    if (changedProps.has("color")) {
+      this.requestUpdate();
+    }
+
   }
 
   _onImageLoad(img) {
@@ -76,6 +84,14 @@ export class CpAnFrame extends UtBase {
     const rect = this.scaledRect;
     const width = this.scaledWidth || 300;
     const height = this.scaledHeight || 300;
+    const colorClassMap = {
+      add: 'border-green-600 bg-green-600/30',
+      edit: 'border-orange-500 bg-orange-500/30',
+      delete: 'border-red-600 bg-red-600/30',
+      view: 'border-blue-600 bg-blue-600/30',
+    };
+
+    const colorClass = colorClassMap[this.color?.trim()] || colorClassMap['view'];
 
     return html`
       <div class="overflow-auto max-h-[80vh] border border-gray-200 rounded-xl p-4 mt-4 shadow-sm bg-white">
@@ -90,7 +106,7 @@ export class CpAnFrame extends UtBase {
           />
           ${rect
             ? html`<div
-                class="absolute z-10 border-2 border-blue-600 bg-blue-600/30 rounded-sm pointer-events-none box-border"
+                class="absolute z-10 border-2 ${colorClass} rounded-sm pointer-events-none box-border"
                 style="
                   left: ${rect.left}px;
                   top: ${rect.top}px;
