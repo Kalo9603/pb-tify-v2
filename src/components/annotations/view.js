@@ -31,6 +31,7 @@ export class CpAnViewer extends UtBase {
     this.annotations = [];
     this.activeAnnotationIndex = null;
     this._currentAnnotationURL = null;
+    this.PORT = 3001;
   }
 
   updated(changedProps) {
@@ -74,7 +75,7 @@ export class CpAnViewer extends UtBase {
     if (!annList?.["@id"]) return (this.annotations = []);
 
     const rawUrl = annList["@id"];
-    const proxiedUrl = "https://corsproxy.io/?" + encodeURIComponent(rawUrl);
+    const proxiedUrl = "http://localhost:" + this.PORT + "/" + rawUrl;
 
     if (rawUrl === this._currentAnnotationURL) return;
     this._currentAnnotationURL = rawUrl;

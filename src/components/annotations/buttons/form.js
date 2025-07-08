@@ -88,14 +88,26 @@ export class CpAnForm extends UtBase {
     }
   }
 
+  _resetForm = () => {
+    this.x = 0;
+    this.y = 0;
+    this.w = 0;
+    this.h = 0;
+    this.motivation = "commenting";
+    this.format = "text/html";
+    this.chars = "";
+    this.requestUpdate();
+  };
+
   renderButtons() {
     const commonClasses = "group flex items-center rounded-full shadow-xl transition-all duration-300 px-3 py-2 w-12 hover:w-[105px] overflow-hidden h-10 text-white hover:shadow-md";
 
-    const makeButton = (label, iconClass, colorClass) => html`
+    const makeButton = (label, iconClass, colorClass, onClick) => html`
       <button
         title="${label}"
         class="${commonClasses} ${colorClass}"
         type="button"
+        @click=${onClick}
       >
         <div class="flex items-center justify-center w-full transition-all duration-300 group-hover:justify-start group-hover:gap-2">
           <i class="${iconClass}"></i>
@@ -109,8 +121,8 @@ export class CpAnForm extends UtBase {
     if (this.mode === "add") {
       return html`
         <div class="flex items-center justify-center gap-6 pt-2 border-t border-gray-200">
-          ${makeButton("Reset", "fa-solid fa-rotate-left", "bg-gray-600")}
-          ${makeButton("Add", "fa-solid fa-plus", "bg-green-600")}
+          ${makeButton("Reset", "fa-solid fa-rotate-left", "bg-gray-600", this._resetForm)}
+          ${makeButton("Add", "fa-solid fa-plus", "bg-green-600", () => {})}
         </div>
       `;
     }
@@ -118,9 +130,9 @@ export class CpAnForm extends UtBase {
     if (this.mode === "edit") {
       return html`
         <div class="flex items-center justify-center gap-6 pt-2 border-t border-gray-200">
-          ${makeButton("Reset", "fa-solid fa-rotate-left", "bg-gray-600")}
-          ${makeButton("Clear", "fa-solid fa-eraser", "bg-yellow-500")}
-          ${makeButton("Edit", "fa-solid fa-pencil", "bg-orange-500")}
+          ${makeButton("Reset", "fa-solid fa-rotate-left", "bg-gray-600", this._resetForm)}
+          ${makeButton("Clear", "fa-solid fa-eraser", "bg-yellow-500", () => {})}
+          ${makeButton("Edit", "fa-solid fa-pencil", "bg-orange-500", () => {})}
         </div>
       `;
     }
@@ -128,7 +140,7 @@ export class CpAnForm extends UtBase {
     if (this.mode === "delete") {
       return html`
         <div class="flex items-center justify-center gap-6 pt-2 border-t border-gray-200">
-          ${makeButton("Delete", "fa-solid fa-trash", "bg-red-600")}
+          ${makeButton("Delete", "fa-solid fa-trash", "bg-red-600", () => {})}
         </div>
       `;
     }
@@ -148,56 +160,40 @@ export class CpAnForm extends UtBase {
         <div class="flex flex-col gap-4 p-4 border border-gray-200 rounded-xl bg-white shadow-sm w-full">
           <div class="text-base font-semibold text-gray-800 mb-1">${titleMap[this.mode]}</div>
 
-          <div class="grid grid-cols-[auto_auto_auto] gap-4 items-end justify-center">
-            ${["x", "y"].map(prop => html`
-              <label class="flex flex-col text-sm text-gray-700 font-semibold">
+          <div class="flex flex-wrap items-end justify-center gap-6">
+            ${["x", "y", "w", "h"].map(prop => html`
+              <label class="flex flex-col text-sm text-gray-700 font-semibold items-center">
                 ${prop}
                 <input
                   type="number"
                   min="0"
-                  max="${prop === 'x' ? this.imageWidth : this.imageHeight}"
+                  max="${prop === 'x' ? this.imageWidth : prop === 'y' ? this.imageHeight : prop === 'w' ? this.imageWidth - this.x : this.imageHeight - this.y}"
                   .value=${this[prop]}
                   @input=${e => this._onInputChange(prop, e.target.value)}
-                  class="mt-1 rounded border border-gray-300 px-2 py-1 text-sm font-normal w-20 focus:ring-2 focus:ring-blue-600 focus:outline-none"
+                  class="mt-1 rounded border border-gray-300 px-2 py-1 text-sm font-normal w-20 text-center focus:ring-2 focus:ring-blue-600 focus:outline-none"
                 />
               </label>
             `)}
 
-            <label class="flex flex-col text-sm text-gray-700 font-semibold w-full">
+            <label class="flex flex-col text-sm text-gray-700 font-semibold items-center">
               Motivation
               <select
                 .value=${this.motivation}
                 @change=${e => this.motivation = e.target.value}
-                class="mt-1 w-40 mx-auto rounded border border-gray-300 px-2 py-1 text-sm font-normal focus:ring-2 focus:ring-blue-600 focus:outline-none"
+                class="mt-1 rounded border border-gray-300 px-2 py-1 text-sm font-normal w-32 text-center focus:ring-2 focus:ring-blue-600 focus:outline-none"
               >
                 ${["commenting", "describing", "tagging", "linking"].map(m => html`
                   <option value="${m}">${m}</option>
                 `)}
               </select>
             </label>
-          </div>
 
-          <div class="grid grid-cols-[auto_auto_auto] gap-4 items-end justify-center">
-            ${["w", "h"].map(prop => html`
-              <label class="flex flex-col text-sm text-gray-700 font-semibold">
-                ${prop}
-                <input
-                  type="number"
-                  min="0"
-                  max="${prop === 'w' ? this.imageWidth - this.x : this.imageHeight - this.y}"
-                  .value=${this[prop]}
-                  @input=${e => this._onInputChange(prop, e.target.value)}
-                  class="mt-1 rounded border border-gray-300 px-2 py-1 text-sm font-normal w-20 focus:ring-2 focus:ring-blue-600 focus:outline-none"
-                />
-              </label>
-            `)}
-
-            <label class="flex flex-col text-sm text-gray-700 font-semibold w-full">
+            <label class="flex flex-col text-sm text-gray-700 font-semibold items-center">
               Format
               <select
                 .value=${this.format}
                 @change=${e => this.format = e.target.value}
-                class="mt-1 w-40 mx-auto rounded border border-gray-300 px-2 py-1 text-sm font-normal focus:ring-2 focus:ring-blue-600 focus:outline-none"
+                class="mt-1 rounded border border-gray-300 px-2 py-1 text-sm font-normal w-32 text-center focus:ring-2 focus:ring-blue-600 focus:outline-none"
               >
                 ${["text/html", "text/plain", "text/markdown"].map(f => html`
                   <option value="${f}">${f}</option>
@@ -211,7 +207,7 @@ export class CpAnForm extends UtBase {
             <textarea
               .value=${this.chars}
               @input=${e => this.chars = e.target.value}
-              class="mt-1 rounded border border-gray-300 px-2 py-1 text-sm font-normal resize-y max-h-48 focus:ring-2 focus:ring-blue-600 focus:outline-none"
+              class="mt-1 rounded border border-gray-300 px-2 py-1 text-sm font-normal resize-y max-h-48 focus:ring-2 focus:ring-blue-600 focus:outline-none gap-6"
             ></textarea>
           </label>
 
