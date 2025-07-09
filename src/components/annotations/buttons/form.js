@@ -2,6 +2,7 @@ import { html } from "https://esm.sh/lit-element";
 import { UtBase } from "../../../utilities/base.js";
 
 export class CpAnForm extends UtBase {
+
   static get properties() {
     return {
       manifestObject: { type: Object },
@@ -122,7 +123,7 @@ export class CpAnForm extends UtBase {
       return html`
         <div class="flex items-center justify-center gap-6 pt-2 border-t border-gray-200">
           ${makeButton("Reset", "fa-solid fa-rotate-left", "bg-gray-600", this._resetForm)}
-          ${makeButton("Add", "fa-solid fa-plus", "bg-green-600", () => {})}
+          ${makeButton("Add", "fa-solid fa-plus", "bg-green-600", this.addAnnotation.bind(this))}
         </div>
       `;
     }
@@ -131,8 +132,8 @@ export class CpAnForm extends UtBase {
       return html`
         <div class="flex items-center justify-center gap-6 pt-2 border-t border-gray-200">
           ${makeButton("Reset", "fa-solid fa-rotate-left", "bg-gray-600", this._resetForm)}
-          ${makeButton("Clear", "fa-solid fa-eraser", "bg-yellow-500", () => {})}
-          ${makeButton("Edit", "fa-solid fa-pencil", "bg-orange-500", () => {})}
+          ${makeButton("Clear", "fa-solid fa-eraser", "bg-yellow-500", () => { })}
+          ${makeButton("Edit", "fa-solid fa-pencil", "bg-orange-500", () => { })}
         </div>
       `;
     }
@@ -140,7 +141,20 @@ export class CpAnForm extends UtBase {
     if (this.mode === "delete") {
       return html`
         <div class="flex items-center justify-center gap-6 pt-2 border-t border-gray-200">
-          ${makeButton("Delete", "fa-solid fa-trash", "bg-red-600", () => {})}
+          ${makeButton("Delete", "fa-solid fa-trash", "bg-red-600", () => { })}
+        </div>
+      `;
+    }
+
+    if (this.mode === "export") {
+      return html`
+        <div class="flex items-center justify-center gap-6 pt-2 border-t border-gray-200">
+          ${makeButton("Export", "fa-solid fa-download", "bg-blue-600", () => {
+        this.dispatchEvent(new CustomEvent("annotation-export", {
+          bubbles: true,
+          composed: true
+        }));
+      })}
         </div>
       `;
     }

@@ -75,13 +75,16 @@ export class CpAnViewer extends UtBase {
     if (!annList?.["@id"]) return (this.annotations = []);
 
     const rawUrl = annList["@id"];
-    const proxiedUrl = "http://localhost:" + this.PORT + "/" + rawUrl;
+    const isLocalhost = rawUrl.startsWith("http://localhost") || rawUrl.startsWith("https://localhost");
+    const fetchUrl = isLocalhost
+      ? `http://localhost:${this.PORT}/${rawUrl}`
+      : rawUrl;
 
     if (rawUrl === this._currentAnnotationURL) return;
     this._currentAnnotationURL = rawUrl;
 
     try {
-      const res = await fetch(proxiedUrl);
+      const res = await fetch(fetchUrl);
       if (!res.ok) throw new Error(`Failed to fetch annotations from ${rawUrl}`);
       const data = await res.json();
 

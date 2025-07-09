@@ -20,25 +20,26 @@ export class CpAnAdd extends UtBase {
   _onClick() {
     const newMode = this.currentMode === "add" ? "" : "add";
     const eventName = newMode === "" ? "hide-frame" : "annotation-add";
-    this.dispatchEvent(new CustomEvent(eventName, {
-      bubbles: true,
-      composed: true,
-    }));
-    this.dispatchEvent(new CustomEvent("mode-toggle", {
-      detail: { mode: newMode },
-      bubbles: true,
-      composed: true,
-    }));
+    
+    this.dispatchEvent(
+      new CustomEvent(eventName, {
+        bubbles: true,
+        composed: true,
+      })
+    );
+    this.dispatchEvent(
+      new CustomEvent("mode-toggle", {
+        detail: { mode: newMode },
+        bubbles: true,
+        composed: true,
+      })
+    );
   }
 
   render() {
     const isActive = this.currentMode === "add";
-    const buttonClass = isActive
-      ? "bg-red-600"
-      : "bg-green-600";
-    const iconClass = isActive
-      ? "fa-solid fa-xmark"
-      : "fa-solid fa-plus";
+    const buttonClass = isActive ? "bg-red-600" : "bg-green-600";
+    const iconClass = isActive ? "fa-solid fa-xmark" : "fa-solid fa-plus";
     const label = isActive ? "Close" : "Add";
 
     return html`
