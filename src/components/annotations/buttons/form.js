@@ -230,6 +230,41 @@ export class CpAnForm extends UtBase {
       </div>
     `;
   }
+
+  addAnnotation() {
+    const annotation = {
+      "@context": "http://iiif.io/api/presentation/2/context.json",
+      "@type": "oa:Annotation",
+      "motivation": [`oa:${this.motivation}`],
+      "on": {
+        "@type": "oa:SpecificResource",
+        "full": this.imageUrl,
+        "selector": {
+          "@type": "oa:FragmentSelector",
+          "value": `xywh=${this.x},${this.y},${this.w},${this.h}`
+        },
+        "within": {
+          "@type": "sc:Manifest",
+          "@id": this.manifestObject["@id"]
+        }
+      },
+      "resource": [
+        {
+          "@type": "dctypes:Text",
+          "format": this.format,
+          "chars": this.chars
+        }
+      ]
+    };
+
+    this.dispatchEvent(new CustomEvent("add-annotation-submit", {
+      detail: { annotation },
+      bubbles: true,
+      composed: true
+    }));
+
+    this._resetForm();
+  }
 }
 
 customElements.define("cp-anform", CpAnForm);

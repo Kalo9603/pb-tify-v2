@@ -9,6 +9,7 @@ export class CpAnViewer extends UtBase {
       canvasIndex: { type: Number },
       annotations: { type: Array },
       activeAnnotationIndex: { type: Number },
+      localAnnotations: { type: Array },
       ...super.properties
     };
   }
@@ -30,12 +31,12 @@ export class CpAnViewer extends UtBase {
     this.canvasIndex = 0;
     this.annotations = [];
     this.activeAnnotationIndex = null;
-    this._currentAnnotationURL = null;
+    this.localAnnotations = [];
     this.PORT = 3001;
   }
 
   updated(changedProps) {
-    if (changedProps.has("manifestObject") || changedProps.has("canvasIndex")) {
+    if (changedProps.has("manifestObject") || changedProps.has("canvasIndex") || changedProps.has("localAnnotations")) {
       this.fetchAnnotations();
     }
   }
@@ -65,55 +66,65 @@ export class CpAnViewer extends UtBase {
     return { x, y, w, h };
   }
 
+  _parseAnnotation(a) {
+    const chars = this.extractChars(a.resource);
+    const region =
+      typeof a.on === "string"
+        ? a.on.split("#xywh=")[1] ?? null
+        : a.on?.selector?.value ?? null;
+
+    return {
+      motivation: a.motivation,
+      chars,
+      region,
+      full: a
+    };
+  }
+
   async fetchAnnotations() {
-    if (!this.manifestObject) return;
+  if (!this.manifestObject) return;
 
-    const canvas = this.manifestObject.sequences?.[0]?.canvases?.[this.canvasIndex];
-    if (!canvas) return (this.annotations = []);
+  const canvas = this.manifestObject.sequences?.[0]?.canvases?.[this.canvasIndex];
+  if (!canvas) return;
 
-    const annList = canvas.otherContent?.find(c => c["@type"] === "sc:AnnotationList");
-    if (!annList?.["@id"]) return (this.annotations = []);
+  const annList = canvas.otherContent?.find(c => c["@type"] === "sc:AnnotationList");
+  let baseAnnotations = [];
 
-    const rawUrl = annList["@id"];
-    const isLocalhost = rawUrl.startsWith("http://localhost") || rawUrl.startsWith("https://localhost");
-    const fetchUrl = isLocalhost
-      ? `http://localhost:${this.PORT}/${rawUrl}`
-      : rawUrl;
-
-    if (rawUrl === this._currentAnnotationURL) return;
-    this._currentAnnotationURL = rawUrl;
-
+  if (annList && Array.isArray(annList.resources)) {
+    baseAnnotations = annList.resources.map(a => this._parseAnnotation(a));
+  } else if (annList) {
     try {
+      const rawUrl = annList["@id"];
+      const isLocalhost = rawUrl.startsWith("http://localhost") || rawUrl.startsWith("https://localhost");
+      const fetchUrl = isLocalhost
+        ? `http://localhost:${this.PORT}/${rawUrl}`
+        : rawUrl;
+
       const res = await fetch(fetchUrl);
       if (!res.ok) throw new Error(`Failed to fetch annotations from ${rawUrl}`);
       const data = await res.json();
-
-      this.annotations = (data.resources || []).map(a => {
-        const chars = this.extractChars(a.resource);
-        const region =
-          typeof a.on === "string"
-            ? a.on.split("#xywh=")[1] ?? null
-            : a.on?.selector?.value ?? null;
-
-        return {
-          motivation: a.motivation,
-          chars,
-          region,
-          full: a
-        };
-      });
-
-      this.dispatchEvent(new CustomEvent("annotations-count", {
-        detail: { count: this.annotations.length },
-        bubbles: true,
-        composed: true
-      }));
-
+      baseAnnotations = (data.resources || []).map(a => this._parseAnnotation(a));
     } catch (err) {
       console.error("Annotation fetch failed:", err);
-      this.annotations = [];
     }
   }
+
+  const canvasId = canvas["@id"] || "";
+  const localAnns = (this.localAnnotations || [])
+    .filter(a => a.canvasId === canvasId)
+    .map(a => this._parseAnnotation(a.annotation));
+
+  const allFull = [...baseAnnotations, ...localAnns].map(a => JSON.stringify(a.full));
+  const unique = Array.from(new Set(allFull)).map(str => JSON.parse(str));
+
+  this.annotations = unique.map(a => this._parseAnnotation(a));
+
+  this.dispatchEvent(new CustomEvent("annotations-count", {
+    detail: { count: this.annotations.length },
+    bubbles: true,
+    composed: true
+  }));
+}
 
   toggleAnnotation(index) {
     const prev = this.activeAnnotationIndex;
@@ -159,8 +170,6 @@ export class CpAnViewer extends UtBase {
     const canvas = this.manifestObject?.sequences?.[0]?.canvases?.[this.canvasIndex];
     const resource = canvas?.images?.[0]?.resource;
     const imageUrl = resource?.["@id"];
-    const imgWidth = resource?.width ?? 0;
-    const imgHeight = resource?.height ?? 0;
 
     return html`
       ${this.annotations.length === 0
@@ -168,15 +177,15 @@ export class CpAnViewer extends UtBase {
         : html`
             <ul class="space-y-4">
               ${this.annotations.map((ann, i) => {
-                const isActive = this.activeAnnotationIndex === i;
-                const xywh = ann.region;
+          const isActive = this.activeAnnotationIndex === i;
+          const xywh = ann.region;
 
-                let x = 0, y = 0, w = 0, h = 0;
-                if (xywh) {
-                  ({ x, y, w, h } = this._parseXYWH(xywh));
-                }
+          let x = 0, y = 0, w = 0, h = 0;
+          if (xywh) {
+            ({ x, y, w, h } = this._parseXYWH(xywh));
+          }
 
-                return html`
+          return html`
                   <li
                     class="text-sm text-gray-700 border-b pb-2 space-y-1 relative transition-colors duration-300 rounded-md px-2
                       ${isActive ? 'bg-yellow-100' : 'hover:bg-gray-50'}"
@@ -198,15 +207,15 @@ export class CpAnViewer extends UtBase {
                     </div>
 
                     ${ann.chars
-                      ? html`
+              ? html`
                           <div class="prose prose-sm max-w-none">
                             ${unsafeHTML(ann.chars)}
                           </div>
                         `
-                      : null}
+              : null}
                   </li>
                 `;
-              })}
+        })}
             </ul>
           `}
     `;

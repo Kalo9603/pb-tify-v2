@@ -7,13 +7,15 @@ import "./buttons/delete.js";
 import "./buttons/export.js";
 
 export class CpAnnotations extends UtBase {
+
   static get properties() {
     return {
       manifestObject: { type: Object },
       canvasIndex: { type: Number },
       entries: { type: Array },
       annotationCount: { type: Number },
-      currentMode: { type: String }
+      currentMode: { type: String },
+      localAnnotations: { type: Array }
     };
   }
 
@@ -24,6 +26,7 @@ export class CpAnnotations extends UtBase {
     this.entries = [];
     this.annotationCount = null;
     this.currentMode = "";
+    this.localAnnotations = [];
   }
 
   _onModeToggle(e) {
@@ -56,6 +59,7 @@ export class CpAnnotations extends UtBase {
           <cp-anviewer
             .manifestObject=${this.manifestObject}
             .canvasIndex=${this.canvasIndex}
+            .localAnnotations=${this.localAnnotations}
             @annotations-count=${e => this.annotationCount = e.detail.count}
           ></cp-anviewer>
         </section>

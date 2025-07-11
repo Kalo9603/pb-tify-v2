@@ -31,6 +31,7 @@ export class PbTest extends UtBase {
       currentCanvasIndex: { type: Number },
       frameData: { type: Object },
       annotationMode: { type: String },
+      localAnnotations: { type: Array },
       ...super.properties,
     };
   }
@@ -44,6 +45,7 @@ export class PbTest extends UtBase {
     this.availableLanguages = [];
     this.currentCanvasIndex = 0;
     this.annotationMode = "";
+    this.localAnnotations = [];
 
     this.frameData = {
       url: "",
@@ -188,6 +190,66 @@ export class PbTest extends UtBase {
     this.requestUpdate();
   }
 
+  _saveLocalAnnotation(e) {
+    const newAnnotation = e.detail.annotation;
+    console.log("📌 Nuova annotazione ricevuta:", newAnnotation);
+
+    const canvas = this.manifestObject?.sequences?.[0]?.canvases?.[this.currentCanvasIndex];
+    if (!canvas) {
+      console.warn("❌ Nessun canvas trovato per index:", this.currentCanvasIndex);
+      return;
+    }
+
+    console.log("📌 Canvas corrente:", canvas);
+
+    if (!Array.isArray(canvas.otherContent)) {
+      console.warn("ℹ️ canvas.otherContent non è un array. Lo inizializzo.");
+      canvas.otherContent = [];
+    }
+
+    let list = canvas.otherContent.find(c => c["@type"] === "sc:AnnotationList");
+    console.log("📌 AnnotationList trovata (può essere undefined):", list);
+
+    if (!list) {
+      const canvasId = encodeURIComponent(canvas["@id"] || `canvas${this.currentCanvasIndex}`);
+      list = {
+        "@type": "sc:AnnotationList",
+        "@id": `http://localhost:8080/exist/rest/db/pb-test/annotations/${canvasId}`,
+        "resources": []
+      };
+      canvas.otherContent.push(list);
+      console.log("✅ Nuova AnnotationList creata e aggiunta al canvas.");
+    }
+
+    if (!Array.isArray(list.resources)) {
+      console.warn("⚠️ list.resources non definito o non è un array. Lo inizializzo.");
+      list.resources = [];
+    }
+
+    console.log("📌 Prima del push, list.resources.length:", list.resources.length);
+    list.resources.push(newAnnotation);
+    console.log("✅ Dopo il push, list.resources.length:", list.resources.length);
+
+    const canvasId = canvas["@id"] || `canvas${this.currentCanvasIndex}`;
+    this.localAnnotations = [
+      ...this.localAnnotations,
+      {
+        canvasId,
+        annotation: newAnnotation
+      }
+    ];
+
+    console.log("📦 Annotazione salvata localmente. Totale locali:", this.localAnnotations.length);
+
+    console.log(this.localAnnotations);
+
+    this.dispatchEvent(new CustomEvent("refresh-annotations", {
+      bubbles: true,
+      composed: true
+    }));
+  }
+
+
   _exportAnnotations() {
     this.dispatchEvent(new CustomEvent("annotation-export", {
       bubbles: true,
@@ -250,6 +312,7 @@ export class PbTest extends UtBase {
               <cp-annotations
                 .manifestObject=${this.manifestObject}
                 .canvasIndex=${this.currentCanvasIndex}
+                .localAnnotations=${this.localAnnotations}
               ></cp-annotations>
 
               ${this.annotationMode ? html`
@@ -257,6 +320,7 @@ export class PbTest extends UtBase {
                   .manifestObject=${this.manifestObject}
                   .canvasIndex=${this.currentCanvasIndex}
                   .mode=${this.annotationMode}
+                  @add-annotation-submit=${e => this._saveLocalAnnotation(e)}
                 ></cp-anform>
               ` : null}
             </div>
