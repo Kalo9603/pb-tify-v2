@@ -40,7 +40,10 @@ export class CpAnnotations extends UtBase {
 
   _refreshViewer() {
     const viewer = this.shadowRoot.querySelector("cp-anviewer");
-    viewer?.fetchAnnotations();
+    if (viewer) {
+      viewer.localAnnotations = [...this.localAnnotations];
+      viewer.fetchAnnotations();
+    }
   }
 
   _onExport() {
@@ -77,7 +80,7 @@ export class CpAnnotations extends UtBase {
               ></cp-anadd>
 
           ${this.annotationCount > 0
-            ? html`
+        ? html`
                 <cp-anedit
                   .currentMode=${this.currentMode}
                   @annotation-edit=${() => this._onEdit()}
@@ -93,7 +96,7 @@ export class CpAnnotations extends UtBase {
                   .canvasIndex=${this.canvasIndex}
                 ></cp-anexport>
               `
-            : null}
+        : null}
         </footer>
 
       </div>

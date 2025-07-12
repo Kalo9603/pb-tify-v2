@@ -191,6 +191,7 @@ export class PbTest extends UtBase {
   }
 
   _saveLocalAnnotation(e) {
+    
     const newAnnotation = e.detail.annotation;
     console.log("📌 Nuova annotazione ricevuta:", newAnnotation);
 
@@ -200,37 +201,12 @@ export class PbTest extends UtBase {
       return;
     }
 
-    console.log("📌 Canvas corrente:", canvas);
-
-    if (!Array.isArray(canvas.otherContent)) {
-      console.warn("ℹ️ canvas.otherContent non è un array. Lo inizializzo.");
-      canvas.otherContent = [];
-    }
-
-    let list = canvas.otherContent.find(c => c["@type"] === "sc:AnnotationList");
-    console.log("📌 AnnotationList trovata (può essere undefined):", list);
-
-    if (!list) {
-      const canvasId = encodeURIComponent(canvas["@id"] || `canvas${this.currentCanvasIndex}`);
-      list = {
-        "@type": "sc:AnnotationList",
-        "@id": `http://localhost:8080/exist/rest/db/pb-test/annotations/${canvasId}`,
-        "resources": []
-      };
-      canvas.otherContent.push(list);
-      console.log("✅ Nuova AnnotationList creata e aggiunta al canvas.");
-    }
-
-    if (!Array.isArray(list.resources)) {
-      console.warn("⚠️ list.resources non definito o non è un array. Lo inizializzo.");
-      list.resources = [];
-    }
-
-    console.log("📌 Prima del push, list.resources.length:", list.resources.length);
-    list.resources.push(newAnnotation);
-    console.log("✅ Dopo il push, list.resources.length:", list.resources.length);
-
     const canvasId = canvas["@id"] || `canvas${this.currentCanvasIndex}`;
+
+    if (!newAnnotation["@id"]) {
+      newAnnotation["@id"] = `annotation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    }
+
     this.localAnnotations = [
       ...this.localAnnotations,
       {
@@ -239,16 +215,13 @@ export class PbTest extends UtBase {
       }
     ];
 
-    console.log("📦 Annotazione salvata localmente. Totale locali:", this.localAnnotations.length);
-
-    console.log(this.localAnnotations);
+    console.log("📌 localAnnotations dopo:", this.localAnnotations);
 
     this.dispatchEvent(new CustomEvent("refresh-annotations", {
       bubbles: true,
       composed: true
     }));
   }
-
 
   _exportAnnotations() {
     this.dispatchEvent(new CustomEvent("annotation-export", {

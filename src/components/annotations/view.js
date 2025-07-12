@@ -3,6 +3,7 @@ import { unsafeHTML } from "https://esm.sh/lit-html/directives/unsafe-html.js";
 import { UtBase } from "../../utilities/base.js";
 
 export class CpAnViewer extends UtBase {
+
   static get properties() {
     return {
       manifestObject: { type: Object },
@@ -33,6 +34,18 @@ export class CpAnViewer extends UtBase {
     this.activeAnnotationIndex = null;
     this.localAnnotations = [];
     this.PORT = 3001;
+
+    this.addEventListener("refresh-annotations", () => this.fetchAnnotations());
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.addEventListener("refresh-annotations", () => this.fetchAnnotations());
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.removeEventListener("refresh-annotations", () => this.fetchAnnotations());
   }
 
   updated(changedProps) {
@@ -82,49 +95,62 @@ export class CpAnViewer extends UtBase {
   }
 
   async fetchAnnotations() {
-  if (!this.manifestObject) return;
+    if (!this.manifestObject) return;
 
-  const canvas = this.manifestObject.sequences?.[0]?.canvases?.[this.canvasIndex];
-  if (!canvas) return;
+    const canvas = this.manifestObject.sequences?.[0]?.canvases?.[this.canvasIndex];
+    if (!canvas) return;
 
-  const annList = canvas.otherContent?.find(c => c["@type"] === "sc:AnnotationList");
-  let baseAnnotations = [];
+    const annList = canvas.otherContent?.find(c => c["@type"] === "sc:AnnotationList");
+    let baseAnnotations = [];
 
-  if (annList && Array.isArray(annList.resources)) {
-    baseAnnotations = annList.resources.map(a => this._parseAnnotation(a));
-  } else if (annList) {
-    try {
-      const rawUrl = annList["@id"];
-      const isLocalhost = rawUrl.startsWith("http://localhost") || rawUrl.startsWith("https://localhost");
-      const fetchUrl = isLocalhost
-        ? `http://localhost:${this.PORT}/${rawUrl}`
-        : rawUrl;
+    if (annList && Array.isArray(annList.resources)) {
+      baseAnnotations = annList.resources.map(a => this._parseAnnotation(a));
+    } else if (annList) {
+      try {
+        const rawUrl = annList["@id"];
+        const isLocalhost = rawUrl.startsWith("http://localhost") || rawUrl.startsWith("https://localhost");
+        const fetchUrl = isLocalhost
+          ? `http://localhost:${this.PORT}/${rawUrl}`
+          : rawUrl;
 
-      const res = await fetch(fetchUrl);
-      if (!res.ok) throw new Error(`Failed to fetch annotations from ${rawUrl}`);
-      const data = await res.json();
-      baseAnnotations = (data.resources || []).map(a => this._parseAnnotation(a));
-    } catch (err) {
-      console.error("Annotation fetch failed:", err);
+        const res = await fetch(fetchUrl);
+        if (!res.ok) throw new Error(`Failed to fetch annotations from ${rawUrl}`);
+        const data = await res.json();
+        baseAnnotations = (data.resources || []).map(a => this._parseAnnotation(a));
+      } catch (err) {
+        console.error("Annotation fetch failed:", err);
+      }
     }
+
+    const canvasId = canvas["@id"] || "";
+    const localAnns = (this.localAnnotations || [])
+      .filter(a => a.canvasId === canvasId)
+      .map(a => this._parseAnnotation(a.annotation));
+
+    const allAnnotations = [...baseAnnotations, ...localAnns];
+    const uniqueAnnotations = [];
+    const seenIds = new Set();
+
+    for (const ann of allAnnotations) {
+      const annId = ann.full["@id"] || JSON.stringify(ann.full);
+      if (!seenIds.has(annId)) {
+        seenIds.add(annId);
+        uniqueAnnotations.push(ann);
+      }
+    }
+
+    this.annotations = uniqueAnnotations;
+
+    console.log("📌 Annotazioni uniche:", this.annotations);
+
+    this.dispatchEvent(new CustomEvent("annotations-count", {
+      detail: { count: this.annotations.length },
+      bubbles: true,
+      composed: true
+    }));
+
+    this.requestUpdate();
   }
-
-  const canvasId = canvas["@id"] || "";
-  const localAnns = (this.localAnnotations || [])
-    .filter(a => a.canvasId === canvasId)
-    .map(a => this._parseAnnotation(a.annotation));
-
-  const allFull = [...baseAnnotations, ...localAnns].map(a => JSON.stringify(a.full));
-  const unique = Array.from(new Set(allFull)).map(str => JSON.parse(str));
-
-  this.annotations = unique.map(a => this._parseAnnotation(a));
-
-  this.dispatchEvent(new CustomEvent("annotations-count", {
-    detail: { count: this.annotations.length },
-    bubbles: true,
-    composed: true
-  }));
-}
 
   toggleAnnotation(index) {
     const prev = this.activeAnnotationIndex;
