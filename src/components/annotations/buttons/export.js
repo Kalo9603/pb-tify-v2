@@ -46,7 +46,14 @@ export class CpAnExport extends UtBase {
 
             const filename = `${safeManifestId}_${safeCanvasLabel}_annotations_${dateStr}.json`;
 
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const annotationList = {
+      "@context": "http://iiif.io/api/presentation/2/context.json",
+      "@id": `annotationList-${Date.now()}`,
+      "@type": "sc:AnnotationList",
+      "resources": combinedAnnotations
+    };
+
+    const blob = new Blob([JSON.stringify(annotationList, null, 2)], { type: "application/json" });
             const url = URL.createObjectURL(blob);
 
             const a = document.createElement("a");

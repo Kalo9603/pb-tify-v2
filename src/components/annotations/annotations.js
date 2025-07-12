@@ -2,8 +2,6 @@ import { html } from "https://esm.sh/lit-element";
 import { UtBase } from "../../utilities/base.js";
 import "./view.js";
 import "./buttons/add.js";
-import "./buttons/edit.js";
-import "./buttons/delete.js";
 import "./buttons/export.js";
 
 export class CpAnnotations extends UtBase {
@@ -53,12 +51,9 @@ export class CpAnnotations extends UtBase {
   render() {
     return html`
       <div class="flex flex-col max-h-[80vh] border border-gray-200 rounded-xl bg-white shadow-sm overflow-hidden">
+        <header class="p-4 border-b font-semibold">✍🏻 Annotations</header>
 
-        <header class="flex-none p-4 border-b border-gray-200 text-gray-800 font-semibold text-lg select-none">
-          ✍🏻 Annotations
-        </header>
-
-        <section class="overflow-auto p-4 max-h-[60vh]">
+        <section class="p-4 overflow-auto max-h-[60vh]">
           <cp-anviewer
             .manifestObject=${this.manifestObject}
             .canvasIndex=${this.canvasIndex}
@@ -67,16 +62,20 @@ export class CpAnnotations extends UtBase {
           ></cp-anviewer>
         </section>
 
-        <footer
-          class="flex items-center justify-center sticky bottom-0 bg-white border-t border-gray-200 shadow-inner gap-6 px-4 py-2 rounded-b-xl select-none z-10"
-        >
+        <footer class="flex items-center justify-center sticky bottom-0 bg-white border-t gap-4 p-2">
+
+          <cp-animport
+            .manifestObject=${this.manifestObject}
+            .canvasIndex=${this.canvasIndex}
+          ></cp-animport>
+
               <cp-anadd
                 .manifestObject=${this.manifestObject}
                 .canvasIndex=${this.canvasIndex}
                 .currentMode=${this.currentMode}
-                @annotation-add=${() => this._onAdd()}
-                @mode-toggle=${(e) => this._onModeToggle(e)}
-                @refresh-annotations=${() => this._refreshViewer()}
+            @annotation-add=${this._onAdd}
+            @mode-toggle=${this._onModeToggle}
+            @refresh-annotations=${this._refreshViewer}
               ></cp-anadd>
 
           ${this.annotationCount > 0
@@ -94,25 +93,13 @@ export class CpAnnotations extends UtBase {
                 <cp-anexport
                   .manifestObject=${this.manifestObject}
                   .canvasIndex=${this.canvasIndex}
+              .localAnnotations=${this.localAnnotations}
                 ></cp-anexport>
-              `
-        : null}
-        </footer>
+          ` : null}
 
+        </footer>
       </div>
     `;
-  }
-
-  _onAdd() {
-    this.dispatchEvent(new CustomEvent("annotation-add", { bubbles: true, composed: true }));
-  }
-
-  _onEdit() {
-    this.dispatchEvent(new CustomEvent("annotation-edit", { bubbles: true, composed: true }));
-  }
-
-  _onDelete() {
-    this.dispatchEvent(new CustomEvent("annotation-delete", { bubbles: true, composed: true }));
   }
 }
 

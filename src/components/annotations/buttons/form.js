@@ -232,8 +232,12 @@ export class CpAnForm extends UtBase {
   }
 
   addAnnotation() {
+
+    const randomId = Math.random().toString(36).substring(2, 10);
+
     const annotation = {
       "@context": "http://iiif.io/api/presentation/2/context.json",
+      "@id": `annotation-${randomId}`,
       "@type": "oa:Annotation",
       "motivation": [`oa:${this.motivation}`],
       "on": {
