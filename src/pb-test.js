@@ -193,7 +193,6 @@ export class PbTest extends UtBase {
   _saveLocalAnnotation(e) {
     
     const newAnnotation = e.detail.annotation;
-    console.log("📌 Nuova annotazione ricevuta:", newAnnotation);
 
     const canvas = this.manifestObject?.sequences?.[0]?.canvases?.[this.currentCanvasIndex];
     if (!canvas) {
@@ -214,8 +213,6 @@ export class PbTest extends UtBase {
         annotation: newAnnotation
       }
     ];
-
-    console.log("📌 localAnnotations dopo:", this.localAnnotations);
 
     this.dispatchEvent(new CustomEvent("refresh-annotations", {
       bubbles: true,

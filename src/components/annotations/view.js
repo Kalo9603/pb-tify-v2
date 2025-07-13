@@ -1,6 +1,7 @@
 import { html, css } from "https://esm.sh/lit-element";
 import { unsafeHTML } from "https://esm.sh/lit-html/directives/unsafe-html.js";
 import { UtBase } from "../../utilities/base.js";
+import { getMotivationIcon } from "../../utilities/lib/utils.js";
 import "./buttons/edit.js";
 import "./buttons/delete.js";
 
@@ -227,7 +228,15 @@ export class CpAnViewer extends UtBase {
                       ${isActive ? "bg-yellow-100" : "hover:bg-gray-50"}"
                   >
                     <div class="flex justify-between">
-                      <div class="pt-1"><strong>#${i + 1}</strong></div>
+                      <div class="pt-1 flex items-center gap-3 text-sm">
+                        <span
+                          class="inline-flex items-center justify-center rounded-full bg-gray-200 w-7 h-7 text-xl"
+                          title="${Array.isArray(ann.motivation) ? ann.motivation[0] : ann.motivation}"
+                        >
+                          ${getMotivationIcon(ann.motivation)}
+                        </span>
+                        <strong>#${i + 1}</strong>
+                      </div>
 
                       <div class="flex items-center gap-4">
                         <button
