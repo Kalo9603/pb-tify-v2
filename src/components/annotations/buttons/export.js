@@ -3,48 +3,64 @@ import { UtBase } from "../../../utilities/base.js";
 
 export class CpAnExport extends UtBase {
 
-    static get properties() {
-        return {
-            manifestObject: { type: Object },
-            canvasIndex: { type: Number }
-        };
+  static get properties() {
+    return {
+      manifestObject: { type: Object },
+      canvasIndex: { type: Number },
+      localAnnotations: { type: Array }
+    };
+  }
+
+  constructor() {
+    super();
+    this.manifestObject = null;
+    this.canvasIndex = 0;
+    this.localAnnotations = [];
+  }
+
+  async _exportAnnotations() {
+    const canvas = this.manifestObject?.sequences?.[0]?.canvases?.[this.canvasIndex];
+    if (!canvas) {
+      console.warn("Canvas not found.");
+      return;
     }
 
-    constructor() {
-        super();
-        this.manifestObject = null;
-        this.canvasIndex = 0;
+    let baseAnnotations = [];
+
+    const ocEntry = canvas.otherContent?.find(
+      item => item["@type"] === "sc:AnnotationList" && typeof item["@id"] === "string"
+    );
+
+    if (ocEntry) {
+      try {
+        const response = await fetch(ocEntry["@id"]);
+        if (!response.ok) throw new Error("Failed to fetch remote annotations.");
+
+        const data = await response.json();
+        baseAnnotations = data.resources || [];
+      } catch (err) {
+        console.error("Error fetching remote annotations:", err);
+      }
     }
 
-    async _exportAnnotations() {
-        const canvas = this.manifestObject?.sequences?.[0]?.canvases?.[this.canvasIndex];
-        if (!canvas) {
-            console.warn("Canvas not found.");
-            return;
-        }
+    const combinedAnnotations = [...baseAnnotations];
+    const existingIds = new Set(baseAnnotations.map(a => a["@id"]));
 
-        const ocEntry = canvas.otherContent?.find(
-            item => item["@type"] === "sc:AnnotationList" && typeof item["@id"] === "string"
-        );
+    for (const localItem of this.localAnnotations || []) {
+      const ann = localItem.annotation;
+      if (ann && ann["@id"] && !existingIds.has(ann["@id"])) {
+        combinedAnnotations.push(ann);
+        existingIds.add(ann["@id"]);
+      }
+    }
 
-        if (!ocEntry) {
-            console.warn("No AnnotationList in otherContent.");
-            return;
-        }
+    const manifestId = this.manifestObject?.["@id"] || "manifest";
+    const canvasLabel = canvas.label?.["@value"] || canvas.label || `canvas${this.canvasIndex + 1}`;
+    const safeManifestId = manifestId.split("/").pop()?.replace(/[^a-zA-Z0-9_-]/g, "_") || "manifest";
+    const safeCanvasLabel = canvasLabel.replace(/[^a-zA-Z0-9_-]/g, "_");
+    const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
 
-        try {
-            const response = await fetch(ocEntry["@id"]);
-            if (!response.ok) throw new Error("Annotation export error.");
-
-            const data = await response.json();
-
-            const manifestId = this.manifestObject?.["@id"] || "manifest";
-            const canvasLabel = canvas.label?.["@value"] || canvas.label || `canvas${this.canvasIndex + 1}`;
-            const safeManifestId = manifestId.split("/").pop()?.replace(/[^a-zA-Z0-9_-]/g, "_") || "manifest";
-            const safeCanvasLabel = canvasLabel.replace(/[^a-zA-Z0-9_-]/g, "_");
-            const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-
-            const filename = `${safeManifestId}_${safeCanvasLabel}_annotations_${dateStr}.json`;
+    const filename = `${safeManifestId}_${safeCanvasLabel}_annotations_${dateStr}.json`;
 
     const annotationList = {
       "@context": "http://iiif.io/api/presentation/2/context.json",
@@ -54,23 +70,19 @@ export class CpAnExport extends UtBase {
     };
 
     const blob = new Blob([JSON.stringify(annotationList, null, 2)], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
+    const url = URL.createObjectURL(blob);
 
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
 
-        } catch (err) {
-            console.error("❌ Unable to export annotations: ", err.message);
-        }
-    }
-
-    render() {
-        return html`
+  render() {
+    return html`
       <button
         class="group flex items-center rounded-full shadow-xl transition-all duration-300 px-3 py-2 w-12 hover:w-[105px] overflow-hidden h-10 bg-blue-600 text-white hover:shadow-md"
         title="Export annotations"
@@ -84,7 +96,7 @@ export class CpAnExport extends UtBase {
         </div>
       </button>
     `;
-    }
+  }
 }
 
 customElements.define("cp-anexport", CpAnExport);

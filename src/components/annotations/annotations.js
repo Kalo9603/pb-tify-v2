@@ -3,6 +3,7 @@ import { UtBase } from "../../utilities/base.js";
 import "./view.js";
 import "./buttons/add.js";
 import "./buttons/export.js";
+import "./buttons/import.js";
 
 export class CpAnnotations extends UtBase {
 
@@ -10,7 +11,6 @@ export class CpAnnotations extends UtBase {
     return {
       manifestObject: { type: Object },
       canvasIndex: { type: Number },
-      entries: { type: Array },
       annotationCount: { type: Number },
       currentMode: { type: String },
       localAnnotations: { type: Array }
@@ -21,31 +21,50 @@ export class CpAnnotations extends UtBase {
     super();
     this.manifestObject = null;
     this.canvasIndex = 0;
-    this.entries = [];
-    this.annotationCount = null;
+    this.annotationCount = 0;
     this.currentMode = "";
     this.localAnnotations = [];
   }
 
-  _onModeToggle(e) {
-    this.currentMode = e.detail.mode || "";
-    this.dispatchEvent(new CustomEvent("mode-toggle", {
-      detail: { mode: this.currentMode },
-      bubbles: true,
-      composed: true
-    }));
+  connectedCallback() {
+    super.connectedCallback();
+    this.addEventListener("annotation-import", this._onImport);
   }
 
-  _refreshViewer() {
-    const viewer = this.shadowRoot.querySelector("cp-anviewer");
-    if (viewer) {
-      viewer.localAnnotations = [...this.localAnnotations];
-      viewer.fetchAnnotations();
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.removeEventListener("annotation-import", this._onImport);
+  }
+
+  _onImport = (e) => {
+    const { additions } = e.detail;
+    const existing = new Set(this.localAnnotations.map(a => a.annotation["@id"]));
+    const toAdd = additions.filter(a => !existing.has(a.annotation["@id"]));
+
+    if (toAdd.length) {
+      this.localAnnotations = [...this.localAnnotations, ...toAdd];
+      this._refreshViewer();
     }
   }
 
-  _onExport() {
-    this.dispatchEvent(new CustomEvent("annotation-export", { bubbles: true, composed: true }));
+  _refreshViewer() {
+      const viewer = this.renderRoot.querySelector("cp-anviewer");
+      if (viewer) {
+        viewer.localAnnotations = [...this.localAnnotations];
+        viewer.manifestObject = this.manifestObject;
+        viewer.canvasIndex = this.canvasIndex;
+        viewer.requestUpdate("localAnnotations");
+        viewer.fetchAnnotations();
+      }
+  }
+
+  _onAdd = () => {
+    this.dispatchEvent(new CustomEvent("annotation-add", { bubbles: true, composed: true }));
+  }
+
+  _onModeToggle = (e) => {
+    this.currentMode = e.detail.mode;
+    this.requestUpdate();
   }
 
   render() {
@@ -69,32 +88,21 @@ export class CpAnnotations extends UtBase {
             .canvasIndex=${this.canvasIndex}
           ></cp-animport>
 
-              <cp-anadd
-                .manifestObject=${this.manifestObject}
-                .canvasIndex=${this.canvasIndex}
-                .currentMode=${this.currentMode}
+          <cp-anadd
+            .manifestObject=${this.manifestObject}
+            .canvasIndex=${this.canvasIndex}
+            .currentMode=${this.currentMode}
             @annotation-add=${this._onAdd}
             @mode-toggle=${this._onModeToggle}
             @refresh-annotations=${this._refreshViewer}
-              ></cp-anadd>
+          ></cp-anadd>
 
-          ${this.annotationCount > 0
-        ? html`
-                <cp-anedit
-                  .currentMode=${this.currentMode}
-                  @annotation-edit=${() => this._onEdit()}
-                  @mode-toggle=${(e) => this._onModeToggle(e)}
-                ></cp-anedit>
-                <cp-andelete
-                  .currentMode=${this.currentMode}
-                  @annotation-delete=${() => this._onDelete()}
-                  @mode-toggle=${(e) => this._onModeToggle(e)}
-                ></cp-andelete>
-                <cp-anexport
-                  .manifestObject=${this.manifestObject}
-                  .canvasIndex=${this.canvasIndex}
+          ${this.annotationCount > 0 ? html`
+            <cp-anexport
+              .manifestObject=${this.manifestObject}
+              .canvasIndex=${this.canvasIndex}
               .localAnnotations=${this.localAnnotations}
-                ></cp-anexport>
+            ></cp-anexport>
           ` : null}
 
         </footer>

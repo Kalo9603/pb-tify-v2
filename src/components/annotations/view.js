@@ -1,6 +1,8 @@
 import { html, css } from "https://esm.sh/lit-element";
 import { unsafeHTML } from "https://esm.sh/lit-html/directives/unsafe-html.js";
 import { UtBase } from "../../utilities/base.js";
+import "./buttons/edit.js";
+import "./buttons/delete.js";
 
 export class CpAnViewer extends UtBase {
 
@@ -11,6 +13,7 @@ export class CpAnViewer extends UtBase {
       annotations: { type: Array },
       activeAnnotationIndex: { type: Number },
       localAnnotations: { type: Array },
+      annotationListJson: { type: Object },
       ...super.properties
     };
   }
@@ -33,7 +36,7 @@ export class CpAnViewer extends UtBase {
     this.annotations = [];
     this.activeAnnotationIndex = null;
     this.localAnnotations = [];
-    this.PORT = 3001;
+    this.annotationListJson = null;
 
     this.addEventListener("refresh-annotations", () => this.fetchAnnotations());
   }
@@ -49,7 +52,11 @@ export class CpAnViewer extends UtBase {
   }
 
   updated(changedProps) {
-    if (changedProps.has("manifestObject") || changedProps.has("canvasIndex") || changedProps.has("localAnnotations")) {
+    if (
+      changedProps.has("manifestObject") ||
+      changedProps.has("canvasIndex") ||
+      changedProps.has("localAnnotations")
+    ) {
       this.fetchAnnotations();
     }
   }
@@ -59,7 +66,7 @@ export class CpAnViewer extends UtBase {
     if (typeof resource === "string") return resource;
     if (Array.isArray(resource)) {
       return resource
-        .map(r => r?.chars || r?.["@value"] || "")
+        .map((r) => r?.chars || r?.["@value"] || "")
         .filter(Boolean)
         .join(" ");
     }
@@ -67,9 +74,10 @@ export class CpAnViewer extends UtBase {
   }
 
   _parseXYWH(region) {
-    if (!region || typeof region !== "string") return { x: 0, y: 0, w: 0, h: 0 };
+    if (!region || typeof region !== "string")
+      return { x: 0, y: 0, w: 0, h: 0 };
 
-    const coords = region.replace("xywh=", "").split(",").map(n => parseInt(n));
+    const coords = region.replace("xywh=", "").split(",").map((n) => parseInt(n));
     if (coords.length !== 4 || coords.some(isNaN)) {
       console.warn("⚠️ Invalid xywh format:", region);
       return { x: 0, y: 0, w: 0, h: 0 };
@@ -90,58 +98,68 @@ export class CpAnViewer extends UtBase {
       motivation: a.motivation,
       chars,
       region,
-      full: a
+      full: a,
     };
   }
 
   async fetchAnnotations() {
-    if (!this.manifestObject) return;
+
+    if (!this.manifestObject) {
+      console.warn("No manifest object available.");
+      return;
+    }
 
     const canvas = this.manifestObject.sequences?.[0]?.canvases?.[this.canvasIndex];
-    if (!canvas) return;
+    if (!canvas) {
+      console.warn("Invalid canvas.");
+      return;
+    }
 
-    const annList = canvas.otherContent?.find(c => c["@type"] === "sc:AnnotationList");
+    const canvasId = canvas["@id"] || `canvas${this.canvasIndex}`;
     let baseAnnotations = [];
 
-    if (annList && Array.isArray(annList.resources)) {
-      baseAnnotations = annList.resources.map(a => this._parseAnnotation(a));
-    } else if (annList) {
-      try {
-        const rawUrl = annList["@id"];
-        const isLocalhost = rawUrl.startsWith("http://localhost") || rawUrl.startsWith("https://localhost");
-        const fetchUrl = isLocalhost
-          ? `http://localhost:${this.PORT}/${rawUrl}`
-          : rawUrl;
+    const annList = canvas.otherContent?.find(c => c["@type"] === "sc:AnnotationList");
 
-        const res = await fetch(fetchUrl);
-        if (!res.ok) throw new Error(`Failed to fetch annotations from ${rawUrl}`);
+    if (annList?.resources?.length) {
+      baseAnnotations = annList.resources.map(a => this._parseAnnotation(a));
+    } else if (annList?.["@id"]) {
+      try {
+        const res = await fetch(annList["@id"]);
+        if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
         const data = await res.json();
-        baseAnnotations = (data.resources || []).map(a => this._parseAnnotation(a));
+
+        if (data?.resources?.length) {
+          baseAnnotations = data.resources.map(a => this._parseAnnotation(a));
+        }
       } catch (err) {
-        console.error("Annotation fetch failed:", err);
+        console.error("Failed to fetch external annotationList:", err);
       }
     }
 
-    const canvasId = canvas["@id"] || "";
     const localAnns = (this.localAnnotations || [])
       .filter(a => a.canvasId === canvasId)
       .map(a => this._parseAnnotation(a.annotation));
 
-    const allAnnotations = [...baseAnnotations, ...localAnns];
-    const uniqueAnnotations = [];
-    const seenIds = new Set();
+    const all = [...baseAnnotations, ...localAnns];
+    const unique = [];
+    const seen = new Set();
 
-    for (const ann of allAnnotations) {
-      const annId = ann.full["@id"] || JSON.stringify(ann.full);
-      if (!seenIds.has(annId)) {
-        seenIds.add(annId);
-        uniqueAnnotations.push(ann);
+    for (const ann of all) {
+      const id = ann.full["@id"] || JSON.stringify(ann.full);
+      if (!seen.has(id)) {
+        seen.add(id);
+        unique.push(ann);
       }
     }
 
-    this.annotations = uniqueAnnotations;
+    this.annotations = unique;
 
-    console.log("📌 Annotazioni uniche:", this.annotations);
+    this.annotationListJson = {
+      "@context": "http://iiif.io/api/presentation/2/context.json",
+      "@id": `annotationList-${Date.now()}`,
+      "@type": "sc:AnnotationList",
+      resources: unique.map(a => a.full),
+    };
 
     this.dispatchEvent(new CustomEvent("annotations-count", {
       detail: { count: this.annotations.length },
@@ -162,41 +180,35 @@ export class CpAnViewer extends UtBase {
 
     const { x, y, w, h } = this._parseXYWH(region);
 
-    this.dispatchEvent(new CustomEvent("highlight-annotation", {
-      detail: {
-        action: index === prev ? "remove" : "add",
-        region: { x, y, w, h }
-      },
-      bubbles: true,
-      composed: true
-    }));
+    this.dispatchEvent(
+      new CustomEvent("highlight-annotation", {
+        detail: {
+          action: index === prev ? "remove" : "add",
+          region: { x, y, w, h },
+        },
+        bubbles: true,
+        composed: true,
+      })
+    );
 
     const canvas = this.manifestObject?.sequences?.[0]?.canvases?.[this.canvasIndex];
     const resource = canvas?.images?.[0]?.resource;
     const imageUrl = resource?.["@id"];
 
     if (index === prev) {
-      this.dispatchEvent(new CustomEvent("hide-frame", {
-        bubbles: true,
-        composed: true,
-      }));
+      this.dispatchEvent(new CustomEvent("hide-frame", { bubbles: true, composed: true }));
     } else {
-      this.dispatchEvent(new CustomEvent("show-frame", {
-        detail: {
-          url: imageUrl,
-          x, y, w, h
-        },
-        bubbles: true,
-        composed: true,
-      }));
+      this.dispatchEvent(
+        new CustomEvent("show-frame", {
+          detail: { url: imageUrl, x, y, w, h },
+          bubbles: true,
+          composed: true,
+        })
+      );
     }
   }
 
   render() {
-    const canvas = this.manifestObject?.sequences?.[0]?.canvases?.[this.canvasIndex];
-    const resource = canvas?.images?.[0]?.resource;
-    const imageUrl = resource?.["@id"];
-
     return html`
       ${this.annotations.length === 0
         ? html`<div class="text-gray-500 italic">No annotations available.</div>`
@@ -207,34 +219,49 @@ export class CpAnViewer extends UtBase {
           const xywh = ann.region;
 
           let x = 0, y = 0, w = 0, h = 0;
-          if (xywh) {
-            ({ x, y, w, h } = this._parseXYWH(xywh));
-          }
+          if (xywh) ({ x, y, w, h } = this._parseXYWH(xywh));
 
           return html`
                   <li
-                    class="text-sm text-gray-700 border-b pb-2 space-y-1 relative transition-colors duration-300 rounded-md px-2
-                      ${isActive ? 'bg-yellow-100' : 'hover:bg-gray-50'}"
+                    class="text-sm text-gray-700 border-b pb-2 relative transition-colors duration-300 rounded-md px-2
+                      ${isActive ? "bg-yellow-100" : "hover:bg-gray-50"}"
                   >
-                    <div class="flex items-center justify-between">
-                      <div><strong>#${i + 1}</strong></div>
-                      <button
-                        @click=${() => this.toggleAnnotation(i)}
-                        class="group flex items-center rounded-full shadow-xl transition-all duration-300 px-3 py-2 w-12 hover:w-28 overflow-hidden h-10
-                          ${isActive ? "bg-red-600" : "bg-blue-600"} text-white hover:bg-green-600"
-                      >
-                        <div class="flex items-center justify-center w-full transition-all duration-300 group-hover:justify-start group-hover:gap-2">
-                          <i class="fa-solid ${isActive ? "fa-magnifying-glass-minus" : "fa-magnifying-glass"} text-lg flex-shrink-0 transition-transform duration-300"></i>
-                          <span class="text-sm font-medium whitespace-nowrap transition-all duration-300 opacity-0 w-0 overflow-hidden group-hover:opacity-100 group-hover:w-auto group-hover:ml-2">
-                            ${isActive ? "Hide" : "Show"}
-                          </span>
-                        </div>
-                      </button>
+                    <div class="flex justify-between">
+                      <div class="pt-1"><strong>#${i + 1}</strong></div>
+
+                      <div class="flex items-center gap-4">
+                        <button
+                          @click=${() => this.toggleAnnotation(i)}
+                          class="group flex items-center rounded-full shadow-xl transition-all duration-300 px-3 py-2 w-12 hover:w-28 overflow-hidden h-10
+                            ${isActive ? "bg-red-600" : "bg-blue-600"} text-white hover:bg-green-600"
+                        >
+                          <div
+                            class="flex items-center justify-center w-full transition-all duration-300 group-hover:justify-start group-hover:gap-2"
+                          >
+                            <i
+                              class="fa-solid
+                              ${isActive ? "fa-magnifying-glass-minus" : "fa-magnifying-glass"}
+                              text-lg flex-shrink-0 transition-transform duration-300"
+                            ></i>
+                            <span
+                              class="text-sm font-medium whitespace-nowrap transition-all duration-300 opacity-0 w-0 overflow-hidden group-hover:opacity-100 group-hover:w-auto group-hover:ml-2"
+                              >${isActive ? "Hide" : "Show"}</span
+                            >
+                          </div>
+                        </button>
+
+                        ${isActive
+              ? html`
+                              <cp-anedit></cp-anedit>
+                              <cp-andelete></cp-andelete>
+                            `
+              : null}
+                      </div>
                     </div>
 
                     ${ann.chars
               ? html`
-                          <div class="prose prose-sm max-w-none">
+                          <div class="prose prose-sm max-w-none pt-2">
                             ${unsafeHTML(ann.chars)}
                           </div>
                         `

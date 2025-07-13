@@ -43,6 +43,7 @@ export class CpAnImport extends UtBase {
   }
 
   _importAnnotations(newAnnotations) {
+    
     if (!this.manifestObject) {
       this.error = "No manifest loaded.";
       this.requestUpdate();
@@ -56,8 +57,8 @@ export class CpAnImport extends UtBase {
       return;
     }
 
-    const canvasId = canvas["@id"] || `canvas${this.canvasIndex}`;
     const manifestId = this.manifestObject["@id"] || "";
+    const canvasId = canvas["@id"] || `canvas${this.canvasIndex}`;
 
     const filtered = newAnnotations.filter(ann => {
       const annId = ann["@id"];
@@ -69,6 +70,31 @@ export class CpAnImport extends UtBase {
       this.error = "No matching annotations to import.";
       this.requestUpdate();
       return;
+    }
+
+    const newAnnotationList = {
+      "@context": "http://iiif.io/api/presentation/2/context.json",
+      "@id": `urn:uuid:${crypto.randomUUID()}`,
+      "@type": "sc:AnnotationList",
+      resources: filtered
+    };
+
+    const currentList = canvas.otherContent?.find(c => c["@type"] === "sc:AnnotationList");
+
+    const isSameList = currentList &&
+      Array.isArray(currentList.resources) &&
+      currentList.resources.length === filtered.length &&
+      currentList.resources.every((ann, i) => ann["@id"] === filtered[i]["@id"]);
+
+    if (!canvas.otherContent) canvas.otherContent = [];
+
+    if (!isSameList) {
+      const idx = canvas.otherContent.findIndex(c => c["@type"] === "sc:AnnotationList");
+      if (idx >= 0) {
+        canvas.otherContent[idx] = newAnnotationList;
+      } else {
+        canvas.otherContent.push(newAnnotationList);
+      }
     }
 
     const additions = filtered.map(ann => ({
@@ -84,6 +110,7 @@ export class CpAnImport extends UtBase {
 
     this.error = null;
   }
+
 
   render() {
     return html`
@@ -113,8 +140,8 @@ export class CpAnImport extends UtBase {
         />
 
         ${this.error
-          ? html`<span class="absolute left-0 top-full mt-1 text-red-600 text-sm font-medium">${this.error}</span>`
-          : null}
+        ? html`<span class="absolute left-0 top-full mt-1 text-red-600 text-sm font-medium">${this.error}</span>`
+        : null}
       </div>
     `;
   }
