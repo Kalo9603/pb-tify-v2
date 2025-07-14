@@ -1,5 +1,6 @@
 import { html } from "https://esm.sh/lit-element";
 import { UtBase } from "../../../utilities/base.js";
+import { generateId } from "../../../utilities/lib/utils.js";
 
 export class CpAnExport extends UtBase {
 
@@ -64,7 +65,7 @@ export class CpAnExport extends UtBase {
 
     const annotationList = {
       "@context": "http://iiif.io/api/presentation/2/context.json",
-      "@id": `annotationList-${Date.now()}`,
+      "@id": generateId("annotationList"),
       "@type": "sc:AnnotationList",
       "resources": combinedAnnotations
     };

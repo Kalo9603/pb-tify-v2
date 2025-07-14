@@ -1,8 +1,8 @@
 import { html } from "https://esm.sh/lit-element";
 import { UtBase } from "../../../utilities/base.js";
+import { generateId } from "../../../utilities/lib/utils.js";
 
 export class CpAnForm extends UtBase {
-
   static get properties() {
     return {
       manifestObject: { type: Object },
@@ -16,6 +16,7 @@ export class CpAnForm extends UtBase {
       motivation: { type: String },
       chars: { type: String },
       format: { type: String },
+      annotationToEdit: { type: Object },
     };
   }
 
@@ -32,6 +33,7 @@ export class CpAnForm extends UtBase {
     this.motivation = "commenting";
     this.chars = "";
     this.format = "text/html";
+    this.annotationToEdit = null;
   }
 
   get imageUrl() {
@@ -48,6 +50,12 @@ export class CpAnForm extends UtBase {
   }
 
   updated(changedProps) {
+    super.updated?.(changedProps);
+
+    if (changedProps.has("annotationToEdit") && this.mode === "edit" && this.annotationToEdit) {
+      this.setAnnotationData(this.annotationToEdit);
+    }
+
     if (["x", "y", "w", "h", "mode"].some(p => changedProps.has(p))) {
       this._dispatchFrame();
     }
@@ -89,6 +97,18 @@ export class CpAnForm extends UtBase {
     }
   }
 
+  setAnnotationData(annotation) {
+    const selector = annotation.on.selector?.value?.replace("xywh=", "").split(",").map(Number);
+
+    this.x = selector?.[0] || 0;
+    this.y = selector?.[1] || 0;
+    this.w = selector?.[2] || 0;
+    this.h = selector?.[3] || 0;
+    this.motivation = annotation.motivation?.[0]?.replace("oa:", "") || "commenting";
+    this.format = annotation.resource?.[0]?.format || "text/html";
+    this.chars = annotation.resource?.[0]?.chars || "";
+  }
+
   _resetForm = () => {
     this.x = 0;
     this.y = 0;
@@ -97,7 +117,45 @@ export class CpAnForm extends UtBase {
     this.motivation = "commenting";
     this.format = "text/html";
     this.chars = "";
+    this.annotationToEdit = null;
     this.requestUpdate();
+  };
+
+  _resetToOriginal = () => {
+    if (!this.annotationToEdit) return;
+    this.setAnnotationData(this.annotationToEdit);
+    this.requestUpdate();
+  };
+
+  editAnnotation = () => {
+    if (!this.annotationToEdit) return;
+
+    const edited = {
+      ...this.annotationToEdit,
+      motivation: [`oa:${this.motivation}`],
+      on: {
+        ...this.annotationToEdit.on,
+        selector: {
+          "@type": "oa:FragmentSelector",
+          "value": `xywh=${this.x},${this.y},${this.w},${this.h}`
+        }
+      },
+      resource: [
+        {
+          "@type": "dctypes:Text",
+          "format": this.format,
+          "chars": this.chars
+        }
+      ]
+    };
+
+    this.dispatchEvent(new CustomEvent("edit-annotation-submit", {
+      detail: { original: this.annotationToEdit, edited },
+      bubbles: true,
+      composed: true
+    }));
+
+    this._resetForm();
   };
 
   renderButtons() {
@@ -132,7 +190,6 @@ export class CpAnForm extends UtBase {
       return html`
         <div class="flex items-center justify-center gap-6 pt-2 border-t border-gray-200">
           ${makeButton("Reset", "fa-solid fa-rotate-left", "bg-gray-600", this._resetForm)}
-          ${makeButton("Clear", "fa-solid fa-eraser", "bg-yellow-500", () => { })}
           ${makeButton("Edit", "fa-solid fa-pencil", "bg-orange-500", () => { })}
         </div>
       `;
@@ -161,6 +218,7 @@ export class CpAnForm extends UtBase {
 
     return null;
   }
+
 
   render() {
     const titleMap = {
@@ -232,12 +290,9 @@ export class CpAnForm extends UtBase {
   }
 
   addAnnotation() {
-
-    const randomId = Math.random().toString(36).substring(2, 10);
-
     const annotation = {
       "@context": "http://iiif.io/api/presentation/2/context.json",
-      "@id": `annotation-${randomId}`,
+      "@id": generateId("annotation"),
       "@type": "oa:Annotation",
       "motivation": [`oa:${this.motivation}`],
       "on": {

@@ -2,31 +2,33 @@ import { html } from "https://esm.sh/lit-element";
 import { UtBase } from "../../../utilities/base.js";
 
 export class CpAnEdit extends UtBase {
+
   static get properties() {
     return {
-      currentMode: { type: String }
+      currentMode: { type: String },
+      annotation: { type: Object }
     };
   }
 
   constructor() {
     super();
     this.currentMode = "";
+    this.annotation = null;
   }
 
+
   _onClick() {
+
     const newMode = this.currentMode === "edit" ? "" : "edit";
-    const eventName = newMode === "" ? "hide-frame" : "annotation-edit";
-
-    this.dispatchEvent(new CustomEvent(eventName, {
-      bubbles: true,
-      composed: true,
-    }));
-
     this.dispatchEvent(new CustomEvent("mode-toggle", {
-      detail: { mode: newMode },
+      detail: {
+        mode: newMode,
+        annotation: this.annotation
+      },
       bubbles: true,
       composed: true
     }));
+    
   }
 
   render() {

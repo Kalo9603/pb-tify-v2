@@ -13,7 +13,8 @@ export class CpAnnotations extends UtBase {
       canvasIndex: { type: Number },
       annotationCount: { type: Number },
       currentMode: { type: String },
-      localAnnotations: { type: Array }
+      localAnnotations: { type: Array },
+      annotationToEdit: { type: Object }
     };
   }
 
@@ -24,11 +25,20 @@ export class CpAnnotations extends UtBase {
     this.annotationCount = 0;
     this.currentMode = "";
     this.localAnnotations = [];
+    this.annotationToEdit = null;
   }
 
   connectedCallback() {
     super.connectedCallback();
     this.addEventListener("annotation-import", this._onImport);
+
+    this.addEventListener("mode-toggle", e => {
+
+      this.currentMode = e.detail.mode;
+      this.annotationToEdit = e.detail.annotation || null;
+      this.requestUpdate();
+
+    });
   }
 
   disconnectedCallback() {
@@ -48,14 +58,14 @@ export class CpAnnotations extends UtBase {
   }
 
   _refreshViewer() {
-      const viewer = this.renderRoot.querySelector("cp-anviewer");
-      if (viewer) {
-        viewer.localAnnotations = [...this.localAnnotations];
-        viewer.manifestObject = this.manifestObject;
-        viewer.canvasIndex = this.canvasIndex;
-        viewer.requestUpdate("localAnnotations");
-        viewer.fetchAnnotations();
-      }
+    const viewer = this.renderRoot.querySelector("cp-anviewer");
+    if (viewer) {
+      viewer.localAnnotations = [...this.localAnnotations];
+      viewer.manifestObject = this.manifestObject;
+      viewer.canvasIndex = this.canvasIndex;
+      viewer.requestUpdate("localAnnotations");
+      viewer.fetchAnnotations();
+    }
   }
 
   _onAdd = () => {
@@ -63,7 +73,11 @@ export class CpAnnotations extends UtBase {
   }
 
   _onModeToggle = (e) => {
+
+    console.log("🛎️ Annotation ricevuta:", e.detail.annotation);
+
     this.currentMode = e.detail.mode;
+    this.annotationToEdit = e.detail.annotation || null;
     this.requestUpdate();
   }
 
@@ -77,6 +91,7 @@ export class CpAnnotations extends UtBase {
             .manifestObject=${this.manifestObject}
             .canvasIndex=${this.canvasIndex}
             .localAnnotations=${this.localAnnotations}
+            .annotationToEdit=${this.annotationToEdit}
             @annotations-count=${e => this.annotationCount = e.detail.count}
           ></cp-anviewer>
         </section>

@@ -1,12 +1,11 @@
 const cors_anywhere = require('cors-anywhere');
-
-const host = 'localhost';
-const port = 3001;
+const { config } = require('../src/utilities/config.js');
 
 cors_anywhere.createServer({
   originWhitelist: [],
-  requireHeaders: [],
+  requireHeader: [],
   removeHeaders: [],
-}).listen(port, host, () => {
-  console.log(`CORS Anywhere proxy running on ${host}:${port}`);
+
+}).listen(config.ports.proxy, config.host, () => {
+  console.log(`CORS Anywhere proxy running on ${config.host}:${config.ports.proxy}`);
 });

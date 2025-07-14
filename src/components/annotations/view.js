@@ -1,7 +1,7 @@
 import { html, css } from "https://esm.sh/lit-element";
 import { unsafeHTML } from "https://esm.sh/lit-html/directives/unsafe-html.js";
 import { UtBase } from "../../utilities/base.js";
-import { getMotivationIcon } from "../../utilities/lib/utils.js";
+import { getMotivationIcon, generateId } from "../../utilities/lib/utils.js";
 import "./buttons/edit.js";
 import "./buttons/delete.js";
 
@@ -43,8 +43,20 @@ export class CpAnViewer extends UtBase {
   }
 
   connectedCallback() {
+
     super.connectedCallback();
     this.addEventListener("refresh-annotations", () => this.fetchAnnotations());
+    
+    this.addEventListener("mode-toggle", e => {
+      if (e.target === this) return;
+      e.stopPropagation();
+      this.dispatchEvent(new CustomEvent("mode-toggle", {
+        detail: e.detail,
+        bubbles: true,
+        composed: true
+      }));
+    });
+
   }
 
   disconnectedCallback() {
@@ -157,7 +169,7 @@ export class CpAnViewer extends UtBase {
 
     this.annotationListJson = {
       "@context": "http://iiif.io/api/presentation/2/context.json",
-      "@id": `annotationList-${Date.now()}`,
+      "@id": generateId("annotationList"),
       "@type": "sc:AnnotationList",
       resources: unique.map(a => a.full),
     };
@@ -216,6 +228,7 @@ export class CpAnViewer extends UtBase {
         : html`
             <ul class="space-y-4">
               ${this.annotations.map((ann, i) => {
+
           const isActive = this.activeAnnotationIndex === i;
           const xywh = ann.region;
 
@@ -261,7 +274,7 @@ export class CpAnViewer extends UtBase {
 
                         ${isActive
               ? html`
-                              <cp-anedit></cp-anedit>
+                              <cp-anedit .annotation=${ann.full}></cp-anedit>
                               <cp-andelete></cp-andelete>
                             `
               : null}

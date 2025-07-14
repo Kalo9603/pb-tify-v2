@@ -1,6 +1,10 @@
 import { html } from "https://esm.sh/lit-element";
 import { UtBase } from "./utilities/base.js";
 import { detectIIIFVersion, convertV3toV2, getLanguages } from "./utilities/lib/manifest.js";
+import { generateId, isLocalUrl } from "./utilities/lib/utils.js";
+import { saveToDb } from "./utilities/lib/db.js";
+import { normalizeAnnotation, isValidAnnotation } from "./utilities/lib/parse.js";
+import { config } from "./utilities/config.js";
 
 import "./components/load/inputBar.js";
 import "./components/load/manifestImport.js";
@@ -114,6 +118,11 @@ export class PbTest extends UtBase {
   _handleModeToggle(e) {
     const newMode = e.detail.mode || "";
     this.annotationMode = newMode;
+    if (newMode === "edit") {
+      this.annotationToEdit = e.detail.annotation || null;
+    } else {
+      this.annotationToEdit = null;
+    }
     if (!newMode) this.hideFrame();
   }
 
@@ -190,35 +199,53 @@ export class PbTest extends UtBase {
     this.requestUpdate();
   }
 
-  _saveLocalAnnotation(e) {
-    
-    const newAnnotation = e.detail.annotation;
+  async _saveLocalAnnotation(e) {
+
+    let newAnnotation = e.detail.annotation;
+
+    if (!isValidAnnotation(newAnnotation)) {
+      console.warn("❌ Annotazione non valida, provo a normalizzarla.");
+      newAnnotation = normalizeAnnotation(newAnnotation, this.manifestUrl, canvasId);
+      if (!isValidAnnotation(newAnnotation)) {
+        console.error("🚫 Annotazione ancora non valida dopo normalizzazione. Abort.");
+        return;
+      }
+    }
 
     const canvas = this.manifestObject?.sequences?.[0]?.canvases?.[this.currentCanvasIndex];
-    if (!canvas) {
-      console.warn("❌ Nessun canvas trovato per index:", this.currentCanvasIndex);
-      return;
-    }
+    if (!canvas) return;
 
     const canvasId = canvas["@id"] || `canvas${this.currentCanvasIndex}`;
 
     if (!newAnnotation["@id"]) {
-      newAnnotation["@id"] = `annotation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      newAnnotation["@id"] = generateId("annotation");
     }
 
-    this.localAnnotations = [
-      ...this.localAnnotations,
-      {
-        canvasId,
-        annotation: newAnnotation
-      }
-    ];
+    this.localAnnotations = [...this.localAnnotations, { canvasId, annotation: newAnnotation }];
 
     this.dispatchEvent(new CustomEvent("refresh-annotations", {
-      bubbles: true,
-      composed: true
+      bubbles: true, composed: true
     }));
+
+    if (isLocalUrl(this.manifestUrl)) {
+      const manifestId = this.manifestObject["@id"].split("/").pop();
+      const canvasShortId = canvasId.split("/").pop();
+      const listId = `${config.baseUrl}:${config.ports.existDb}${config.paths.annotations(config.componentName)}/${manifestId}/${canvasShortId}.json`;
+
+      const payload = {
+        annotation: newAnnotation,
+        listId,
+        manifestId,
+        canvasId: canvasShortId
+      };
+
+      console.log(payload);
+      const res = await saveToDb(payload);
+      if (res?.ok) console.log("✅ Annotazione salvata su eXist-db.");
+      else console.warn("⚠️ Salvataggio su eXist-db fallito.");
+    }
   }
+
 
   _exportAnnotations() {
     this.dispatchEvent(new CustomEvent("annotation-export", {
@@ -290,6 +317,7 @@ export class PbTest extends UtBase {
                   .manifestObject=${this.manifestObject}
                   .canvasIndex=${this.currentCanvasIndex}
                   .mode=${this.annotationMode}
+                  .annotationToEdit=${this.annotationToEdit}
                   @add-annotation-submit=${e => this._saveLocalAnnotation(e)}
                 ></cp-anform>
               ` : null}
