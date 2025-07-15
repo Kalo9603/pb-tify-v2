@@ -1,6 +1,6 @@
 import { html } from "https://esm.sh/lit-element";
-import { UtBase } from "../../../utilities/base.js";
-import { generateId } from "../../../utilities/lib/utils.js";
+import { UtBase } from "../../utilities/base.js";
+import { generateId } from "../../utilities/lib/utils.js";
 
 export class CpAnForm extends UtBase {
   static get properties() {
@@ -190,7 +190,7 @@ export class CpAnForm extends UtBase {
       return html`
         <div class="flex items-center justify-center gap-6 pt-2 border-t border-gray-200">
           ${makeButton("Reset", "fa-solid fa-rotate-left", "bg-gray-600", this._resetForm)}
-          ${makeButton("Edit", "fa-solid fa-pencil", "bg-orange-500", () => { })}
+          ${makeButton("Edit", "fa-solid fa-pencil", "bg-orange-500", this.editAnnotation)}
         </div>
       `;
     }
@@ -207,11 +207,11 @@ export class CpAnForm extends UtBase {
       return html`
         <div class="flex items-center justify-center gap-6 pt-2 border-t border-gray-200">
           ${makeButton("Export", "fa-solid fa-download", "bg-blue-600", () => {
-        this.dispatchEvent(new CustomEvent("annotation-export", {
-          bubbles: true,
-          composed: true
-        }));
-      })}
+            this.dispatchEvent(new CustomEvent("annotation-export", {
+              bubbles: true,
+              composed: true
+            }));
+          })}
         </div>
       `;
     }

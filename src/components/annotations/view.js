@@ -228,14 +228,13 @@ export class CpAnViewer extends UtBase {
         : html`
             <ul class="space-y-4">
               ${this.annotations.map((ann, i) => {
+                const isActive = this.activeAnnotationIndex === i;
+                const xywh = ann.region;
 
-          const isActive = this.activeAnnotationIndex === i;
-          const xywh = ann.region;
+                let x = 0, y = 0, w = 0, h = 0;
+                if (xywh) ({ x, y, w, h } = this._parseXYWH(xywh));
 
-          let x = 0, y = 0, w = 0, h = 0;
-          if (xywh) ({ x, y, w, h } = this._parseXYWH(xywh));
-
-          return html`
+                return html`
                   <li
                     class="text-sm text-gray-700 border-b pb-2 relative transition-colors duration-300 rounded-md px-2
                       ${isActive ? "bg-yellow-100" : "hover:bg-gray-50"}"
@@ -273,24 +272,27 @@ export class CpAnViewer extends UtBase {
                         </button>
 
                         ${isActive
-              ? html`
-                              <cp-anedit .annotation=${ann.full}></cp-anedit>
+                          ? html`
+                              <cp-anedit
+                                .annotation=${ann.full}
+                                .currentMode=${this.annotationMode}
+                              ></cp-anedit>
                               <cp-andelete></cp-andelete>
                             `
-              : null}
+                          : null}
                       </div>
                     </div>
 
                     ${ann.chars
-              ? html`
+                      ? html`
                           <div class="prose prose-sm max-w-none pt-2">
                             ${unsafeHTML(ann.chars)}
                           </div>
                         `
-              : null}
+                      : null}
                   </li>
                 `;
-        })}
+              })}
             </ul>
           `}
     `;

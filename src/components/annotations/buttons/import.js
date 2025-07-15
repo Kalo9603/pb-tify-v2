@@ -43,7 +43,6 @@ export class CpAnImport extends UtBase {
   }
 
   _importAnnotations(newAnnotations) {
-    
     if (!this.manifestObject) {
       this.error = "No manifest loaded.";
       this.requestUpdate();
@@ -72,31 +71,6 @@ export class CpAnImport extends UtBase {
       return;
     }
 
-    const newAnnotationList = {
-      "@context": "http://iiif.io/api/presentation/2/context.json",
-      "@id": `urn:uuid:${crypto.randomUUID()}`,
-      "@type": "sc:AnnotationList",
-      resources: filtered
-    };
-
-    const currentList = canvas.otherContent?.find(c => c["@type"] === "sc:AnnotationList");
-
-    const isSameList = currentList &&
-      Array.isArray(currentList.resources) &&
-      currentList.resources.length === filtered.length &&
-      currentList.resources.every((ann, i) => ann["@id"] === filtered[i]["@id"]);
-
-    if (!canvas.otherContent) canvas.otherContent = [];
-
-    if (!isSameList) {
-      const idx = canvas.otherContent.findIndex(c => c["@type"] === "sc:AnnotationList");
-      if (idx >= 0) {
-        canvas.otherContent[idx] = newAnnotationList;
-      } else {
-        canvas.otherContent.push(newAnnotationList);
-      }
-    }
-
     const additions = filtered.map(ann => ({
       canvasId,
       annotation: ann
@@ -110,7 +84,6 @@ export class CpAnImport extends UtBase {
 
     this.error = null;
   }
-
 
   render() {
     return html`
