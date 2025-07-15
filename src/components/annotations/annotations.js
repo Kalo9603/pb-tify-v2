@@ -151,9 +151,11 @@ export class CpAnnotations extends UtBase {
           <cp-anviewer
             .manifestObject=${this.manifestObject}
             .canvasIndex=${this.canvasIndex}
+            .currentMode=${this.currentMode}
             .localAnnotations=${this.localAnnotations}
             .annotationToEdit=${this.annotationToEdit}
             @annotations-count=${e => this.annotationCount = e.detail.count}
+            @mode-toggle=${this._onModeToggle}
           ></cp-anviewer>
         </section>
 

@@ -115,14 +115,25 @@ export class PbTest extends UtBase {
   }
 
   _handleModeToggle(e) {
+    
     const newMode = e.detail.mode || "";
-    this.annotationMode = newMode;
-    if (newMode === "edit") {
-      this.annotationToEdit = e.detail.annotation || null;
-    } else {
+    const annotation = e.detail.annotation || null;
+
+    const exitingMode = this.annotationMode && newMode === "";
+
+    if (exitingMode) {
+      this.annotationMode = "";
       this.annotationToEdit = null;
+      this.hideFrame();
+      return;
     }
-    if (!newMode) this.hideFrame();
+
+    this.annotationMode = newMode;
+    this.annotationToEdit = newMode === "edit" ? annotation : null;
+
+    if (newMode !== "edit") {
+      this.hideFrame();
+    }
   }
 
   showFrame(e) {

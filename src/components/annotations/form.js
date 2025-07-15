@@ -17,6 +17,7 @@ export class CpAnForm extends UtBase {
       chars: { type: String },
       format: { type: String },
       annotationToEdit: { type: Object },
+      readonly: { type: Boolean }
     };
   }
 
@@ -52,7 +53,7 @@ export class CpAnForm extends UtBase {
   updated(changedProps) {
     super.updated?.(changedProps);
 
-    if (changedProps.has("annotationToEdit") && this.mode === "edit" && this.annotationToEdit) {
+    if (changedProps.has("annotationToEdit") && (this.mode === "edit" || this.mode === "delete") && this.annotationToEdit) {
       this.setAnnotationData(this.annotationToEdit);
     }
 
@@ -207,11 +208,11 @@ export class CpAnForm extends UtBase {
       return html`
         <div class="flex items-center justify-center gap-6 pt-2 border-t border-gray-200">
           ${makeButton("Export", "fa-solid fa-download", "bg-blue-600", () => {
-            this.dispatchEvent(new CustomEvent("annotation-export", {
-              bubbles: true,
-              composed: true
-            }));
-          })}
+        this.dispatchEvent(new CustomEvent("annotation-export", {
+          bubbles: true,
+          composed: true
+        }));
+      })}
         </div>
       `;
     }
@@ -241,6 +242,7 @@ export class CpAnForm extends UtBase {
                   min="0"
                   max="${prop === 'x' ? this.imageWidth : prop === 'y' ? this.imageHeight : prop === 'w' ? this.imageWidth - this.x : this.imageHeight - this.y}"
                   .value=${this[prop]}
+                  ?readonly=${this.readonly}
                   @input=${e => this._onInputChange(prop, e.target.value)}
                   class="mt-1 rounded border border-gray-300 px-2 py-1 text-sm font-normal w-20 text-center focus:ring-2 focus:ring-blue-600 focus:outline-none"
                 />
@@ -251,6 +253,7 @@ export class CpAnForm extends UtBase {
               Motivation
               <select
                 .value=${this.motivation}
+                ?disabled=${this.readonly}
                 @change=${e => this.motivation = e.target.value}
                 class="mt-1 rounded border border-gray-300 px-2 py-1 text-sm font-normal w-32 text-center focus:ring-2 focus:ring-blue-600 focus:outline-none"
               >
@@ -264,6 +267,7 @@ export class CpAnForm extends UtBase {
               Format
               <select
                 .value=${this.format}
+                ?disabled=${this.readonly}
                 @change=${e => this.format = e.target.value}
                 class="mt-1 rounded border border-gray-300 px-2 py-1 text-sm font-normal w-32 text-center focus:ring-2 focus:ring-blue-600 focus:outline-none"
               >
@@ -278,6 +282,7 @@ export class CpAnForm extends UtBase {
             Annotation Text
             <textarea
               .value=${this.chars}
+              ?readonly=${this.readonly}
               @input=${e => this.chars = e.target.value}
               class="mt-1 rounded border border-gray-300 px-2 py-1 text-sm font-normal resize-y max-h-48 focus:ring-2 focus:ring-blue-600 focus:outline-none gap-6"
             ></textarea>

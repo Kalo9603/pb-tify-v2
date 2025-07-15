@@ -16,19 +16,21 @@ export class CpAnEdit extends UtBase {
     this.annotation = null;
   }
 
-
   _onClick() {
-
     const newMode = this.currentMode === "edit" ? "" : "edit";
+    const eventName = newMode === "" ? "hide-frame" : "annotation-edit";
+
+    this.dispatchEvent(new CustomEvent(eventName, {
+      bubbles: true,
+      composed: true,
+      detail: { annotation: this.annotation }
+    }));
+
     this.dispatchEvent(new CustomEvent("mode-toggle", {
-      detail: {
-        mode: newMode,
-        annotation: this.annotation
-      },
+      detail: { mode: newMode, annotation: this.annotation },
       bubbles: true,
       composed: true
     }));
-    
   }
 
   render() {

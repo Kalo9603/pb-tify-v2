@@ -34,8 +34,25 @@ export class CpAnWrapper extends UtBase {
     }
 
     _setMode(mode, annotation = null) {
+        const oldMode = this.annotationMode;
         this.annotationMode = mode;
-        this.annotationToEdit = mode === "edit" ? annotation : null;
+
+        if (mode === "edit" || mode === "delete") {
+            this.annotationToEdit = annotation || null;
+        } else {
+            this.annotationToEdit = null;
+        }
+
+        if (oldMode === "edit" || oldMode === "delete") {
+            if (mode === "") {
+                this.dispatchEvent(new CustomEvent("show-frame", {
+                    detail: { color: "view" },
+                    bubbles: true,
+                    composed: true
+                }));
+            }
+        }
+
         this.requestUpdate();
     }
 
@@ -59,42 +76,50 @@ export class CpAnWrapper extends UtBase {
 
     _annotationEdit(e) {
         console.log("Annotation edit event received in wrapper", e.detail);
+
+        if (!e.detail || !e.detail.annotation) {
+            console.warn("Evento edit senza annotation valida, ignorato");
+            return;
+        }
+
         this._setMode("edit", e.detail.annotation);
     }
 
     _modeToggle(e) {
         e.stopPropagation();
-        const { mode, annotation } = e.detail;
+        const { mode, annotation } = e.detail || {};
         this._setMode(mode, annotation);
     }
 
     render() {
         return html`
-            <div class="flex flex-col gap-6">
-                <cp-annotations
-                    .manifestObject=${this.manifestObject}
-                    .canvasIndex=${this.canvasIndex}
-                    .annotationMode=${this.annotationMode}
-                    .localAnnotations=${this.localAnnotations}
-                    .annotationToEdit=${this.annotationToEdit}
-                ></cp-annotations>
+      <div class="flex flex-col gap-6">
+        <cp-annotations
+          .manifestObject=${this.manifestObject}
+          .canvasIndex=${this.canvasIndex}
+          .annotationMode=${this.annotationMode}
+          .localAnnotations=${this.localAnnotations}
+          .annotationToEdit=${this.annotationToEdit}
+        ></cp-annotations>
 
-                ${this.annotationMode
-                    ? html`
-                        <cp-anform
-                            .manifestObject=${this.manifestObject}
-                            .canvasIndex=${this.canvasIndex}
-                            .mode=${this.annotationMode}
-                            .annotationToEdit=${this.annotationToEdit}
-                            @add-annotation-submit=${e => this._onAddSubmit(e)}
-                            @edit-annotation-submit=${e => this._onEditSubmit(e)}
-                            @cancel-edit=${() => this._setMode("")}
-                        ></cp-anform>
-                    `
-                    : null}
-            </div>
-        `;
+        ${this.annotationMode
+                ? html`
+            <cp-anform
+              .manifestObject=${this.manifestObject}
+              .canvasIndex=${this.canvasIndex}
+              .mode=${this.annotationMode}
+              .annotationToEdit=${this.annotationToEdit}
+              .readonly=${this.annotationMode === 'delete'}
+              @add-annotation-submit=${e => this._onAddSubmit(e)}
+              @edit-annotation-submit=${e => this._onEditSubmit(e)}
+              @cancel-edit=${() => this._setMode("")}
+            ></cp-anform>
+          `
+                : null}
+      </div>
+    `;
     }
 
 }
+
 customElements.define("cp-anwrapper", CpAnWrapper);

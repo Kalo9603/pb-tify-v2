@@ -2,6 +2,7 @@ import { html, css } from "https://esm.sh/lit-element";
 import { unsafeHTML } from "https://esm.sh/lit-html/directives/unsafe-html.js";
 import { UtBase } from "../../utilities/base.js";
 import { getMotivationIcon, generateId } from "../../utilities/lib/utils.js";
+import "./buttons/duplicate.js";
 import "./buttons/edit.js";
 import "./buttons/delete.js";
 
@@ -12,6 +13,7 @@ export class CpAnViewer extends UtBase {
       manifestObject: { type: Object },
       canvasIndex: { type: Number },
       annotations: { type: Array },
+      currentMode: { type: String },
       activeAnnotationIndex: { type: Number },
       localAnnotations: { type: Array },
       annotationListJson: { type: Object },
@@ -34,6 +36,7 @@ export class CpAnViewer extends UtBase {
     super();
     this.manifestObject = null;
     this.canvasIndex = 0;
+    this.currentMode = null;
     this.annotations = [];
     this.activeAnnotationIndex = null;
     this.localAnnotations = [];
@@ -43,10 +46,9 @@ export class CpAnViewer extends UtBase {
   }
 
   connectedCallback() {
-
     super.connectedCallback();
     this.addEventListener("refresh-annotations", () => this.fetchAnnotations());
-    
+
     this.addEventListener("mode-toggle", e => {
       if (e.target === this) return;
       e.stopPropagation();
@@ -56,7 +58,6 @@ export class CpAnViewer extends UtBase {
         composed: true
       }));
     });
-
   }
 
   disconnectedCallback() {
@@ -65,6 +66,9 @@ export class CpAnViewer extends UtBase {
   }
 
   updated(changedProps) {
+    if (changedProps.has("currentMode")) {
+      this.requestUpdate();
+    }
     if (
       changedProps.has("manifestObject") ||
       changedProps.has("canvasIndex") ||
@@ -116,7 +120,6 @@ export class CpAnViewer extends UtBase {
   }
 
   async fetchAnnotations() {
-
     if (!this.manifestObject) {
       console.warn("No manifest object available.");
       return;
@@ -134,7 +137,10 @@ export class CpAnViewer extends UtBase {
     const annList = canvas.otherContent?.find(c => c["@type"] === "sc:AnnotationList");
 
     if (annList?.resources?.length) {
-      baseAnnotations = annList.resources.map(a => this._parseAnnotation(a));
+      baseAnnotations = annList.resources.map(a => ({
+        ...this._parseAnnotation(a),
+        isLocal: false
+      }));
     } else if (annList?.["@id"]) {
       try {
         const res = await fetch(annList["@id"]);
@@ -142,7 +148,10 @@ export class CpAnViewer extends UtBase {
         const data = await res.json();
 
         if (data?.resources?.length) {
-          baseAnnotations = data.resources.map(a => this._parseAnnotation(a));
+          baseAnnotations = data.resources.map(a => ({
+            ...this._parseAnnotation(a),
+            isLocal: false
+          }));
         }
       } catch (err) {
         console.error("Failed to fetch external annotationList:", err);
@@ -151,7 +160,10 @@ export class CpAnViewer extends UtBase {
 
     const localAnns = (this.localAnnotations || [])
       .filter(a => a.canvasId === canvasId)
-      .map(a => this._parseAnnotation(a.annotation));
+      .map(a => ({
+        ...this._parseAnnotation(a.annotation),
+        isLocal: true
+      }));
 
     const all = [...baseAnnotations, ...localAnns];
     const unique = [];
@@ -183,6 +195,14 @@ export class CpAnViewer extends UtBase {
     this.requestUpdate();
   }
 
+  _forwardModeToggle(e) {
+    this.dispatchEvent(new CustomEvent("mode-toggle", {
+      detail: e.detail,
+      bubbles: true,
+      composed: true
+    }));
+  }
+
   toggleAnnotation(index) {
     const prev = this.activeAnnotationIndex;
     this.activeAnnotationIndex = index === prev ? null : index;
@@ -194,6 +214,7 @@ export class CpAnViewer extends UtBase {
     const { x, y, w, h } = this._parseXYWH(region);
 
     this.dispatchEvent(
+
       new CustomEvent("highlight-annotation", {
         detail: {
           action: index === prev ? "remove" : "add",
@@ -228,13 +249,13 @@ export class CpAnViewer extends UtBase {
         : html`
             <ul class="space-y-4">
               ${this.annotations.map((ann, i) => {
-                const isActive = this.activeAnnotationIndex === i;
-                const xywh = ann.region;
+          const isActive = this.activeAnnotationIndex === i;
+          const xywh = ann.region;
 
-                let x = 0, y = 0, w = 0, h = 0;
-                if (xywh) ({ x, y, w, h } = this._parseXYWH(xywh));
+          let x = 0, y = 0, w = 0, h = 0;
+          if (xywh) ({ x, y, w, h } = this._parseXYWH(xywh));
 
-                return html`
+          return html`
                   <li
                     class="text-sm text-gray-700 border-b pb-2 relative transition-colors duration-300 rounded-md px-2
                       ${isActive ? "bg-yellow-100" : "hover:bg-gray-50"}"
@@ -248,6 +269,10 @@ export class CpAnViewer extends UtBase {
                           ${getMotivationIcon(ann.motivation)}
                         </span>
                         <strong>#${i + 1}</strong>
+                          ${ann.isLocal
+                            ? html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-green-600">Local</span>`
+                            : html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-blue-500">Default</span>`
+                          }
                       </div>
 
                       <div class="flex items-center gap-4">
@@ -272,27 +297,36 @@ export class CpAnViewer extends UtBase {
                         </button>
 
                         ${isActive
-                          ? html`
-                              <cp-anedit
+              ? html`
+                              <cp-anduplicate
                                 .annotation=${ann.full}
                                 .currentMode=${this.annotationMode}
+                              ></cp-anduplicate>
+                              <cp-anedit
+                                .annotation=${ann.full}
+                                .currentMode=${this.currentMode}
+                                @mode-toggle=${e => this._forwardModeToggle(e)}
                               ></cp-anedit>
-                              <cp-andelete></cp-andelete>
+                              <cp-andelete
+                                .annotation=${ann.full}
+                                .currentMode=${this.currentMode}
+                                @mode-toggle=${e => this._forwardModeToggle(e)}
+                              ></cp-andelete>
                             `
-                          : null}
+              : null}
                       </div>
                     </div>
 
                     ${ann.chars
-                      ? html`
+              ? html`
                           <div class="prose prose-sm max-w-none pt-2">
                             ${unsafeHTML(ann.chars)}
                           </div>
                         `
-                      : null}
+              : null}
                   </li>
                 `;
-              })}
+        })}
             </ul>
           `}
     `;
