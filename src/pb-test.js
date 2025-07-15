@@ -9,9 +9,8 @@ import { config } from "./utilities/config.js";
 import "./components/load/inputBar.js";
 import "./components/load/manifestImport.js";
 
-import "./components/annotations/annotations.js";
+import "./components/annotations/wrapper.js";
 import "./components/annotations/frame.js";
-import "./components/annotations/buttons/form.js";
 
 import "./components/buttons/manifestExport.js";
 import "./components/buttons/manifestURLCopy.js";
@@ -246,6 +245,49 @@ export class PbTest extends UtBase {
     }
   }
 
+  async _editLocalAnnotation(e) {
+
+    const edited = e.detail.edited;
+    const canvas = this.manifestObject?.sequences?.[0]?.canvases?.[this.currentCanvasIndex];
+    if (!canvas) return;
+
+    const canvasId = canvas["@id"] || `canvas${this.currentCanvasIndex}`;
+
+    this.localAnnotations = this.localAnnotations.filter(
+      entry => entry.annotation["@id"] !== edited["@id"]
+    );
+
+    this.localAnnotations = [
+      ...this.localAnnotations,
+      { canvasId, annotation: edited }
+    ];
+
+    this.dispatchEvent(new CustomEvent("refresh-annotations", {
+      bubbles: true,
+      composed: true
+    }));
+
+    if (isLocalUrl(this.manifestUrl)) {
+      const manifestId = this.manifestObject["@id"].split("/").pop();
+      const canvasShortId = canvasId.split("/").pop();
+      const listId = `${config.baseUrl}:${config.ports.existDb}${config.paths.annotations(config.componentName)}/${manifestId}/${canvasShortId}.json`;
+
+      const payload = {
+        annotation: edited,
+        listId,
+        manifestId,
+        canvasId: canvasShortId
+      };
+
+      const res = await saveToDb(payload);
+      if (res?.ok) console.log("✏️ Annotazione modificata e salvata su eXist-db.");
+      else console.warn("⚠️ Salvataggio modifica su eXist-db fallito.");
+    } else {
+      console.log("✏️ Annotazione modificata (non salvata su eXist perché manifest remoto).");
+    }
+
+    this.annotationMode = "";
+  }
 
   _exportAnnotations() {
     this.dispatchEvent(new CustomEvent("annotation-export", {
@@ -306,21 +348,14 @@ export class PbTest extends UtBase {
                 @canvaschange=${(e) => this.currentCanvasIndex = e.detail.canvasIndex}
               ></cp-tf-wrapper>
 
-              <cp-annotations
-                .manifestObject=${this.manifestObject}
-                .canvasIndex=${this.currentCanvasIndex}
-                .localAnnotations=${this.localAnnotations}
-              ></cp-annotations>
-
-              ${this.annotationMode ? html`
-                <cp-anform
-                  .manifestObject=${this.manifestObject}
-                  .canvasIndex=${this.currentCanvasIndex}
-                  .mode=${this.annotationMode}
-                  .annotationToEdit=${this.annotationToEdit}
-                  @add-annotation-submit=${e => this._saveLocalAnnotation(e)}
-                ></cp-anform>
-              ` : null}
+             <cp-anwrapper
+              .manifestObject=${this.manifestObject}
+              .canvasIndex=${this.currentCanvasIndex}
+              .localAnnotations=${this.localAnnotations}
+              @add-annotation-submit=${e => this._saveLocalAnnotation(e)}
+              @edit-annotation-submit=${e => this._editLocalAnnotation(e)}
+            ></cp-anwrapper>
+            
             </div>
 
             <div class="flex flex-col gap-6">
