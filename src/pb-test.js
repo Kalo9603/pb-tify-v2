@@ -48,7 +48,6 @@ export class PbTest extends UtBase {
     this.availableLanguages = [];
     this.currentCanvasIndex = 0;
     this.annotationMode = "";
-    this.localAnnotations = [];
 
     this.frameData = {
       url: "",
@@ -362,9 +361,6 @@ export class PbTest extends UtBase {
              <cp-anwrapper
               .manifestObject=${this.manifestObject}
               .canvasIndex=${this.currentCanvasIndex}
-              .localAnnotations=${this.localAnnotations}
-              @add-annotation-submit=${e => this._saveLocalAnnotation(e)}
-              @edit-annotation-submit=${e => this._editLocalAnnotation(e)}
             ></cp-anwrapper>
             
             </div>

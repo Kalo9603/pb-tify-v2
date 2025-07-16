@@ -66,6 +66,7 @@ export class CpAnViewer extends UtBase {
   }
 
   updated(changedProps) {
+
     if (changedProps.has("currentMode")) {
       this.requestUpdate();
     }
@@ -120,6 +121,7 @@ export class CpAnViewer extends UtBase {
   }
 
   async fetchAnnotations() {
+
     if (!this.manifestObject) {
       console.warn("No manifest object available.");
       return;
@@ -132,6 +134,7 @@ export class CpAnViewer extends UtBase {
     }
 
     const canvasId = canvas["@id"] || `canvas${this.canvasIndex}`;
+
     let baseAnnotations = [];
 
     const annList = canvas.otherContent?.find(c => c["@type"] === "sc:AnnotationList");
@@ -141,9 +144,12 @@ export class CpAnViewer extends UtBase {
         ...this._parseAnnotation(a),
         isLocal: false
       }));
+
     } else if (annList?.["@id"]) {
       try {
+
         const res = await fetch(annList["@id"]);
+
         if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
         const data = await res.json();
 
@@ -152,6 +158,7 @@ export class CpAnViewer extends UtBase {
             ...this._parseAnnotation(a),
             isLocal: false
           }));
+
         }
       } catch (err) {
         console.error("Failed to fetch external annotationList:", err);
@@ -270,9 +277,9 @@ export class CpAnViewer extends UtBase {
                         </span>
                         <strong>#${i + 1}</strong>
                           ${ann.isLocal
-                            ? html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-green-600">Local</span>`
-                            : html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-blue-500">Default</span>`
-                          }
+              ? html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-green-600">Local</span>`
+              : html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-blue-500">Default</span>`
+            }
                       </div>
 
                       <div class="flex items-center gap-4">
