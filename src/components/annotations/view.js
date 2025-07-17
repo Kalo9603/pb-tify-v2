@@ -58,6 +58,7 @@ export class CpAnViewer extends UtBase {
         composed: true
       }));
     });
+
   }
 
   disconnectedCallback() {

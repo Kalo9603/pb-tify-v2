@@ -17,7 +17,8 @@ export class CpAnForm extends UtBase {
       chars: { type: String },
       format: { type: String },
       annotationToEdit: { type: Object },
-      readonly: { type: Boolean }
+      readonly: { type: Boolean },
+      confirmDelete: { type: Boolean }
     };
   }
 
@@ -35,6 +36,7 @@ export class CpAnForm extends UtBase {
     this.chars = "";
     this.format = "text/html";
     this.annotationToEdit = null;
+    this.confirmDelete = false;
   }
 
   get imageUrl() {
@@ -167,8 +169,26 @@ export class CpAnForm extends UtBase {
 
     if (this.mode === "delete") {
       return html`
-        <div class="flex items-center justify-center gap-6 pt-2 border-t border-gray-200">
-          ${makeButton("Delete", "fa-solid fa-trash", "bg-red-600", () => { })}
+        <div class="flex flex-col items-center gap-4 pt-2 border-t border-gray-200">
+          <label
+            class="flex items-center gap-3 text-sm text-red-800 font-semibold cursor-pointer select-none
+                  transition-colors duration-200 hover:text-red-600"
+          >
+            <input
+              type="checkbox"
+              class="form-checkbox h-5 w-5 text-red-700 border-2 border-red-500 rounded focus:ring-2 focus:ring-red-400"
+              .checked=${this.confirmDelete}
+              @change=${e => this.confirmDelete = e.target.checked}
+            />
+            <span>I'm sure I want to delete this annotation.</span>
+          </label>
+
+            ${makeButton(
+          "Delete",
+          "fa-solid fa-trash",
+          `bg-red-600 ${!this.confirmDelete ? "opacity-50 cursor-not-allowed" : ""}`,
+          this.confirmDelete ? this.deleteAnnotation : () => { }
+        )}
         </div>
       `;
     }
@@ -291,8 +311,6 @@ export class CpAnForm extends UtBase {
       ]
     };
 
-    console.trace("[CpAnForm] dispatching add-annotation-submit:", annotation);
-
     this.dispatchEvent(new CustomEvent("add-annotation-submit", {
       detail: { annotation },
       bubbles: true,
@@ -325,10 +343,20 @@ export class CpAnForm extends UtBase {
       ]
     };
 
-    console.trace("[CpAnForm] dispatching edit-annotation-submit:", edited);
-
     this.dispatchEvent(new CustomEvent("edit-annotation-submit", {
       detail: { original: this.annotationToEdit, edited },
+      bubbles: true,
+      composed: true
+    }));
+
+    this._resetForm();
+  };
+
+  deleteAnnotation = () => {
+    if (!this.annotationToEdit) return;
+
+    this.dispatchEvent(new CustomEvent("delete-annotation-submit", {
+      detail: { annotation: this.annotationToEdit },
       bubbles: true,
       composed: true
     }));
