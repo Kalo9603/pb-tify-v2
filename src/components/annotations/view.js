@@ -1,7 +1,7 @@
 import { html, css } from "https://esm.sh/lit-element";
 import { unsafeHTML } from "https://esm.sh/lit-html/directives/unsafe-html.js";
 import { UtBase } from "../../utilities/base.js";
-import { getMotivationIcon, generateId } from "../../utilities/lib/utils.js";
+import { getMotivationIcon, generateId, isLocalUrl } from "../../utilities/lib/utils.js";
 import "./buttons/duplicate.js";
 import "./buttons/edit.js";
 import "./buttons/delete.js";
@@ -10,6 +10,7 @@ export class CpAnViewer extends UtBase {
 
   static get properties() {
     return {
+      manifestUrl: { type: String },
       manifestObject: { type: Object },
       canvasIndex: { type: Number },
       annotations: { type: Array },
@@ -19,17 +20,6 @@ export class CpAnViewer extends UtBase {
       annotationListJson: { type: Object },
       ...super.properties
     };
-  }
-
-  static get styles() {
-    return [
-      super.styles || [],
-      css`
-        li {
-          transition: background-color 0.3s ease-in-out;
-        }
-      `
-    ];
   }
 
   constructor() {
@@ -46,6 +36,7 @@ export class CpAnViewer extends UtBase {
   }
 
   connectedCallback() {
+
     super.connectedCallback();
     this.addEventListener("refresh-annotations", () => this.fetchAnnotations());
 
@@ -78,6 +69,53 @@ export class CpAnViewer extends UtBase {
     ) {
       this.fetchAnnotations();
     }
+  }
+
+  get annotationListId() {
+    const canvas = this.manifestObject?.sequences?.[0]?.canvases?.[this.canvasIndex];
+    if (!canvas) return null;
+    const annList = canvas.otherContent?.find(c => c["@type"] === "sc:AnnotationList");
+    return annList?.["@id"] || null;
+  }
+
+  get isRemote() {
+
+    if (!this.manifestUrl) return false;
+    const manifestIsLocal = isLocalUrl(this.manifestUrl);
+
+    const canvas = this.manifestObject?.sequences?.[0]?.canvases?.[this.canvasIndex];
+    const annList = canvas?.otherContent?.find(c => c["@type"] === "sc:AnnotationList");
+    const annotationListId = annList?.["@id"] || null;
+    const annotationListIsLocal = annotationListId ? isLocalUrl(annotationListId) : false;
+
+    return manifestIsLocal && annotationListIsLocal;
+  }
+
+  _isLocalUrl(url) {
+    return isLocalUrl(url);
+  }
+
+  _getAnnotationType(ann) {
+    if (ann.isLocal) {
+      return "local";
+    }
+
+    const manifestIsLocal = this.manifestUrl ? this._isLocalUrl(this.manifestUrl) : false;
+
+    const canvas = this.manifestObject?.sequences?.[0]?.canvases?.[this.canvasIndex];
+    const annList = canvas?.otherContent?.find(c => c["@type"] === "sc:AnnotationList");
+    const annotationListId = annList?.["@id"] || null;
+    const annotationListIsLocal = annotationListId ? this._isLocalUrl(annotationListId) : false;
+
+    if (manifestIsLocal && annotationListIsLocal) {
+      return "remote";
+    }
+
+    if (!manifestIsLocal && !annotationListIsLocal) {
+      return "default";
+    }
+
+    return "remote";
   }
 
   extractChars(resource) {
@@ -255,20 +293,17 @@ export class CpAnViewer extends UtBase {
       ${this.annotations.length === 0
         ? html`<div class="text-gray-500 italic">No annotations available.</div>`
         : html`
-            <ul class="space-y-4">
-              ${this.annotations.map((ann, i) => {
+          <ul class="space-y-4">
+            ${this.annotations.map((ann, i) => {
           const isActive = this.activeAnnotationIndex === i;
-          const xywh = ann.region;
-
-          let x = 0, y = 0, w = 0, h = 0;
-          if (xywh) ({ x, y, w, h } = this._parseXYWH(xywh));
+          const annotationType = this._getAnnotationType(ann);
 
           return html`
-                  <li
-                    class="text-sm text-gray-700 border-b pb-2 relative transition-colors duration-300 rounded-md px-2
-                      ${isActive ? "bg-yellow-100" : "hover:bg-gray-50"}"
-                  >
-                    <div class="flex justify-between">
+               <li class="text-sm text-gray-700 border-b pb-2 relative transition-colors duration-300 rounded-md px-2
+                  ${isActive ? "bg-yellow-100" : "hover:bg-gray-50"}"
+                >
+                  <div class="flex justify-between items-start">
+                    <div class="flex flex-col flex-grow pr-4">
                       <div class="pt-1 flex items-center gap-3 text-sm">
                         <span
                           class="inline-flex items-center justify-center rounded-full bg-gray-200 w-7 h-7 text-xl"
@@ -278,38 +313,52 @@ export class CpAnViewer extends UtBase {
                         </span>
                         <strong>#${i + 1}</strong>
                           ${ann.isLocal
-              ? html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-green-600">Local</span>`
-              : html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-blue-500">Default</span>`
-            }
+                          ? html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-green-600">Local</span>`
+                          : annotationType === "remote"
+                            ? html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-purple-600">Remote</span>`
+                            : html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-blue-500">Default</span>`
+                        }
                       </div>
 
-                      <div class="flex items-center gap-4">
-                        <button
-                          @click=${() => this.toggleAnnotation(i)}
-                          class="group flex items-center rounded-full shadow-xl transition-all duration-300 px-3 py-2 w-12 hover:w-28 overflow-hidden h-10
-                            ${isActive ? "bg-red-600" : "bg-blue-600"} text-white hover:bg-green-600"
-                        >
-                          <div
-                            class="flex items-center justify-center w-full transition-all duration-300 group-hover:justify-start group-hover:gap-2"
-                          >
-                            <i
-                              class="fa-solid
-                              ${isActive ? "fa-magnifying-glass-minus" : "fa-magnifying-glass"}
-                              text-lg flex-shrink-0 transition-transform duration-300"
-                            ></i>
-                            <span
-                              class="text-sm font-medium whitespace-nowrap transition-all duration-300 opacity-0 w-0 overflow-hidden group-hover:opacity-100 group-hover:w-auto group-hover:ml-2"
-                              >${isActive ? "Hide" : "Show"}</span
-                            >
+                      ${ann.chars
+                        ? html`
+                          <div class="prose prose-sm max-w-none pt-2">
+                            ${unsafeHTML(ann.chars)}
                           </div>
-                        </button>
+                        `
+                      : null}
+                    </div>
 
-                        ${isActive
-              ? html`
-                              <cp-anduplicate
-                                .annotation=${ann.full}
-                                .currentMode=${this.annotationMode}
-                              ></cp-anduplicate>
+                    <div class="flex flex-row items-end gap-2">
+                      <button
+                        @click=${() => this.toggleAnnotation(i)}
+                        class="group flex items-center rounded-full shadow-xl transition-all duration-300 px-3 py-2 w-12 hover:w-28 overflow-hidden h-10
+                          ${isActive ? "bg-red-600" : "bg-blue-600"} text-white hover:bg-green-600"
+                      >
+                        <div
+                          class="flex items-center justify-center w-full transition-all duration-300 group-hover:justify-start group-hover:gap-2"
+                        >
+                          <i
+                            class="fa-solid
+                            ${isActive ? "fa-magnifying-glass-minus" : "fa-magnifying-glass"}
+                            text-lg flex-shrink-0 transition-transform duration-300"
+                          ></i>
+                          <span
+                            class="text-sm font-medium whitespace-nowrap transition-all duration-300 opacity-0 w-0 overflow-hidden group-hover:opacity-100 group-hover:w-auto group-hover:ml-2"
+                            >${isActive ? "Hide" : "Show"}</span
+                          >
+                        </div>
+                      </button>
+
+                      ${isActive
+                      ? html`
+                          <cp-anduplicate
+                            .annotation=${ann.full}
+                            .currentMode=${this.currentMode}
+                          ></cp-anduplicate>
+
+                          ${(annotationType === "local" || annotationType === "remote")
+                      ? html`
                               <cp-anedit
                                 .annotation=${ann.full}
                                 .currentMode=${this.currentMode}
@@ -321,22 +370,19 @@ export class CpAnViewer extends UtBase {
                                 @mode-toggle=${e => this._forwardModeToggle(e)}
                               ></cp-andelete>
                             `
-              : null}
-                      </div>
-                    </div>
-
-                    ${ann.chars
-              ? html`
-                          <div class="prose prose-sm max-w-none pt-2">
-                            ${unsafeHTML(ann.chars)}
-                          </div>
+                      : null
+                    }
                         `
-              : null}
-                  </li>
-                `;
+                      : null
+                    }
+                    </div>
+                  </div>
+                </li>
+              `;
         })}
-            </ul>
-          `}
+          </ul>
+        `
+      }
     `;
   }
 }

@@ -359,6 +359,7 @@ export class PbTest extends UtBase {
               ></cp-tf-wrapper>
 
              <cp-anwrapper
+              .manifestUrl=${this.manifestUrl}
               .manifestObject=${this.manifestObject}
               .canvasIndex=${this.currentCanvasIndex}
             ></cp-anwrapper>

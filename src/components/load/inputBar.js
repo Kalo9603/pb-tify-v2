@@ -27,8 +27,6 @@ export class CpInputBar extends UtBase {
           bubbles: true,
           composed: true,
         }));
-        
-      // window.location.href = `${this.targetPath}?src=${encodeURIComponent(this.url)}`;
     }
   }
 

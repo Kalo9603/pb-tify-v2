@@ -149,6 +149,7 @@ export class CpAnnotations extends UtBase {
 
         <section class="p-4 overflow-auto max-h-[60vh]">
           <cp-anviewer
+            .manifestUrl=${this.manifestUrl}
             .manifestObject=${this.manifestObject}
             .canvasIndex=${this.canvasIndex}
             .currentMode=${this.currentMode}

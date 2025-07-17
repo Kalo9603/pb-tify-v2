@@ -5,6 +5,7 @@ import "./form.js";
 import "./annotations.js";
 
 export class CpAnWrapper extends UtBase {
+
     static get properties() {
         return {
             manifestObject: { type: Object },
@@ -169,6 +170,7 @@ export class CpAnWrapper extends UtBase {
         return html`
             <div class="flex flex-col gap-6 mt-4">
                 <cp-annotations
+                .manifestUrl=${this.manifestUrl}
                 .manifestObject=${this.manifestObject}
                 .canvasIndex=${this.canvasIndex}
                 .localAnnotations=${this.localAnnotations}
