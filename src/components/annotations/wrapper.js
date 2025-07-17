@@ -1,5 +1,6 @@
 import { html } from "https://esm.sh/lit-element";
 import { UtBase } from "../../utilities/base.js";
+import { generateId } from "../../utilities/lib/utils.js";
 import "./form.js";
 import "./annotations.js";
 
@@ -71,8 +72,6 @@ export class CpAnWrapper extends UtBase {
 
     _onAddSubmit(e) {
 
-        console.trace("[CpAnWrapper] _onAddSubmit detail:", e.detail);
-
         const newAnnotation = e.detail.annotation;
         const canvas = this.manifestObject?.sequences?.[0]?.canvases?.[this.canvasIndex];
         const canvasId = canvas?.["@id"] || `canvas${this.canvasIndex}`;
@@ -109,7 +108,7 @@ export class CpAnWrapper extends UtBase {
     }
 
     _onDeleteSubmit(e) {
-        
+
         const { annotation } = e.detail;
         if (!annotation) return;
 
@@ -132,7 +131,6 @@ export class CpAnWrapper extends UtBase {
     }
 
     _onImportSubmit(e) {
-        console.trace("[CpAnWrapper] _onImportSubmit detail:", e.detail);
         const additions = e.detail.additions;
         this.localAnnotations = [...this.localAnnotations, ...additions];
         this.dispatchEvent(new CustomEvent("refresh-annotations", { bubbles: true, composed: true }));
@@ -140,11 +138,19 @@ export class CpAnWrapper extends UtBase {
 
     _onDuplicateSubmit(e) {
 
-        console.trace("[CpAnWrapper] _onDuplicateSubmit detail:", e.detail);
-        const { annotation: dup } = e.detail;
+        const original = e.detail.annotation;
+        if (!original) return;
+
         const canvas = this.manifestObject.sequences[0].canvases[this.canvasIndex];
         const canvasId = canvas["@id"] || `canvas${this.canvasIndex}`;
-        this.localAnnotations = [...this.localAnnotations, { canvasId, annotation: dup }];
+        const duplicated = structuredClone(original);
+        duplicated["@id"] = generateId("annotation");
+
+        if (duplicated.resource && typeof duplicated.resource === "object" && duplicated.resource.chars) {
+            duplicated.resource.chars += " (copy)";
+        }
+
+        this.localAnnotations = [...this.localAnnotations, { canvasId, annotation: duplicated }];
         this.dispatchEvent(new CustomEvent("refresh-annotations", { bubbles: true, composed: true }));
     }
 
