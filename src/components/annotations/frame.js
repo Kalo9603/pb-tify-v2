@@ -2,7 +2,6 @@ import { html } from "https://esm.sh/lit-element";
 import { UtBase } from "../../utilities/base.js";
 
 export class CpAnFrame extends UtBase {
-  
   static get properties() {
     return {
       url: { type: String },
@@ -11,7 +10,7 @@ export class CpAnFrame extends UtBase {
       w: { type: Number },
       h: { type: Number },
       visible: { type: Boolean },
-      color: { type: String }, 
+      color: { type: String },
     };
   }
 
@@ -23,15 +22,22 @@ export class CpAnFrame extends UtBase {
     this.w = 0;
     this.h = 0;
     this.visible = false;
+    this.color = "view";
+
     this.naturalWidth = 0;
     this.naturalHeight = 0;
     this.scaledWidth = 0;
     this.scaledHeight = 0;
-    this.color = "view";
+
+    this.scaleFactor = 0.1;
+    this.minScale = 1;
+    this.maxScale = 10;
+    this._wheelAttached = false;
   }
 
   willUpdate(changedProps) {
     if (changedProps.has("url") && this.url) {
+
       this.naturalWidth = 0;
       this.naturalHeight = 0;
       this.scaledWidth = 0;
@@ -52,7 +58,14 @@ export class CpAnFrame extends UtBase {
     if (changedProps.has("color")) {
       this.requestUpdate();
     }
+  }
 
+  updated() {
+    const container = this.renderRoot.querySelector(".image-container");
+    if (container && !this._wheelAttached) {
+      container.addEventListener("wheel", this._onWheel.bind(this), { passive: false });
+      this._wheelAttached = true;
+    }
   }
 
   _onImageLoad(img) {
@@ -61,9 +74,34 @@ export class CpAnFrame extends UtBase {
     this.naturalHeight = img.naturalHeight;
 
     const ratio = Math.min(maxDim / this.naturalWidth, maxDim / this.naturalHeight);
-    this.scaledWidth = this.naturalWidth * ratio;
-    this.scaledHeight = this.naturalHeight * ratio;
+    this.minScale = ratio;
+    this.scaleFactor = 1;
+
+    this.scaledWidth = this.naturalWidth * this.scaleFactor * this.minScale;
+    this.scaledHeight = this.naturalHeight * this.scaleFactor * this.minScale;
+
     this.requestUpdate();
+  }
+
+  _onWheel(e) {
+    e.preventDefault();
+    const delta = Math.sign(e.deltaY);
+    let newScale = this.scaleFactor;
+
+    if (delta < 0) {
+      newScale *= 1.1;
+    } else {
+      newScale /= 1.1;
+    }
+
+    newScale = Math.max(1, Math.min(newScale, this.maxScale));
+
+    if (newScale !== this.scaleFactor) {
+      this.scaleFactor = newScale;
+      this.scaledWidth = this.naturalWidth * this.scaleFactor * this.minScale;
+      this.scaledHeight = this.naturalHeight * this.scaleFactor * this.minScale;
+      this.requestUpdate();
+    }
   }
 
   get scaledRect() {
@@ -98,7 +136,10 @@ export class CpAnFrame extends UtBase {
         <div class="text-lg font-semibold text-gray-800 mb-4">
           🧩 Annotation Frame
         </div>
-        <div class="relative rounded-lg overflow-hidden shadow border border-gray-300 m-auto" style="width: ${width}px; height: ${height}px;">
+        <div
+          class="relative rounded-lg overflow-hidden shadow border border-gray-300 m-auto image-container"
+          style="width: ${width}px; height: ${height}px;"
+        >
           <img
             src="${this.url}"
             alt="Annotation image"
