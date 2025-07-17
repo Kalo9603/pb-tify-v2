@@ -128,37 +128,6 @@ export class CpAnForm extends UtBase {
     this.requestUpdate();
   };
 
-  editAnnotation = () => {
-    if (!this.annotationToEdit) return;
-
-    const edited = {
-      ...this.annotationToEdit,
-      motivation: [`oa:${this.motivation}`],
-      on: {
-        ...this.annotationToEdit.on,
-        selector: {
-          "@type": "oa:FragmentSelector",
-          "value": `xywh=${this.x},${this.y},${this.w},${this.h}`
-        }
-      },
-      resource: [
-        {
-          "@type": "dctypes:Text",
-          "format": this.format,
-          "chars": this.chars
-        }
-      ]
-    };
-
-    this.dispatchEvent(new CustomEvent("edit-annotation-submit", {
-      detail: { original: this.annotationToEdit, edited },
-      bubbles: true,
-      composed: true
-    }));
-
-    this._resetForm();
-  };
-
   renderButtons() {
     const commonClasses = "group flex items-center rounded-full shadow-xl transition-all duration-300 px-3 py-2 w-12 hover:w-[105px] overflow-hidden h-10 text-white hover:shadow-md";
 
@@ -295,6 +264,7 @@ export class CpAnForm extends UtBase {
   }
 
   addAnnotation() {
+
     const annotation = {
       "@context": "http://iiif.io/api/presentation/2/context.json",
       "@id": generateId("annotation"),
@@ -321,6 +291,8 @@ export class CpAnForm extends UtBase {
       ]
     };
 
+    console.trace("[CpAnForm] dispatching add-annotation-submit:", annotation);
+
     this.dispatchEvent(new CustomEvent("add-annotation-submit", {
       detail: { annotation },
       bubbles: true,
@@ -329,6 +301,41 @@ export class CpAnForm extends UtBase {
 
     this._resetForm();
   }
+
+
+  editAnnotation = () => {
+    if (!this.annotationToEdit) return;
+
+    const edited = {
+      ...this.annotationToEdit,
+      motivation: [`oa:${this.motivation}`],
+      on: {
+        ...this.annotationToEdit.on,
+        selector: {
+          "@type": "oa:FragmentSelector",
+          "value": `xywh=${this.x},${this.y},${this.w},${this.h}`
+        }
+      },
+      resource: [
+        {
+          "@type": "dctypes:Text",
+          "format": this.format,
+          "chars": this.chars
+        }
+      ]
+    };
+
+    console.trace("[CpAnForm] dispatching edit-annotation-submit:", edited);
+
+    this.dispatchEvent(new CustomEvent("edit-annotation-submit", {
+      detail: { original: this.annotationToEdit, edited },
+      bubbles: true,
+      composed: true
+    }));
+
+    this._resetForm();
+  };
+
 }
 
 customElements.define("cp-anform", CpAnForm);

@@ -24,7 +24,11 @@ export class CpAnWrapper extends UtBase {
     }
 
     connectedCallback() {
+
         super.connectedCallback();
+
+        this.addEventListener("annotation-import", this._onImportSubmit.bind(this));
+        this.addEventListener("annotation-duplicate", this._onDuplicateSubmit.bind(this));
         this.addEventListener("annotation-add", () => this._setMode("add"));
         this.addEventListener("annotation-edit", this._annotationEdit.bind(this));
         this.addEventListener("annotation-delete", () => this._setMode("delete"));
@@ -59,6 +63,9 @@ export class CpAnWrapper extends UtBase {
     }
 
     _onAddSubmit(e) {
+
+        console.trace("[CpAnWrapper] _onAddSubmit detail:", e.detail);
+
         const newAnnotation = e.detail.annotation;
         const canvas = this.manifestObject?.sequences?.[0]?.canvases?.[this.canvasIndex];
         const canvasId = canvas?.["@id"] || `canvas${this.canvasIndex}`;
@@ -71,6 +78,9 @@ export class CpAnWrapper extends UtBase {
     }
 
     _onEditSubmit(e) {
+
+        console.trace("[CpAnWrapper] _onEditSubmit detail:", e.detail);
+
         const edited = e.detail.edited;
         const canvas = this.manifestObject?.sequences?.[0]?.canvases?.[this.canvasIndex];
         const canvasId = canvas?.["@id"] || `canvas${this.canvasIndex}`;
@@ -82,6 +92,22 @@ export class CpAnWrapper extends UtBase {
 
         this.dispatchEvent(new CustomEvent("refresh-annotations", { bubbles: true, composed: true }));
         this._setMode("");
+    }
+
+    _onImportSubmit(e) {
+        console.trace("[CpAnWrapper] _onImportSubmit detail:", e.detail);
+        const additions = e.detail.additions;
+        this.localAnnotations = [...this.localAnnotations, ...additions];
+        this.dispatchEvent(new CustomEvent("refresh-annotations", { bubbles: true, composed: true }));
+    }
+
+    _onDuplicateSubmit(e) {
+        console.trace("[CpAnWrapper] _onDuplicateSubmit detail:", e.detail);
+        const { annotation: dup } = e.detail;
+        const canvas = this.manifestObject.sequences[0].canvases[this.canvasIndex];
+        const canvasId = canvas["@id"] || `canvas${this.canvasIndex}`;
+        this.localAnnotations = [...this.localAnnotations, { canvasId, annotation: dup }];
+        this.dispatchEvent(new CustomEvent("refresh-annotations", { bubbles: true, composed: true }));
     }
 
     _annotationEdit(e) {
@@ -97,11 +123,12 @@ export class CpAnWrapper extends UtBase {
 
     render() {
         return html`
-      <div class="flex flex-col gap-6">
+      <div class="flex flex-col gap-6 mt-4">
         <cp-annotations
           .manifestObject=${this.manifestObject}
           .canvasIndex=${this.canvasIndex}
-          .annotationMode=${this.annotationMode}
+          .localAnnotations=${this.localAnnotations}
+          .currentMode=${this.annotationMode}
           .annotationToEdit=${this.annotationToEdit}
         ></cp-annotations>
 

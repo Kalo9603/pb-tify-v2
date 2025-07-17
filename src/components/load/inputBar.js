@@ -17,6 +17,7 @@ export class CpInputBar extends UtBase {
   }
 
   handleSubmit(e) {
+    
     e.preventDefault();
     if (this.url.trim()) {
 
@@ -26,6 +27,7 @@ export class CpInputBar extends UtBase {
           bubbles: true,
           composed: true,
         }));
+        
       // window.location.href = `${this.targetPath}?src=${encodeURIComponent(this.url)}`;
     }
   }
