@@ -1,8 +1,8 @@
 {
-  "name": "@teipublisher/pb-extension-template",
+  "name": "@teipublisher/pb-tify-v2",
   "version": "1.0.0",
-  "description": "A demo component to be used as template for extending pb-components",
-  "main": "pb-extension-bundle.js",
+  "description": "An example of a possible pb-tify extension.",
+  "main": "pb-test.js",
   "scripts": {
     "start": "npm run build && web-dev-server --config web-dev-server.config.mjs",
     "docs": "wca src -f json --outFile custom-elements.json",
@@ -11,9 +11,9 @@
     "clean": "rimraf dist i18n/common images css lib custom-elements.json",
     "prepare": "npm run docs && npm run build:production"
   },
-  "author": "Wolfgang Meier",
+  "author": "Calogero Giudice",
   "license": "GPL-3.0-or-later",
-  "repository": "https://gitlab.existsolutions.com/tei-publisher/pb-extension-template.git",
+  "repository": "https://github.com/Kalo9603/pb-tify-v2/tree/test",
   "dependencies": {
     "@teipublisher/pb-components": "latest"
   },
