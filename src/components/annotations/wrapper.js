@@ -1,6 +1,7 @@
 import { html } from "https://esm.sh/lit-element";
 import { UtBase } from "../../utilities/base.js";
-import { generateId } from "../../utilities/lib/utils.js";
+import { generateId, isLocalUrl } from "../../utilities/lib/utils.js";
+import { config } from "../../utilities/config.js";
 import "./form.js";
 import "./annotations.js";
 
@@ -8,6 +9,7 @@ export class CpAnWrapper extends UtBase {
 
     static get properties() {
         return {
+            manifestUrl: { type: String },
             manifestObject: { type: Object },
             canvasIndex: { type: Number },
             annotationMode: { type: String },
@@ -71,14 +73,65 @@ export class CpAnWrapper extends UtBase {
         this.requestUpdate();
     }
 
-    _onAddSubmit(e) {
+    async _onAddSubmit(e) {
 
         const newAnnotation = e.detail.annotation;
         const canvas = this.manifestObject?.sequences?.[0]?.canvases?.[this.canvasIndex];
         const canvasId = canvas?.["@id"] || `canvas${this.canvasIndex}`;
         const id = newAnnotation?.["@id"] || `annotation-${Date.now()}`;
         newAnnotation["@id"] = id;
+
         this.localAnnotations = [...this.localAnnotations, { canvasId, annotation: newAnnotation }];
+
+        const annotationListUrl = canvas?.otherContent?.[0]?.["@id"] || "";
+        const isManifestLocal = isLocalUrl(this.manifestUrl);
+        const isListLocal = isLocalUrl(annotationListUrl);
+
+        const manifestId = this.manifestObject?.["@id"]?.split("/").pop();
+        const listId = annotationListUrl;
+
+        const url = `${config.baseUrl}:${config.ports.existDb}${config.paths.annotationCreate(config.componentName)}`;
+        console.log(url);
+        
+        if (isManifestLocal && isListLocal) {
+
+            try {
+
+                const payload = {
+                        annotation: newAnnotation,
+                        canvasId,
+                        manifestId,
+                        listId
+                    };
+                
+                console.log(payload);
+
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/xml",
+                        "Content-Type": "application/json, text/plain",
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const xmlText = await response.text();
+
+                if (!response.ok) {
+                    console.error("Errore nella creazione remota:", xmlText);
+                } else {
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(xmlText, "application/xml");
+
+                    console.log("✅ Risposta ricevuta (XML):", xmlDoc);
+                }
+
+            } catch (err) {
+                console.error("Errore di rete durante il salvataggio remoto:", err);
+            }
+        } else {
+            console.log("Salvataggio remoto non eseguito: manifest o annotationList non locali.");
+        }
 
         this.dispatchEvent(new CustomEvent("refresh-annotations", { bubbles: true, composed: true }));
         this._setMode("");
