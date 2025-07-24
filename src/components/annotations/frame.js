@@ -221,7 +221,7 @@ export class CpAnFrame extends UtBase {
           style="max-width: 100%; height: 405px; background: #f9fafb; position: relative;"
         >
           <div
-            style="position: relative; width: ${zoomedWidth}px; height: ${zoomedHeight}px;"
+            style="position: relative; width: ${zoomedWidth}px; height: ${zoomedHeight}px; transition: width 0.3s ease, height 0.3s ease;"
           >
             <img
               src="${this.url}"
