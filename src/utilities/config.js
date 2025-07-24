@@ -10,6 +10,7 @@ const getUpdateEndpoint = (component = "pb-test") => `${getAPIPath(component)}/u
 const getDeleteEndpoint = (component = "pb-test") => `${getAPIPath(component)}/delete.xql`;
 
 export const config = {
+
   componentName: "pb-test",
   host: "localhost",
 

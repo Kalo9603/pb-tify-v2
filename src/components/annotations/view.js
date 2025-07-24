@@ -112,7 +112,7 @@ export class CpAnViewer extends UtBase {
     }
 
     if (!manifestIsLocal && !annotationListIsLocal) {
-      return "default";
+      return "source";
     }
 
     return "remote";
@@ -265,6 +265,8 @@ export class CpAnViewer extends UtBase {
         detail: {
           action: index === prev ? "remove" : "add",
           region: { x, y, w, h },
+          motivation: annotation?.motivation || "",
+          chars: annotation?.chars || ""
         },
         bubbles: true,
         composed: true,
@@ -280,7 +282,12 @@ export class CpAnViewer extends UtBase {
     } else {
       this.dispatchEvent(
         new CustomEvent("show-frame", {
-          detail: { url: imageUrl, x, y, w, h },
+          detail: {
+            url: imageUrl,
+                  x, y, w, h,
+                  motivation: annotation?.motivation || "",
+                  chars: annotation?.chars || ""
+                  },
           bubbles: true,
           composed: true,
         })
@@ -316,7 +323,7 @@ export class CpAnViewer extends UtBase {
                           ? html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-green-600">Local</span>`
                           : annotationType === "remote"
                             ? html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-purple-600">Remote</span>`
-                            : html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-blue-500">Default</span>`
+                            : html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-blue-500">Source</span>`
                         }
                       </div>
 

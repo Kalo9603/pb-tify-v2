@@ -56,6 +56,8 @@ export class PbTest extends UtBase {
       w: 0,
       h: 0,
       visible: false,
+      motivation: "",
+      chars: ""
     };
 
     this.handleURLSubmit = this.handleURLSubmit.bind(this);
@@ -145,6 +147,8 @@ export class PbTest extends UtBase {
       h: detail.h || 0,
       visible: true,
       color: detail.color || "view",
+      motivation: detail.motivation || "",
+      chars: detail.chars || "",
     };
   }
 
@@ -156,6 +160,8 @@ export class PbTest extends UtBase {
       w: 0,
       h: 0,
       visible: false,
+      motivation: "",
+      chars: ""
     };
   }
 
@@ -385,6 +391,8 @@ export class PbTest extends UtBase {
                 .h=${this.frameData.h}
                 .visible=${this.frameData.visible}
                 .color=${this.frameData.color}
+                .motivation=${this.frameData.motivation}
+                .chars=${this.frameData.chars}
               />
             </div>
           </div>
