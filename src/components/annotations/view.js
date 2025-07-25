@@ -1,6 +1,7 @@
 import { html } from "https://esm.sh/lit-element";
 import { unsafeHTML } from "https://esm.sh/lit-html/directives/unsafe-html.js";
 import { UtBase } from "../../utilities/base.js";
+import { refreshAnnotations } from "../../utilities/lib/db.js";
 import { getMotivationIcon, generateId, isLocalUrl, parseMarkdownToHtml } from "../../utilities/lib/utils.js";
 import "./buttons/duplicate.js";
 import "./buttons/edit.js";
@@ -43,16 +44,16 @@ export class CpAnViewer extends UtBase {
   }
 
   _onModeToggle(e) {
-      if (e.target === this) return;
-      e.stopPropagation();
-      this.dispatchEvent(new CustomEvent("mode-toggle", {
-        detail: e.detail,
-        bubbles: true,
-        composed: true
-      }));
-    }
+    if (e.target === this) return;
+    e.stopPropagation();
+    this.dispatchEvent(new CustomEvent("mode-toggle", {
+      detail: e.detail,
+      bubbles: true,
+      composed: true
+    }));
+  }
 
-  _onRefreshAnnotations = () => {}
+  _onRefreshAnnotations = () => { }
 
   disconnectedCallback() {
     super.disconnectedCallback();
@@ -179,7 +180,6 @@ export class CpAnViewer extends UtBase {
   }
 
   async fetchAnnotations() {
-
     if (!this.manifestObject) {
       console.warn("No manifest object available.");
       return;
@@ -193,21 +193,16 @@ export class CpAnViewer extends UtBase {
 
     const canvasId = canvas["@id"] || `canvas${this.canvasIndex}`;
 
+    const annList = canvas.otherContent?.find(c => c["@type"] === "sc:AnnotationList");
+    const annotationListId = annList?.["@id"] || null;
+
+    const isRemote = this.manifestUrl && isLocalUrl(this.manifestUrl);
+
     let baseAnnotations = [];
 
-    const annList = canvas.otherContent?.find(c => c["@type"] === "sc:AnnotationList");
-
-    if (annList?.resources?.length) {
-      baseAnnotations = annList.resources.map(a => ({
-        ...this._parseAnnotation(a),
-        isLocal: false
-      }));
-
-    } else if (annList?.["@id"]) {
+    if (annotationListId) {
       try {
-
-        const res = await fetch(annList["@id"]);
-
+        const res = await fetch(`${annotationListId}?_=${Date.now()}`);
         if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
         const data = await res.json();
 
@@ -217,10 +212,17 @@ export class CpAnViewer extends UtBase {
             isLocal: false
           }));
 
+          this.annotationListJson = data;
         }
       } catch (err) {
-        console.error("Failed to fetch external annotationList:", err);
+        console.error("❌ Errore fetch annotationList:", err);
       }
+
+    } else if (annList?.resources?.length) {
+      baseAnnotations = annList.resources.map(a => ({
+        ...this._parseAnnotation(a),
+        isLocal: false
+      }));
     }
 
     const localAnns = (this.localAnnotations || [])
@@ -303,10 +305,10 @@ export class CpAnViewer extends UtBase {
         new CustomEvent("show-frame", {
           detail: {
             url: imageUrl,
-                  x, y, w, h,
-                  motivation: annotation?.motivation || "",
-                  chars: annotation?.chars || ""
-                  },
+            x, y, w, h,
+            motivation: annotation?.motivation || "",
+            chars: annotation?.chars || ""
+          },
           bubbles: true,
           composed: true,
         })
@@ -339,20 +341,20 @@ export class CpAnViewer extends UtBase {
                         </span>
                         <strong>#${i + 1}</strong>
                           ${ann.isLocal
-                          ? html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-green-600">Local</span>`
-                          : annotationType === "remote"
-                            ? html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-purple-600">Remote</span>`
-                            : html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-blue-500">Source</span>`
-                        }
+              ? html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-green-600">Local</span>`
+              : annotationType === "remote"
+                ? html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-purple-600">Remote</span>`
+                : html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-blue-500">Source</span>`
+            }
                       </div>
 
                       ${ann.chars
-                        ? html`
+              ? html`
                           <div class="prose prose-sm max-w-none pt-2">
                             ${unsafeHTML(ann.chars)}
                           </div>
                         `
-                      : null}
+              : null}
                     </div>
 
                     <div class="flex flex-row items-end gap-2">
@@ -377,14 +379,14 @@ export class CpAnViewer extends UtBase {
                       </button>
 
                       ${isActive
-                      ? html`
+              ? html`
                           <cp-anduplicate
                             .annotation=${ann.full}
                             .currentMode=${this.currentMode}
                           ></cp-anduplicate>
 
                           ${(annotationType === "local" || annotationType === "remote")
-                      ? html`
+                  ? html`
                               <cp-anedit
                                 .annotation=${ann.full}
                                 .currentMode=${this.currentMode}
@@ -396,11 +398,11 @@ export class CpAnViewer extends UtBase {
                                 @mode-toggle=${e => this._forwardModeToggle(e)}
                               ></cp-andelete>
                             `
-                      : null
-                    }
+                  : null
+                }
                         `
-                      : null
-                    }
+              : null
+            }
                     </div>
                   </div>
                 </li>

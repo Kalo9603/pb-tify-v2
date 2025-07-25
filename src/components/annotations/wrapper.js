@@ -106,6 +106,7 @@ export class CpAnWrapper extends UtBase {
             this.localAnnotations = this.localAnnotations.filter(
                 (entry) => entry.annotation["@id"] !== newAnnotation["@id"]
             );
+
             await refreshAnnotations(listId, this);
             }
         } else {
