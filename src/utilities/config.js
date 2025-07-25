@@ -5,9 +5,9 @@ const getAnnotationsPath = (component = "pb-test") => `${getDbMainPath(component
 const getManifestsPath = (component = "pb-test") => `${getDbMainPath(component)}/manifest`;
 const getAPIPath = (component = "pb-test") => `${getDbMainPath(component)}/api`;
 
-const getCreateEndpoint = (component = "pb-test") => `${getAPIPath(component)}/create.xql`;
-const getUpdateEndpoint = (component = "pb-test") => `${getAPIPath(component)}/update.xql`;
-const getDeleteEndpoint = (component = "pb-test") => `${getAPIPath(component)}/delete.xql`;
+const getCreateEndpoint = (component = "pb-test") => `${getAPIPath(component)}/create`;
+const getUpdateEndpoint = (component = "pb-test") => `${getAPIPath(component)}/update`;
+const getDeleteEndpoint = (component = "pb-test") => `${getAPIPath(component)}/delete`;
 
 export const config = {
 

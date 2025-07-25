@@ -1,7 +1,7 @@
-import { html, css } from "https://esm.sh/lit-element";
+import { html } from "https://esm.sh/lit-element";
 import { unsafeHTML } from "https://esm.sh/lit-html/directives/unsafe-html.js";
 import { UtBase } from "../../utilities/base.js";
-import { getMotivationIcon, generateId, isLocalUrl } from "../../utilities/lib/utils.js";
+import { getMotivationIcon, generateId, isLocalUrl, parseMarkdownToHtml } from "../../utilities/lib/utils.js";
 import "./buttons/duplicate.js";
 import "./buttons/edit.js";
 import "./buttons/delete.js";
@@ -38,9 +38,11 @@ export class CpAnViewer extends UtBase {
   connectedCallback() {
 
     super.connectedCallback();
-    this.addEventListener("refresh-annotations", () => this.fetchAnnotations());
+    this.addEventListener("refresh-annotations", this._onRefreshAnnotations);
+    this.addEventListener("mode-toggle", e => this._onModeToggle(e));
+  }
 
-    this.addEventListener("mode-toggle", e => {
+  _onModeToggle(e) {
       if (e.target === this) return;
       e.stopPropagation();
       this.dispatchEvent(new CustomEvent("mode-toggle", {
@@ -48,13 +50,13 @@ export class CpAnViewer extends UtBase {
         bubbles: true,
         composed: true
       }));
-    });
+    }
 
-  }
+  _onRefreshAnnotations = () => {}
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    this.removeEventListener("refresh-annotations", () => this.fetchAnnotations());
+    this.removeEventListener("refresh-annotations", this._onRefreshAnnotations);
   }
 
   updated(changedProps) {
@@ -120,15 +122,32 @@ export class CpAnViewer extends UtBase {
 
   extractChars(resource) {
     if (!resource) return "";
-    if (typeof resource === "string") return resource;
-    if (Array.isArray(resource)) {
-      return resource
-        .map((r) => r?.chars || r?.["@value"] || "")
-        .filter(Boolean)
-        .join(" ");
+
+    const value = typeof resource === "string"
+      ? resource
+      : Array.isArray(resource)
+        ? resource.map((r) => r?.chars || r?.["@value"] || "").filter(Boolean).join(" ")
+        : resource.chars || resource["@value"] || "";
+
+    const format = resource.format || (Array.isArray(resource) ? resource[0]?.format : null);
+
+    if (format === "text/markdown") {
+      return parseMarkdownToHtml(value);
     }
-    return resource.chars || resource["@value"] || "";
+
+    if (format === "text/html") {
+      return value;
+    }
+
+    const escaped = value
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\n/g, "<br>");
+
+    return escaped;
   }
+
 
   _parseXYWH(region) {
     if (!region || typeof region !== "string")

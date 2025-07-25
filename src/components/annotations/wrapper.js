@@ -2,6 +2,7 @@ import { html } from "https://esm.sh/lit-element";
 import { UtBase } from "../../utilities/base.js";
 import { generateId, isLocalUrl } from "../../utilities/lib/utils.js";
 import { config } from "../../utilities/config.js";
+import { saveToDb, refreshAnnotations } from "../../utilities/lib/db.js";
 import "./form.js";
 import "./annotations.js";
 
@@ -90,52 +91,29 @@ export class CpAnWrapper extends UtBase {
         const manifestId = this.manifestObject?.["@id"]?.split("/").pop();
         const listId = annotationListUrl;
 
-        const url = `${config.baseUrl}:${config.ports.existDb}${config.paths.annotationCreate(config.componentName)}`;
-        console.log(url);
-        
         if (isManifestLocal && isListLocal) {
+            const payload = {
+            annotation: newAnnotation,
+            canvasId,
+            canvasIndex: this.canvasIndex + 1,
+            manifestId,
+            listId
+            };
 
-            try {
+            const ok = await saveToDb(payload, config.componentName);
 
-                const payload = {
-                        annotation: newAnnotation,
-                        canvasId,
-                        manifestId,
-                        listId
-                    };
-                
-                console.log(payload);
-
-                const response = await fetch(url, {
-                    method: "POST",
-                    headers: {
-                        "Accept": "application/xml",
-                        "Content-Type": "application/json, text/plain",
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                const xmlText = await response.text();
-
-                if (!response.ok) {
-                    console.error("Errore nella creazione remota:", xmlText);
-                } else {
-                    const parser = new DOMParser();
-                    const xmlDoc = parser.parseFromString(xmlText, "application/xml");
-
-                    console.log("✅ Risposta ricevuta (XML):", xmlDoc);
-                }
-
-            } catch (err) {
-                console.error("Errore di rete durante il salvataggio remoto:", err);
+            if (ok) {
+            this.localAnnotations = this.localAnnotations.filter(
+                (entry) => entry.annotation["@id"] !== newAnnotation["@id"]
+            );
+            await refreshAnnotations(listId, this);
             }
         } else {
             console.log("Salvataggio remoto non eseguito: manifest o annotationList non locali.");
         }
 
-        this.dispatchEvent(new CustomEvent("refresh-annotations", { bubbles: true, composed: true }));
         this._setMode("");
-    }
+        }
 
     _onEditSubmit(e) {
 

@@ -35,6 +35,7 @@ export class CpAnnotations extends UtBase {
     this.addEventListener("annotation-duplicate", this._onDuplicate);
     this.addEventListener("mode-toggle", this._onModeToggle);
     this.addEventListener("update-annotation", this._onUpdateAnnotation);
+    this.addEventListener("refresh-annotations", this._onRefreshAnnotations);
   }
 
   disconnectedCallback() {
@@ -43,6 +44,12 @@ export class CpAnnotations extends UtBase {
     this.removeEventListener("annotation-duplicate", this._onDuplicate);
     this.removeEventListener("mode-toggle", this._onModeToggle);
     this.removeEventListener("update-annotation", this._onUpdateAnnotation);
+    this.removeEventListener("refresh-annotations", this._onRefreshAnnotations);
+  }
+
+  _onRefreshAnnotations = (e) => {
+    this.manifestObject = e.detail.manifestObject;
+    this._refreshViewer();
   }
 
   _onImport = async (e) => {
