@@ -6,7 +6,7 @@ const getManifestsPath = (component = "pb-test") => `${getDbMainPath(component)}
 const getAPIPath = (component = "pb-test") => `${getDbMainPath(component)}/api`;
 
 const getCreateEndpoint = (component = "pb-test") => `${getAPIPath(component)}/create`;
-const getUpdateEndpoint = (component = "pb-test") => `${getAPIPath(component)}/update`;
+const getUpdateEndpoint = (component = "pb-test") => `${getAPIPath(component)}/edit`;
 const getDeleteEndpoint = (component = "pb-test") => `${getAPIPath(component)}/delete`;
 
 export const config = {

@@ -2,7 +2,7 @@ import { html } from "https://esm.sh/lit-element";
 import { UtBase } from "../../utilities/base.js";
 import { generateId, isLocalUrl } from "../../utilities/lib/utils.js";
 import { config } from "../../utilities/config.js";
-import { saveToDb, refreshAnnotations } from "../../utilities/lib/db.js";
+import { saveToDb, updateInDb, deleteFromDb, refreshAnnotations } from "../../utilities/lib/db.js";
 import "./form.js";
 import "./annotations.js";
 
@@ -93,75 +93,130 @@ export class CpAnWrapper extends UtBase {
 
         if (isManifestLocal && isListLocal) {
             const payload = {
-            annotation: newAnnotation,
-            canvasId,
-            canvasIndex: this.canvasIndex + 1,
-            manifestId,
-            listId
+                annotation: newAnnotation,
+                canvasId,
+                canvasIndex: this.canvasIndex + 1,
+                manifestId,
+                listId
             };
 
             const ok = await saveToDb(payload, config.componentName);
 
             if (ok) {
-            this.localAnnotations = this.localAnnotations.filter(
-                (entry) => entry.annotation["@id"] !== newAnnotation["@id"]
-            );
+                this.localAnnotations = this.localAnnotations.filter(
+                    (entry) => entry.annotation["@id"] !== newAnnotation["@id"]
+                );
 
-            await refreshAnnotations(listId, this);
+                await refreshAnnotations(listId, this);
             }
         } else {
             console.log("Salvataggio remoto non eseguito: manifest o annotationList non locali.");
         }
 
         this._setMode("");
-        }
+    }
 
-    _onEditSubmit(e) {
-
+    async _onEditSubmit(e) {
         const edited = e.detail.edited;
         const canvas = this.manifestObject?.sequences?.[0]?.canvases?.[this.canvasIndex];
         const canvasId = canvas?.["@id"] || `canvas${this.canvasIndex}`;
 
-        this.localAnnotations = this.localAnnotations.map((entry) => {
-            if (entry.annotation["@id"] === edited["@id"]) {
-                return { canvasId, annotation: edited };
+        const annotationListUrl = canvas?.otherContent?.[0]?.["@id"] || "";
+        const isManifestLocal = isLocalUrl(this.manifestUrl);
+        const isListLocal = isLocalUrl(annotationListUrl);
+
+        const manifestId = this.manifestObject?.["@id"]?.split("/").pop();
+        const listId = annotationListUrl;
+
+        if (isManifestLocal && isListLocal) {
+            const payload = {
+                annotation: edited,
+                canvasId,
+                canvasIndex: this.canvasIndex + 1,
+                manifestId,
+                listId
+            };
+
+            const ok = await updateInDb(payload, config.componentName);
+
+            if (ok) {
+                this.localAnnotations = this.localAnnotations.filter(
+                    (entry) => entry.annotation["@id"] !== edited["@id"]
+                );
+
+                await refreshAnnotations(listId, this);
+            } else {
+                console.error("Aggiornamento remoto fallito");
             }
-            return entry;
-        });
+        } else {
+            this.localAnnotations = this.localAnnotations.map((entry) => {
+                if (entry.annotation["@id"] === edited["@id"]) {
+                    return { canvasId, annotation: edited };
+                }
+                return entry;
+            });
 
-        this.dispatchEvent(new CustomEvent("refresh-annotations", { bubbles: true, composed: true }));
+            this.dispatchEvent(new CustomEvent("refresh-annotations", { bubbles: true, composed: true }));
 
-        const viewer = this.renderRoot.querySelector("cp-anviewer");
-        if (viewer) {
-            viewer.activeAnnotationIndex = null;
-            viewer.requestUpdate();
+            const viewer = this.renderRoot.querySelector("cp-anviewer");
+            if (viewer) {
+                viewer.activeAnnotationIndex = null;
+                viewer.requestUpdate();
+            }
         }
-
         this._setMode("");
     }
 
-    _onDeleteSubmit(e) {
+    async _onDeleteSubmit(e) {
 
         const { annotation } = e.detail;
         if (!annotation) return;
 
         const canvas = this.manifestObject?.sequences?.[0]?.canvases?.[this.canvasIndex];
         const canvasId = canvas?.["@id"] || `canvas${this.canvasIndex}`;
+        const annotationListUrl = canvas?.otherContent?.[0]?.["@id"] || "";
+        const isManifestLocal = isLocalUrl(this.manifestUrl);
+        const isListLocal = isLocalUrl(annotationListUrl);
+        const manifestId = this.manifestObject?.["@id"]?.split("/").pop();
+        const listId = annotationListUrl;
 
-        this.localAnnotations = this.localAnnotations.filter(
-            entry => !(entry.annotation["@id"] === annotation["@id"] && entry.canvasId === canvasId)
-        );
+        if (isManifestLocal && isListLocal) {
+            const payload = {
+                annotation,
+                canvasId,
+                canvasIndex: this.canvasIndex + 1,
+                manifestId,
+                listId
+            };
 
-        this.dispatchEvent(new CustomEvent("refresh-annotations", { bubbles: true, composed: true }));
+            const ok = await deleteFromDb(payload, config.componentName);
 
-        const viewer = this.renderRoot.querySelector("cp-anviewer");
-        if (viewer) {
-            viewer.activeAnnotationIndex = null;
-            viewer.requestUpdate();
+            if (ok) {
+                this.localAnnotations = this.localAnnotations.filter(
+                    entry => !(entry.annotation["@id"] === annotation["@id"] && entry.canvasId === canvasId)
+                );
+
+                await refreshAnnotations(listId, this);
+            } else {
+                console.error("Cancellazione remota fallita");
+            }
+        } else {
+            this.localAnnotations = this.localAnnotations.filter(
+                entry => !(entry.annotation["@id"] === annotation["@id"] && entry.canvasId === canvasId)
+            );
+
+            this.dispatchEvent(new CustomEvent("refresh-annotations", { bubbles: true, composed: true }));
+
+            const viewer = this.renderRoot.querySelector("cp-anviewer");
+            if (viewer) {
+                viewer.activeAnnotationIndex = null;
+                viewer.requestUpdate();
+            }
         }
 
         this._setMode("");
     }
+
 
     _onImportSubmit(e) {
         const additions = e.detail.additions;
