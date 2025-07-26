@@ -162,6 +162,7 @@ export class CpAnWrapper extends UtBase {
             if (viewer) {
                 viewer.activeAnnotationIndex = null;
                 viewer.requestUpdate();
+                isActive: false;
             }
         }
         this._setMode("");
@@ -211,6 +212,7 @@ export class CpAnWrapper extends UtBase {
             if (viewer) {
                 viewer.activeAnnotationIndex = null;
                 viewer.requestUpdate();
+                isActive: false;
             }
         }
 

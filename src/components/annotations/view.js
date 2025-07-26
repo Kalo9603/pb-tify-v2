@@ -221,7 +221,8 @@ export class CpAnViewer extends UtBase {
     } else if (annList?.resources?.length) {
       baseAnnotations = annList.resources.map(a => ({
         ...this._parseAnnotation(a),
-        isLocal: false
+        isLocal: false,
+        isActive: false
       }));
     }
 
@@ -229,7 +230,8 @@ export class CpAnViewer extends UtBase {
       .filter(a => a.canvasId === canvasId)
       .map(a => ({
         ...this._parseAnnotation(a.annotation),
-        isLocal: true
+        isLocal: true,
+        isActive: false
       }));
 
     const all = [...baseAnnotations, ...localAnns];
