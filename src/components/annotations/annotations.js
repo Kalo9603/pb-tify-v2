@@ -3,6 +3,7 @@ import { UtBase } from "../../utilities/base.js";
 import { generateId } from "../../utilities/lib/utils.js";
 import "./view.js";
 import "./buttons/add.js";
+import "./buttons/hideall.js";
 import "./buttons/export.js";
 import "./buttons/import.js";
 
@@ -15,6 +16,7 @@ export class CpAnnotations extends UtBase {
       annotationCount: { type: Number },
       currentMode: { type: String },
       localAnnotations: { type: Array },
+      activeAnnotations: { type: Array },
       annotationToEdit: { type: Object }
     };
   }
@@ -161,6 +163,7 @@ export class CpAnnotations extends UtBase {
             .canvasIndex=${this.canvasIndex}
             .currentMode=${this.currentMode}
             .localAnnotations=${this.localAnnotations}
+            .activeAnnotations=${this.activeAnnotations}
             .annotationToEdit=${this.annotationToEdit}
             @annotations-count=${e => this.annotationCount = e.detail.count}
             @mode-toggle=${this._onModeToggle}
@@ -181,6 +184,13 @@ export class CpAnnotations extends UtBase {
             @mode-toggle=${this._onModeToggle}
             @refresh-annotations=${this._refreshViewer}
           ></cp-anadd>
+
+          <cp-anhideall
+            .activeAnnotations=${this.activeAnnotations}
+            @hide-all-annotations=${() => {
+            this.dispatchEvent(new CustomEvent("hide-all-annotations", { bubbles: true, composed: true }));
+            }}
+          ></cp-anhideall>
 
           ${this.annotationCount > 0 ? html`
             <cp-anexport

@@ -2,6 +2,7 @@ import { html } from "https://esm.sh/lit-element";
 import { UtBase } from "../../../utilities/base.js";
 
 export class CpAnAdd extends UtBase {
+  
   static get properties() {
     return {
       manifestObject: { type: Object },

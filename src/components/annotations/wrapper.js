@@ -15,6 +15,7 @@ export class CpAnWrapper extends UtBase {
             canvasIndex: { type: Number },
             annotationMode: { type: String },
             annotationToEdit: { type: Object },
+            activeAnnotations: { type: Array },
             localAnnotations: { type: Array },
         };
     }
@@ -263,6 +264,7 @@ export class CpAnWrapper extends UtBase {
                 .manifestObject=${this.manifestObject}
                 .canvasIndex=${this.canvasIndex}
                 .localAnnotations=${this.localAnnotations}
+                .activeAnnotations=${this.activeAnnotations}
                 .currentMode=${this.annotationMode}
                 .annotationToEdit=${this.annotationToEdit}
                 ></cp-annotations>

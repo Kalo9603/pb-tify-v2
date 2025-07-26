@@ -1,7 +1,7 @@
 import { html } from "https://esm.sh/lit-element";
 import { UtBase } from "./utilities/base.js";
 import { detectIIIFVersion, convertV3toV2, getLanguages } from "./utilities/lib/manifest.js";
-import { generateId, isLocalUrl } from "./utilities/lib/utils.js";
+import { generateId, isLocalUrl, getRandomRectColor } from "./utilities/lib/utils.js";
 import { saveToDb } from "./utilities/lib/db.js";
 import { normalizeAnnotation, isValidAnnotation } from "./utilities/lib/parse.js";
 import { config } from "./utilities/config.js";
@@ -35,6 +35,7 @@ export class PbTest extends UtBase {
       frameData: { type: Object },
       annotationMode: { type: String },
       localAnnotations: { type: Array },
+      activeAnnotations: { type: Array },
       ...super.properties,
     };
   }
@@ -48,6 +49,7 @@ export class PbTest extends UtBase {
     this.availableLanguages = [];
     this.currentCanvasIndex = 0;
     this.annotationMode = "";
+    this.activeAnnotations = [];
 
     this.frameData = {
       url: "",
@@ -79,6 +81,9 @@ export class PbTest extends UtBase {
     this.addEventListener("annotation-edit", () => this.annotationMode = "edit");
     this.addEventListener("annotation-delete", () => this.annotationMode = "delete");
     this.addEventListener("annotation-export", () => this._exportAnnotations());
+    this.addEventListener("show-annotation", e => this._addActiveAnnotation(e.detail));
+    this.addEventListener("hide-annotation", e => this._removeActiveAnnotation(e.detail.id));
+    this.addEventListener("hide-all-annotations", this._hideAllAnnotations);
     this.addEventListener("mode-toggle", this._handleModeToggle);
   }
 
@@ -90,6 +95,8 @@ export class PbTest extends UtBase {
     this.removeEventListener("canvaschange", this._onCanvasChange);
     this.removeEventListener("show-frame", this.showFrame);
     this.removeEventListener("hide-frame", this.hideFrame);
+    this.removeEventListener("show-annotation", e => this._addActiveAnnotation(e.detail));
+    this.removeEventListener("hide-annotation", e => this._removeActiveAnnotation(e.detail.id));
     this.removeEventListener("mode-toggle", this._handleModeToggle);
   }
 
@@ -116,7 +123,7 @@ export class PbTest extends UtBase {
   }
 
   _handleModeToggle(e) {
-    
+
     const newMode = e.detail.mode || "";
     const annotation = e.detail.annotation || null;
 
@@ -210,8 +217,33 @@ export class PbTest extends UtBase {
   }
 
   handleClose() {
+
     this.clearManifest();
+
+    this.currentCanvasIndex = 0;
+    this.annotationMode = "";
+    this.localAnnotations = [];
+
+    this.frameData = {
+      url: "",
+      x: 0,
+      y: 0,
+      w: 0,
+      h: 0,
+      visible: false,
+      motivation: "",
+      chars: ""
+    };
+
+    this.annotationToEdit = null;
+    this.activeAnnotations = [];
+
+    this._updateFrameData();
+
+    this.dispatchEvent(new CustomEvent("reset-ui", { bubbles: true, composed: true }));
+
     this.requestUpdate();
+
   }
 
   async _saveLocalAnnotation(e) {
@@ -305,6 +337,62 @@ export class PbTest extends UtBase {
     this.annotationMode = "";
   }
 
+  _addActiveAnnotation(detail) {
+
+    const exists = this.activeAnnotations.find(a => a.id === detail.id);
+    if (exists) return;
+
+    this.activeAnnotations = [
+
+      ...this.activeAnnotations,
+      {
+        id: detail.id,
+        x: detail.x,
+        y: detail.y,
+        w: detail.w,
+        h: detail.h,
+        chars: detail.chars,
+        motivation: detail.motivation,
+        color: getRandomRectColor()
+      }
+    ];
+
+    this.dispatchEvent(new CustomEvent("annotation-color-updated", {
+      detail: { id: detail.id, color: this.activeAnnotations.find(a => a.id === detail.id).color },
+      bubbles: true, composed: true
+    }));
+
+    this._updateFrameData();
+
+  }
+
+  _removeActiveAnnotation(id) {
+    this.activeAnnotations = this.activeAnnotations.filter(a => a.id !== id);
+    this._updateFrameData();
+  }
+
+  _hideAllAnnotations() {
+    this.activeAnnotations = [];
+    this._updateFrameData();
+  }
+
+  _updateFrameData() {
+
+    const hasActive = this.activeAnnotations.length > 0;
+    let url = "";
+
+    if (hasActive && this.manifestObject) {
+      const canvas = this.manifestObject.sequences?.[0]?.canvases?.[this.currentCanvasIndex];
+      url = canvas?.images?.[0]?.resource?.["@id"] || "";
+    }
+
+    this.frameData = {
+      ...this.frameData,
+      url,
+      visible: hasActive
+    };
+  }
+
   _exportAnnotations() {
     this.dispatchEvent(new CustomEvent("annotation-export", {
       bubbles: true,
@@ -365,6 +453,7 @@ export class PbTest extends UtBase {
               ></cp-tf-wrapper>
 
              <cp-anwrapper
+              .activeAnnotations=${this.activeAnnotations}
               .manifestUrl=${this.manifestUrl}
               .manifestObject=${this.manifestObject}
               .canvasIndex=${this.currentCanvasIndex}
@@ -385,14 +474,7 @@ export class PbTest extends UtBase {
 
               <cp-anframe
                 .url=${this.frameData.url}
-                .x=${this.frameData.x}
-                .y=${this.frameData.y}
-                .w=${this.frameData.w}
-                .h=${this.frameData.h}
-                .visible=${this.frameData.visible}
-                .color=${this.frameData.color}
-                .motivation=${this.frameData.motivation}
-                .chars=${this.frameData.chars}
+                .annotations=${this.activeAnnotations}
               />
             </div>
           </div>
