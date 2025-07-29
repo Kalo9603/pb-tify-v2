@@ -160,16 +160,16 @@ export class CpAnFrame extends UtBase {
   _getDraftStyle(color) {
     const colorMap = {
       "green": {
-        border: "border-green-500",
-        bg: "bg-green-200/30"
+        border: "border-green-700",
+        bg: "bg-green-500/40"
       },
       "orange": {
-        border: "border-orange-500", 
-        bg: "bg-orange-200/30"
+        border: "border-orange-700", 
+        bg: "bg-orange-500/40"
       },
       "red": {
-        border: "border-red-500",
-        bg: "bg-red-200/30"
+        border: "border-red-700",
+        bg: "bg-red-500/40"
       }
     };
 
