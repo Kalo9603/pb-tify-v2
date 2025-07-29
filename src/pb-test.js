@@ -59,7 +59,8 @@ export class PbTest extends UtBase {
       h: 0,
       visible: false,
       motivation: "",
-      chars: ""
+      chars: "",
+      mode: ""
     };
 
     this.handleURLSubmit = this.handleURLSubmit.bind(this);
@@ -77,6 +78,7 @@ export class PbTest extends UtBase {
     this.addEventListener("canvaschange", this._onCanvasChange);
     this.addEventListener("show-frame", this.showFrame);
     this.addEventListener("hide-frame", this.hideFrame);
+    this.addEventListener("draft-frame-update", e => this._onDraftChangeFrame(e));
     this.addEventListener("annotation-add", () => this.annotationMode = "add");
     this.addEventListener("annotation-edit", () => this.annotationMode = "edit");
     this.addEventListener("annotation-delete", () => this.annotationMode = "delete");
@@ -95,6 +97,7 @@ export class PbTest extends UtBase {
     this.removeEventListener("canvaschange", this._onCanvasChange);
     this.removeEventListener("show-frame", this.showFrame);
     this.removeEventListener("hide-frame", this.hideFrame);
+    this.removeEventListener("draft-frame-update", e => this._onDraftChangeFrame(e));
     this.removeEventListener("show-annotation", e => this._addActiveAnnotation(e.detail));
     this.removeEventListener("hide-annotation", e => this._removeActiveAnnotation(e.detail.id));
     this.removeEventListener("mode-toggle", this._handleModeToggle);
@@ -123,7 +126,7 @@ export class PbTest extends UtBase {
   }
 
   _handleModeToggle(e) {
-
+    
     const newMode = e.detail.mode || "";
     const annotation = e.detail.annotation || null;
 
@@ -133,15 +136,41 @@ export class PbTest extends UtBase {
       this.annotationMode = "";
       this.annotationToEdit = null;
       this.hideFrame();
+
+      const frame = this.renderRoot.querySelector("cp-anframe");
+      if (frame) {
+        frame.draftRect = null;
+        frame.mode = "";
+      }
+
+      this.frameData = { ...this.frameData, mode: "" };
       return;
     }
 
     this.annotationMode = newMode;
     this.annotationToEdit = newMode === "edit" ? annotation : null;
 
-    if (newMode !== "edit") {
-      this.hideFrame();
+    const frame = this.renderRoot.querySelector("cp-anframe");
+    if (frame) {
+      frame.mode = newMode;
+
+      if (newMode === "edit" && annotation) {
+        const selector = annotation.on?.selector?.value?.replace("xywh=", "").split(",").map(Number);
+        if (selector && selector.length >= 4) {
+          frame.draftRect = {
+            x: selector[0] || 0,
+            y: selector[1] || 0,
+            w: selector[2] || 0,
+            h: selector[3] || 0,
+            color: "orange"
+          };
+        }
+      } else if (newMode !== "edit") {
+        frame.draftRect = null;
+      }
     }
+
+    this.frameData = { ...this.frameData, mode: newMode };
   }
 
   showFrame(e) {
@@ -156,6 +185,7 @@ export class PbTest extends UtBase {
       color: detail.color || "view",
       motivation: detail.motivation || "",
       chars: detail.chars || "",
+      mode: this.annotationMode
     };
   }
 
@@ -168,8 +198,18 @@ export class PbTest extends UtBase {
       h: 0,
       visible: false,
       motivation: "",
-      chars: ""
+      chars: "",
+      mode: ""
     };
+  }
+
+  _onDraftChangeFrame(e) {
+    const { url, x, y, w, h, color } = e.detail;
+    const frame = this.renderRoot.querySelector("cp-anframe");
+    if (frame) {
+      frame.draftRect = { x, y, w, h, color };
+      frame.url = url;
+    }
   }
 
   _onCanvasChange(e) {
@@ -475,6 +515,7 @@ export class PbTest extends UtBase {
               <cp-anframe
                 .url=${this.frameData.url}
                 .annotations=${this.activeAnnotations}
+                .mode=${this.frameData.mode}
               />
             </div>
           </div>

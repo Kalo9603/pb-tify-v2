@@ -18,6 +18,7 @@ export class CpAnViewer extends UtBase {
       activeAnnotations: { type: Array },
       localAnnotations: { type: Array },
       annotationListJson: { type: Object },
+      filterQuery: { type: String },
       ...super.properties
     };
   }
@@ -31,6 +32,7 @@ export class CpAnViewer extends UtBase {
     this.localAnnotations = [];
     this.activeAnnotations = [];
     this.annotationListJson = null;
+    this.filterQuery = "";
 
     this.addEventListener("refresh-annotations", () => this.fetchAnnotations());
   }
@@ -39,6 +41,7 @@ export class CpAnViewer extends UtBase {
     super.connectedCallback();
     this.addEventListener("mode-toggle", e => this._onModeToggle(e));
     this.addEventListener("reset-ui", () => this._resetUI());
+    this.addEventListener("filter-annotations", e => this._filterAnnotations(e));
   }
 
   disconnectedCallback() {
@@ -57,6 +60,12 @@ export class CpAnViewer extends UtBase {
     ) {
       this.fetchAnnotations();
     }
+  }
+
+  _filterAnnotations(e) {
+    this.filterQuery = e.detail.query;
+    console.log("🔍 Filtro ricevuto:", this.filterQuery);
+    this.requestUpdate("filterQuery");
   }
 
   get annotationListId() {
@@ -266,22 +275,30 @@ export class CpAnViewer extends UtBase {
   }
 
   render() {
-    
+
     const multipleActive = this.activeAnnotations.length > 1;
+
+    const filteredAnnotations = this.annotations
+    .map((ann, originalIndex) => ({ ann, originalIndex }))
+    .filter(({ ann }) => {
+      const text = (ann.chars || "").toLowerCase();
+      return !this.filterQuery || text.includes(this.filterQuery);
+    });
+
 
     return html`
       ${this.annotations.length === 0
         ? html`<div class="text-gray-500 italic">No annotations available.</div>`
         : html`
         <ul class="space-y-4">
-          ${this.annotations.map((ann, i) => {
-          const annId = ann.full["@id"] || `local-${i}`;
-          const activeObj = this.activeAnnotations.find(a => a.id === annId);
-          const isActive = !!activeObj;
-          const annotationColorClass = activeObj?.color || "";
-          const annotationType = this._getAnnotationType(ann);
+          ${filteredAnnotations.map(({ ann, originalIndex }, i) => {
+            const annId = ann.full["@id"] || `local-${originalIndex}`;
+            const activeObj = this.activeAnnotations.find(a => a.id === annId);
+            const isActive = !!activeObj;
+            const annotationColorClass = activeObj?.color || "";
+            const annotationType = this._getAnnotationType(ann);
 
-          return html`
+            return html`
               <li class="text-sm text-gray-700 border-b pb-2 relative transition-colors duration-300 rounded-md px-2 hover:bg-yellow-100
                 ${isActive ? annotationColorClass : ""}">
                 
@@ -294,10 +311,10 @@ export class CpAnViewer extends UtBase {
                       </span>
                       <strong>#${i + 1}</strong>
                       ${ann.isLocal
-              ? html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-green-600">Local</span>`
-              : annotationType === "remote"
-                ? html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-purple-600">Remote</span>`
-                : html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-blue-500">Source</span>`}
+                        ? html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-green-600">Local</span>`
+                        : annotationType === "remote"
+                          ? html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-purple-600">Remote</span>`
+                          : html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-blue-500">Source</span>`}
                     </div>
 
                     ${ann.chars ? html`
@@ -309,7 +326,7 @@ export class CpAnViewer extends UtBase {
 
                   <div class="flex flex-row items-end gap-2">
                     <button
-                      @click=${() => this.toggleAnnotation(i)}
+                      @click=${() => this.toggleAnnotation(originalIndex)}
                       class="group flex items-center rounded-full shadow-xl transition-all duration-300 px-3 py-2 w-12 hover:w-28 overflow-hidden h-10
                         ${isActive ? "bg-red-600" : "bg-blue-600"} text-white hover:bg-red-800">
                       <div class="flex items-center justify-center w-full transition-all duration-300 group-hover:justify-start group-hover:gap-2">
@@ -344,7 +361,7 @@ export class CpAnViewer extends UtBase {
                 </div>
               </li>
             `;
-        })}
+          })}
         </ul>
       `}
     `;

@@ -10,7 +10,9 @@ export class CpAnFrame extends UtBase {
       annotations: { type: Array },
       zoom: { type: Number },
       _hoveredAnnotation: { type: Object },
-      _tooltipPosition: { type: Object }
+      _tooltipPosition: { type: Object },
+      mode: { type: String },
+      draftRect: { type: Object }
     };
   }
 
@@ -26,6 +28,8 @@ export class CpAnFrame extends UtBase {
     this.naturalHeight = 0;
     this.baseWidth = 0;
     this.baseHeight = 0;
+    this.mode = "";
+    this.draftRect = null;
 
     this._hoveredAnnotation = null;
     this._tooltipPosition = { x: 0, y: 0 };
@@ -117,13 +121,26 @@ export class CpAnFrame extends UtBase {
     const scaleX = (this.baseWidth * this.zoom) / this.naturalWidth;
     const scaleY = (this.baseHeight * this.zoom) / this.naturalHeight;
 
-    return this.annotations.map(a => ({
+    let rects = this.annotations.map(a => ({
       ...a,
       left: a.x * scaleX,
       top: a.y * scaleY,
       width: a.w * scaleX,
       height: a.h * scaleY
     }));
+
+    if (this.draftRect) {
+      rects.push({
+        ...this.draftRect,
+        left: this.draftRect.x * scaleX,
+        top: this.draftRect.y * scaleY,
+        width: this.draftRect.w * scaleX,
+        height: this.draftRect.h * scaleY,
+        isDraft: true
+      });
+    }
+
+    return rects;
   }
 
   _showTooltip(e, ann) {
@@ -139,6 +156,25 @@ export class CpAnFrame extends UtBase {
   }
 
   _hideTooltip() { this._hoveredAnnotation = null; }
+
+  _getDraftStyle(color) {
+    const colorMap = {
+      "green": {
+        border: "border-green-500",
+        bg: "bg-green-200/30"
+      },
+      "orange": {
+        border: "border-orange-500", 
+        bg: "bg-orange-200/30"
+      },
+      "red": {
+        border: "border-red-500",
+        bg: "bg-red-200/30"
+      }
+    };
+
+    return colorMap[color] || colorMap["red"];
+  }
 
   render() {
     if (!this.url) return null;
@@ -163,23 +199,48 @@ export class CpAnFrame extends UtBase {
           <div style="position: relative; width: ${zoomedWidth}px; height: ${zoomedHeight}px; transition: width 0.3s ease, height 0.3s ease;">
             <img src="${this.url}" style="width: 100%; height: 100%; display: block;" />
 
-            ${this.scaledRects.map(rect => html`
-              <div
-                class="absolute z-10 rounded-sm pointer-events-auto box-border border-2 hover:shadow-xl transition-all duration-300 ease-in-out ${rect.color}"
-                style="
-                  left: ${rect.left}px;
-                  top: ${rect.top}px;
-                  width: ${rect.width}px;
-                  height: ${rect.height}px;
-                "
-                @mouseenter="${e => this._showTooltip(e, rect)}"
-                @mouseleave="${this._hideTooltip}"
-              ></div>
-            `)}
+            ${this.scaledRects.map(rect => {
+              if (rect.isDraft) {
+                const draftStyles = this._getDraftStyle(rect.color || "red");
+                
+                return html`
+                  <div
+                    class="absolute z-10 rounded-sm pointer-events-auto box-border border-2
+                      border-dashed opacity-70 ${draftStyles.border} ${draftStyles.bg}
+                      transition-all duration-300 ease-in-out"
+                    style="
+                      left: ${rect.left}px;
+                      top: ${rect.top}px;
+                      width: ${rect.width}px;
+                      height: ${rect.height}px;
+                    "
+                    @mouseenter="${e => this._showTooltip(e, rect)}"
+                    @mouseleave="${this._hideTooltip}">
+                  </div>
+                `;
+              } else {
+                const rectColor = rect.color || "red";
+                
+                return html`
+                  <div
+                    class="absolute z-10 rounded-sm pointer-events-auto box-border border-2
+                      ${rectColor} hover:shadow-xl transition-all duration-300 ease-in-out"
+                    style="
+                      left: ${rect.left}px;
+                      top: ${rect.top}px;
+                      width: ${rect.width}px;
+                      height: ${rect.height}px;
+                    "
+                    @mouseenter="${e => this._showTooltip(e, rect)}"
+                    @mouseleave="${this._hideTooltip}">
+                  </div>
+                `;
+              }
+            })}
 
             ${this._hoveredAnnotation ? html`
                 <div
-                  class="absolute tooltip-animate-in px-3 py-2 text-xs text-white rounded-md shadow-lg pointer-events-none min-w-[10rem] max-w-[18rem] text-center break-words
+                  class="absolute tooltip-animate-in px-3 py-2 text-xs text-white rounded-md shadow-lg pointer-events-none min-w-[10rem] max-w-[24rem] text-center break-words
                     ${getColorVariant(this._hoveredAnnotation.color, 'bg', 200)} ${getColorVariant(this._hoveredAnnotation.color, 'border', 300)}"
                   style="
                     left: ${this._tooltipPosition.x}px;

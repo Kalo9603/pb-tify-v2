@@ -65,6 +65,14 @@ export class CpAnForm extends UtBase {
   }
 
   _dispatchFrame() {
+    const colorMap = {
+      "add": "green",
+      "edit": "orange",
+      "delete": "red"
+    };
+
+    const frameColor = colorMap[this.mode] || "red";
+
     this.dispatchEvent(new CustomEvent("show-frame", {
       detail: {
         url: this.imageUrl,
@@ -72,7 +80,21 @@ export class CpAnForm extends UtBase {
         y: this.y,
         w: this.w,
         h: this.h,
-        color: this.mode,
+        color: frameColor,
+      },
+      bubbles: true,
+      composed: true
+    }));
+
+    this.dispatchEvent(new CustomEvent("draft-frame-update", {
+      detail: {
+        url: this.imageUrl,
+        x: this.x,
+        y: this.y,
+        w: this.w,
+        h: this.h,
+        mode: this.mode,
+        color: frameColor
       },
       bubbles: true,
       composed: true
@@ -184,11 +206,11 @@ export class CpAnForm extends UtBase {
           </label>
 
             ${makeButton(
-          "Delete",
-          "fa-solid fa-trash",
-          `bg-red-600 ${!this.confirmDelete ? "opacity-50 cursor-not-allowed" : ""}`,
-          this.confirmDelete ? this.deleteAnnotation : () => { }
-        )}
+        "Delete",
+        "fa-solid fa-trash",
+        `bg-red-600 ${!this.confirmDelete ? "opacity-50 cursor-not-allowed" : ""}`,
+        this.confirmDelete ? this.deleteAnnotation : () => { }
+      )}
         </div>
       `;
     }

@@ -3,6 +3,7 @@ import { UtBase } from "../../utilities/base.js";
 import { generateId } from "../../utilities/lib/utils.js";
 import "./view.js";
 import "./buttons/add.js";
+import "./buttons/filter.js";
 import "./buttons/hideall.js";
 import "./buttons/export.js";
 import "./buttons/import.js";
@@ -17,7 +18,8 @@ export class CpAnnotations extends UtBase {
       currentMode: { type: String },
       localAnnotations: { type: Array },
       activeAnnotations: { type: Array },
-      annotationToEdit: { type: Object }
+      annotationToEdit: { type: Object },
+      filterQuery: { type: String }
     };
   }
 
@@ -29,6 +31,7 @@ export class CpAnnotations extends UtBase {
     this.currentMode = "";
     this.localAnnotations = [];
     this.annotationToEdit = null;
+    this.filterQuery = "";
   }
 
   connectedCallback() {
@@ -38,6 +41,7 @@ export class CpAnnotations extends UtBase {
     this.addEventListener("mode-toggle", this._onModeToggle);
     this.addEventListener("update-annotation", this._onUpdateAnnotation);
     this.addEventListener("refresh-annotations", this._onRefreshAnnotations);
+    this.addEventListener("filter-annotations", this._onFilterAnnotations);
   }
 
   disconnectedCallback() {
@@ -47,11 +51,15 @@ export class CpAnnotations extends UtBase {
     this.removeEventListener("mode-toggle", this._onModeToggle);
     this.removeEventListener("update-annotation", this._onUpdateAnnotation);
     this.removeEventListener("refresh-annotations", this._onRefreshAnnotations);
+    this.removeEventListener("filter-annotations", this._onFilterAnnotations);
   }
 
   _onRefreshAnnotations = (e) => {
     this.manifestObject = e.detail.manifestObject;
     this._refreshViewer();
+  }
+  _onFilterAnnotations = (e) => {
+    this.filterQuery = e.detail.query;
   }
 
   _onImport = async (e) => {
@@ -165,6 +173,7 @@ export class CpAnnotations extends UtBase {
             .localAnnotations=${this.localAnnotations}
             .activeAnnotations=${this.activeAnnotations}
             .annotationToEdit=${this.annotationToEdit}
+            .filterQuery=${this.filterQuery}
             @annotations-count=${e => this.annotationCount = e.detail.count}
             @mode-toggle=${this._onModeToggle}
           ></cp-anviewer>
@@ -175,6 +184,8 @@ export class CpAnnotations extends UtBase {
             .manifestObject=${this.manifestObject}
             .canvasIndex=${this.canvasIndex}
           ></cp-animport>
+
+          ${this.annotationCount > 0 ? html`<cp-anfilter></cp-anfilter>` : null}
 
           <cp-anadd
             .manifestObject=${this.manifestObject}
@@ -188,8 +199,8 @@ export class CpAnnotations extends UtBase {
           <cp-anhideall
             .activeAnnotations=${this.activeAnnotations}
             @hide-all-annotations=${() => {
-            this.dispatchEvent(new CustomEvent("hide-all-annotations", { bubbles: true, composed: true }));
-            }}
+        this.dispatchEvent(new CustomEvent("hide-all-annotations", { bubbles: true, composed: true }));
+      }}
           ></cp-anhideall>
 
           ${this.annotationCount > 0 ? html`
