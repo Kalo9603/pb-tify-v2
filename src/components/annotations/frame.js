@@ -24,6 +24,7 @@ export class CpAnFrame extends UtBase {
     this.maxZoom = 5;
     this.minZoom = 0.5;
     this.zoomStep = 0.05;
+    this._zoomIntervalId = null;
     this.naturalWidth = 0;
     this.naturalHeight = 0;
     this.baseWidth = 0;
@@ -66,6 +67,7 @@ export class CpAnFrame extends UtBase {
   }
 
   _onWheel(event) {
+
     event.preventDefault();
 
     const container = this.renderRoot.querySelector(".image-scroll-container");
@@ -99,6 +101,7 @@ export class CpAnFrame extends UtBase {
   _zoomOut() { this._applyZoom(this.zoom - this.zoomStep); }
 
   _applyZoom(newZoom) {
+
     newZoom = Math.max(this.minZoom, Math.min(this.maxZoom, newZoom));
     const prevZoom = this.zoom;
     const container = this.renderRoot.querySelector(".image-scroll-container");
@@ -114,6 +117,26 @@ export class CpAnFrame extends UtBase {
       container.scrollTop = scrollTop * ratio;
     });
   }
+
+  _startZoomIn() {
+    if (this._zoomIntervalId) return;
+    this._zoomIn();
+    this._zoomIntervalId = setInterval(() => this._zoomIn(), 500);
+  }
+
+  _startZoomOut() {
+    if (this._zoomIntervalId) return;
+    this._zoomOut();
+    this._zoomIntervalId = setInterval(() => this._zoomOut(), 500);
+  }
+
+  _stopZoom() {
+    if (this._zoomIntervalId) {
+      clearInterval(this._zoomIntervalId);
+      this._zoomIntervalId = null;
+    }
+  }
+
 
   get scaledRects() {
     if (!this.naturalWidth || !this.naturalHeight) return [];
@@ -164,7 +187,7 @@ export class CpAnFrame extends UtBase {
         bg: "bg-green-500/40"
       },
       "orange": {
-        border: "border-orange-700", 
+        border: "border-orange-700",
         bg: "bg-orange-500/40"
       },
       "red": {
@@ -177,6 +200,7 @@ export class CpAnFrame extends UtBase {
   }
 
   render() {
+
     if (!this.url) return null;
 
     const zoomedWidth = this.baseWidth * this.zoom;
@@ -195,15 +219,15 @@ export class CpAnFrame extends UtBase {
         <div class="text-lg font-semibold text-gray-800 mb-4">🧩 Annotation Frame</div>
 
         <div class="image-scroll-container overflow-auto border border-gray-300 rounded-lg shadow mb-4"
-             style="max-width: 100%; height: 405px; background: #f9fafb; position: relative;">
+             style="max-width: 100%; height: 405px; background: #eee; position: relative;">
           <div style="position: relative; width: ${zoomedWidth}px; height: ${zoomedHeight}px; transition: width 0.3s ease, height 0.3s ease;">
             <img src="${this.url}" style="width: 100%; height: 100%; display: block;" />
 
             ${this.scaledRects.map(rect => {
-              if (rect.isDraft) {
-                const draftStyles = this._getDraftStyle(rect.color || "red");
-                
-                return html`
+      if (rect.isDraft) {
+        const draftStyles = this._getDraftStyle(rect.color || "red");
+
+        return html`
                   <div
                     class="absolute z-10 rounded-sm pointer-events-auto box-border border-2
                       border-dashed opacity-70 ${draftStyles.border} ${draftStyles.bg}
@@ -218,10 +242,10 @@ export class CpAnFrame extends UtBase {
                     @mouseleave="${this._hideTooltip}">
                   </div>
                 `;
-              } else {
-                const rectColor = rect.color || "red";
-                
-                return html`
+      } else {
+        const rectColor = rect.color || "red";
+
+        return html`
                   <div
                     class="absolute z-10 rounded-sm pointer-events-auto box-border border-2
                       ${rectColor} hover:shadow-xl transition-all duration-300 ease-in-out"
@@ -235,8 +259,8 @@ export class CpAnFrame extends UtBase {
                     @mouseleave="${this._hideTooltip}">
                   </div>
                 `;
-              }
-            })}
+      }
+    })}
 
             ${this._hoveredAnnotation ? html`
                 <div
@@ -264,8 +288,15 @@ export class CpAnFrame extends UtBase {
 
         <div style="display: flex; justify-content: center; gap: 1em;">
           <div class="flex items-center justify-center gap-4">
-            <button @click="${this._zoomOut}"
-              class="rounded-full bg-blue-600 text-white shadow-md px-4 py-2 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors duration-300">
+            <button 
+              @click="${this._zoomOut}"
+              @mousedown="${this._startZoomOut}"
+              @mouseup="${this._stopZoom}"
+              @mouseleave="${this._stopZoom}"
+              ?disabled="${this.zoom <= this.minZoom}"
+              class="rounded-full bg-blue-600 text-white shadow-md px-4 py-2 hover:bg-blue-800 
+                    focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors duration-300 
+                    disabled:opacity-50 disabled:cursor-not-allowed">
               <i class="fa-solid fa-minus"></i>
             </button>
 
@@ -273,8 +304,15 @@ export class CpAnFrame extends UtBase {
               ${(this.zoom * 100).toFixed(0)}%
             </span>
 
-            <button @click="${this._zoomIn}"
-              class="rounded-full bg-blue-600 text-white shadow-md px-4 py-2 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors duration-300">
+            <button 
+              @click="${this._zoomIn}"
+              @mousedown="${this._startZoomIn}"
+              @mouseup="${this._stopZoom}"
+              @mouseleave="${this._stopZoom}"
+              ?disabled="${this.zoom >= this.maxZoom}"
+              class="rounded-full bg-blue-600 text-white shadow-md px-4 py-2 hover:bg-blue-800 
+                    focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors duration-300 
+                    disabled:opacity-50 disabled:cursor-not-allowed">
               <i class="fa-solid fa-plus"></i>
             </button>
           </div>

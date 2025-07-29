@@ -274,16 +274,21 @@ export class CpAnViewer extends UtBase {
     this.requestUpdate();
   }
 
+  _onModeToggle(e) {
+    this.currentMode = e.detail?.mode || null;
+    this.requestUpdate("currentMode");
+  }
+
   render() {
 
     const multipleActive = this.activeAnnotations.length > 1;
 
     const filteredAnnotations = this.annotations
-    .map((ann, originalIndex) => ({ ann, originalIndex }))
-    .filter(({ ann }) => {
-      const text = (ann.chars || "").toLowerCase();
-      return !this.filterQuery || text.includes(this.filterQuery);
-    });
+      .map((ann, originalIndex) => ({ ann, originalIndex }))
+      .filter(({ ann }) => {
+        const text = (ann.chars || "").toLowerCase();
+        return !this.filterQuery || text.includes(this.filterQuery);
+      });
 
 
     return html`
@@ -292,13 +297,13 @@ export class CpAnViewer extends UtBase {
         : html`
         <ul class="space-y-4">
           ${filteredAnnotations.map(({ ann, originalIndex }, i) => {
-            const annId = ann.full["@id"] || `local-${originalIndex}`;
-            const activeObj = this.activeAnnotations.find(a => a.id === annId);
-            const isActive = !!activeObj;
-            const annotationColorClass = activeObj?.color || "";
-            const annotationType = this._getAnnotationType(ann);
+          const annId = ann.full["@id"] || `local-${originalIndex}`;
+          const activeObj = this.activeAnnotations.find(a => a.id === annId);
+          const isActive = !!activeObj;
+          const annotationColorClass = activeObj?.color || "";
+          const annotationType = this._getAnnotationType(ann);
 
-            return html`
+          return html`
               <li class="text-sm text-gray-700 border-b pb-2 relative transition-colors duration-300 rounded-md px-2 hover:bg-yellow-100
                 ${isActive ? annotationColorClass : ""}">
                 
@@ -311,10 +316,10 @@ export class CpAnViewer extends UtBase {
                       </span>
                       <strong>#${i + 1}</strong>
                       ${ann.isLocal
-                        ? html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-green-600">Local</span>`
-                        : annotationType === "remote"
-                          ? html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-purple-600">Remote</span>`
-                          : html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-blue-500">Source</span>`}
+              ? html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-green-600">Local</span>`
+              : annotationType === "remote"
+                ? html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-purple-600">Remote</span>`
+                : html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-blue-500">Source</span>`}
                     </div>
 
                     ${ann.chars ? html`
@@ -361,7 +366,7 @@ export class CpAnViewer extends UtBase {
                 </div>
               </li>
             `;
-          })}
+        })}
         </ul>
       `}
     `;

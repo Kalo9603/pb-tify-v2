@@ -122,11 +122,9 @@ export class CpAnWrapper extends UtBase {
         const edited = e.detail.edited;
         const canvas = this.manifestObject?.sequences?.[0]?.canvases?.[this.canvasIndex];
         const canvasId = canvas?.["@id"] || `canvas${this.canvasIndex}`;
-
         const annotationListUrl = canvas?.otherContent?.[0]?.["@id"] || "";
         const isManifestLocal = isLocalUrl(this.manifestUrl);
         const isListLocal = isLocalUrl(annotationListUrl);
-
         const manifestId = this.manifestObject?.["@id"]?.split("/").pop();
         const listId = annotationListUrl;
 
@@ -167,6 +165,12 @@ export class CpAnWrapper extends UtBase {
                 isActive: false;
             }
         }
+
+        this.activeAnnotations = [{
+            id: edited["@id"],
+            annotation: edited
+        }];
+
         this._setMode("");
     }
 
@@ -200,6 +204,7 @@ export class CpAnWrapper extends UtBase {
                 );
 
                 await refreshAnnotations(listId, this);
+                this.activeAnnotations = [];
             } else {
                 console.error("Cancellazione remota fallita");
             }
@@ -218,6 +223,7 @@ export class CpAnWrapper extends UtBase {
             }
         }
 
+        this.activeAnnotations = [];
         this._setMode("");
     }
 
@@ -257,12 +263,7 @@ export class CpAnWrapper extends UtBase {
         this._setMode(mode, annotation);
     }
 
-    handleFormClosed(e) {
-        this.dispatchEvent(new CustomEvent("form-closed", {
-            bubbles: true,
-            composed: true
-        }));
-    }
+    handleFormClosed() { this._setMode(""); }
 
     render() {
         return html`
