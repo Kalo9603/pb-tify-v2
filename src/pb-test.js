@@ -50,6 +50,7 @@ export class PbTest extends UtBase {
     this.currentCanvasIndex = 0;
     this.annotationMode = "";
     this.activeAnnotations = [];
+    this.handleFormClosed = this.handleFormClosed.bind(this);
 
     this.frameData = {
       url: "",
@@ -87,6 +88,7 @@ export class PbTest extends UtBase {
     this.addEventListener("hide-annotation", e => this._removeActiveAnnotation(e.detail.id));
     this.addEventListener("hide-all-annotations", this._hideAllAnnotations);
     this.addEventListener("mode-toggle", this._handleModeToggle);
+    this.addEventListener("form-closed", this.handleFormClosed);
   }
 
   disconnectedCallback() {
@@ -101,6 +103,7 @@ export class PbTest extends UtBase {
     this.removeEventListener("show-annotation", e => this._addActiveAnnotation(e.detail));
     this.removeEventListener("hide-annotation", e => this._removeActiveAnnotation(e.detail.id));
     this.removeEventListener("mode-toggle", this._handleModeToggle);
+    this.removeEventListener("form-closed", this.handleFormClosed);
   }
 
   async handleURLSubmit(e) {
@@ -126,7 +129,7 @@ export class PbTest extends UtBase {
   }
 
   _handleModeToggle(e) {
-    
+
     const newMode = e.detail.mode || "";
     const annotation = e.detail.annotation || null;
 
@@ -203,12 +206,26 @@ export class PbTest extends UtBase {
     };
   }
 
+  handleFormClosed(e) {
+    this.draftRect = null;
+
+    const frame = this.renderRoot.querySelector("cp-anframe");
+    if (frame) {
+      frame.draftRect = null;
+    }
+
+    this.requestUpdate();
+  }
+
   _onDraftChangeFrame(e) {
     const { url, x, y, w, h, color } = e.detail;
     const frame = this.renderRoot.querySelector("cp-anframe");
     if (frame) {
-      frame.draftRect = { x, y, w, h, color };
+      const draftRect = { x, y, w, h, color };
+      frame.draftRect = draftRect;
       frame.url = url;
+
+      this.frameData = { ...this.frameData, draftRect };
     }
   }
 
@@ -516,6 +533,7 @@ export class PbTest extends UtBase {
                 .url=${this.frameData.url}
                 .annotations=${this.activeAnnotations}
                 .mode=${this.frameData.mode}
+                .draftRect=${this.frameData.draftRect}
               />
             </div>
           </div>

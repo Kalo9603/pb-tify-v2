@@ -42,6 +42,7 @@ export class CpAnWrapper extends UtBase {
         this.addEventListener("cancel-edit", () => this._setMode(""));
         this.addEventListener("refresh-annotations", () => this.requestUpdate());
         this.addEventListener("delete-annotation-submit", this._onDeleteSubmit.bind(this));
+        this.addEventListener("form-closed", this.handleFormClosed);
     }
 
     _setMode(mode, annotation = null) {
@@ -254,6 +255,13 @@ export class CpAnWrapper extends UtBase {
         e.stopPropagation();
         const { mode, annotation } = e.detail || {};
         this._setMode(mode, annotation);
+    }
+
+    handleFormClosed(e) {
+        this.dispatchEvent(new CustomEvent("form-closed", {
+            bubbles: true,
+            composed: true
+        }));
     }
 
     render() {
