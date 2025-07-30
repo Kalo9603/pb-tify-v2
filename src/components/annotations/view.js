@@ -157,6 +157,7 @@ export class CpAnViewer extends UtBase {
   }
 
   async fetchAnnotations() {
+    
     if (!this.manifestObject) {
       console.warn("No manifest object available.");
       return;
@@ -166,7 +167,6 @@ export class CpAnViewer extends UtBase {
     if (!canvas) return;
 
     const canvasId = canvas["@id"] || `canvas${this.canvasIndex}`;
-
     const annList = canvas.otherContent?.find(c => c["@type"] === "sc:AnnotationList");
     const annotationListId = annList?.["@id"] || null;
 
@@ -184,15 +184,21 @@ export class CpAnViewer extends UtBase {
             isLocal: false
           }));
           this.annotationListJson = data;
+        } else {
+          this.annotationListJson = { resources: [] };
         }
       } catch (err) {
         console.error("❌ Errore fetch annotationList:", err);
+        this.annotationListJson = { resources: [] };
       }
     } else if (annList?.resources?.length) {
       baseAnnotations = annList.resources.map(a => ({
         ...this._parseAnnotation(a),
         isLocal: false
       }));
+      this.annotationListJson = { resources: annList.resources };
+    } else {
+      this.annotationListJson = { resources: [] };
     }
 
     const localAnns = (this.localAnnotations || [])
@@ -216,12 +222,16 @@ export class CpAnViewer extends UtBase {
 
     this.annotations = unique;
 
-    this.annotationListJson = {
+    this.annotationListJson = this.annotationListJson || {
       "@context": "http://iiif.io/api/presentation/2/context.json",
       "@id": generateId("annotationList"),
       "@type": "sc:AnnotationList",
-      resources: unique.map(a => a.full),
+      resources: []
     };
+
+    if (unique.length) {
+      this.annotationListJson.resources = unique.map(a => a.full);
+    }
 
     this.dispatchEvent(new CustomEvent("annotations-count", {
       detail: { count: this.annotations.length },

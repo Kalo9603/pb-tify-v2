@@ -12,7 +12,6 @@ export class CpInputBar extends UtBase {
 
   constructor() {
     super();
-    this.targetPath = "/view";
     this.url = "";
   }
 
