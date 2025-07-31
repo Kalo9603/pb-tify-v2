@@ -3,6 +3,7 @@ import { UtBase } from "../../utilities/base.js";
 import { detectIIIFVersion, convertV3toV2 } from "../../utilities/lib/manifest.js";
 
 export class CpTifyWrapper extends UtBase {
+  
   static get properties() {
     return {
       manifestUrl: { type: String },

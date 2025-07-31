@@ -28,13 +28,18 @@ export class UtBase extends pbMixin(LitElement) {
     }
 
     connectedCallback() {
+
+        // Importazione dinamica degli script necessari al funzionamento
+
         super.connectedCallback();
+
         if (!document.querySelector("#tailwind-cdn")) {
             const link = document.createElement("script");
             link.src = "https://cdn.tailwindcss.com";
             link.id = "tailwind-cdn";
             document.head.appendChild(link);
         }
+
         if (!document.querySelector('link[data-fontawesome]')) {
             const fa = document.createElement('link');
             fa.rel = 'stylesheet';
@@ -45,6 +50,32 @@ export class UtBase extends pbMixin(LitElement) {
             fa.setAttribute('data-fontawesome', 'true');
             document.head.appendChild(fa);
         }
+
+        if (!document.querySelector("#pb-tify-cdn")) {
+            const script = document.createElement("script");
+            script.type = "module";
+            script.src = "https://cdn.jsdelivr.net/npm/@teipublisher/pb-components/dist/pb-tify.js";
+            script.setAttribute("data-auto", "false");
+            script.id = "pb-tify-cdn";
+            document.head.appendChild(script);
+        }
+
+        if (!document.querySelector("#pb-components-cdn")) {
+            const script = document.createElement("script");
+            script.type = "module";
+            script.src = "https://cdn.jsdelivr.net/npm/@teipublisher/pb-components/dist/pb-components-bundle.js";
+            script.crossOrigin = "anonymous";
+            script.id = "pb-components-cdn";
+            document.head.appendChild(script);
+        }
+
+        if (!document.querySelector("#webcomponents-loader")) {
+            const script = document.createElement("script");
+            script.src = "https://cdn.jsdelivr.net/npm/@webcomponents/webcomponentsjs@2.6.0/webcomponents-loader.min.js";
+            script.id = "webcomponents-loader";
+            document.head.appendChild(script);
+        }
+
     }
 
     drawQualityStyle(ctx, quality, x, y, w, h) {
