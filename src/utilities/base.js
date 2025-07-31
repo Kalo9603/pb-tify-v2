@@ -27,11 +27,21 @@ export class UtBase extends pbMixin(LitElement) {
         `;
     }
 
-     drawQualityStyle(ctx, quality, x, y, w, h) {
-        
+    connectedCallback() {
+        super.connectedCallback();
+        if (!document.querySelector("#tailwind-cdn")) {
+            const link = document.createElement("script");
+            link.src = "https://cdn.tailwindcss.com";
+            link.id = "tailwind-cdn";
+            document.head.appendChild(link);
+        }
+    }
+
+    drawQualityStyle(ctx, quality, x, y, w, h) {
+
         ctx.save();
 
-        switch(quality) {
+        switch (quality) {
             case "gray":
                 ctx.fillStyle = "rgba(128, 128, 128, 0.3)";
                 ctx.strokeStyle = "rgba(90, 90, 90, 1)";
