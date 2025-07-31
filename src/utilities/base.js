@@ -35,6 +35,16 @@ export class UtBase extends pbMixin(LitElement) {
             link.id = "tailwind-cdn";
             document.head.appendChild(link);
         }
+        if (!document.querySelector('link[data-fontawesome]')) {
+            const fa = document.createElement('link');
+            fa.rel = 'stylesheet';
+            fa.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css';
+            fa.integrity = 'sha512-x...';
+            fa.crossOrigin = 'anonymous';
+            fa.referrerPolicy = 'no-referrer';
+            fa.setAttribute('data-fontawesome', 'true');
+            document.head.appendChild(fa);
+        }
     }
 
     drawQualityStyle(ctx, quality, x, y, w, h) {
