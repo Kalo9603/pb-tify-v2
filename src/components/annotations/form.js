@@ -1,6 +1,7 @@
 import { html } from "https://esm.sh/lit-element";
 import { UtBase } from "../../utilities/base.js";
 import { generateId } from "../../utilities/lib/utils.js";
+import { config } from "../../utilities/config.js";
 
 export class CpAnForm extends UtBase {
   static get properties() {
@@ -123,13 +124,14 @@ export class CpAnForm extends UtBase {
   }
 
   setAnnotationData(annotation) {
+
     const selector = annotation.on.selector?.value?.replace("xywh=", "").split(",").map(Number);
 
     this.x = selector?.[0] || 0;
     this.y = selector?.[1] || 0;
     this.w = selector?.[2] || 0;
     this.h = selector?.[3] || 0;
-    this.motivation = annotation.motivation?.[0]?.replace("oa:", "") || "commenting";
+    this.motivation = annotation.motivation?.[0]?.replace(/^(oa:|sc:)/, '') || "commenting";
     this.format = annotation.resource?.[0]?.format || "text/html";
     this.chars = annotation.resource?.[0]?.chars || "";
   }
@@ -272,11 +274,13 @@ export class CpAnForm extends UtBase {
                 .value=${this.motivation}
                 ?disabled=${this.readonly}
                 @change=${e => this.motivation = e.target.value}
-                class="mt-1 rounded border border-gray-300 px-2 py-1 text-sm font-normal w-32 text-center focus:ring-2 focus:ring-blue-600 focus:outline-none"
+                class="mt-1 rounded border border-gray-300 px-2 py-1 text-sm font-normal w-36 text-center focus:ring-2 focus:ring-blue-600 focus:outline-none"
               >
-                ${["commenting", "describing", "tagging", "linking"].map(m => html`
-                  <option value="${m}">${m}</option>
-                `)}
+              ${config.motivations.map(m => html`
+                <option value="${m}">
+                  ${config.motivationIcons[m] || config.motivationIcons.default} ${m}
+                </option>
+              `)}
               </select>
             </label>
 
@@ -313,11 +317,13 @@ export class CpAnForm extends UtBase {
 
   addAnnotation() {
 
+    let prefix = this.motivation == "painting" ? "sc:" : "oa:"; 
+
     const annotation = {
       "@context": "http://iiif.io/api/presentation/2/context.json",
       "@id": generateId("annotation"),
       "@type": "oa:Annotation",
-      "motivation": [`oa:${this.motivation}`],
+      "motivation": [`${prefix}${this.motivation}`],
       "on": {
         "@type": "oa:SpecificResource",
         "full": this.imageUrl,
@@ -352,9 +358,11 @@ export class CpAnForm extends UtBase {
   editAnnotation = () => {
     if (!this.annotationToEdit) return;
 
+    let prefix = this.motivation == "painting" ? "sc:" : "oa:"; 
+
     const edited = {
       ...this.annotationToEdit,
-      motivation: [`oa:${this.motivation}`],
+      motivation: [`${prefix}${this.motivation}`],
       on: {
         ...this.annotationToEdit.on,
         selector: {

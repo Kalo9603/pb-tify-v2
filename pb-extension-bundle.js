@@ -2,7 +2,7 @@
  * Add your components here to include them in the generated bundles
  */
 
-import './src/pb-test.js';
+import './src/pb-tify-v2.js';
 
 import "./src/components/load/inputBar.js";
 import "./src/components/load/manifestImport.js";

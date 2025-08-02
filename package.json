@@ -2,7 +2,7 @@
   "name": "@teipublisher/pb-tify-v2",
   "version": "1.0.0",
   "description": "An example of a possible pb-tify extension.",
-  "main": "pb-test.js",
+  "main": "pb-tify-v2.js",
   "scripts": {
     "start": "npm run build && web-dev-server --config web-dev-server.config.mjs",
     "docs": "wca src -f json --outFile custom-elements.json",

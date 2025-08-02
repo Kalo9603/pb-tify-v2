@@ -1,7 +1,7 @@
 import { html } from "https://esm.sh/lit-element";
 import { unsafeHTML } from "https://esm.sh/lit-html/directives/unsafe-html.js";
 import { UtBase } from "../../utilities/base.js";
-import { getMotivationIcon, generateId, isLocalUrl, parseMarkdownToHtml, sanitizeHTML, getRandomRectColor } from "../../utilities/lib/utils.js";
+import { getMotivationIcon, generateId, isLocalUrl, parseMarkdownToHtml, sanitizeHTML } from "../../utilities/lib/utils.js";
 import "./buttons/duplicate.js";
 import "./buttons/edit.js";
 import "./buttons/delete.js";

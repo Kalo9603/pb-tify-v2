@@ -543,4 +543,4 @@ export class PbTest extends UtBase {
   }
 }
 
-customElements.define("pb-test", PbTest);
+customElements.define("pb-tify-v2", PbTest);
