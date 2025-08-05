@@ -1,10 +1,7 @@
 {
-    "pb-clipboard": {
-        "demo/pb-clipboard.html": "Clipboard Demo"
-    },
 
     "pb-tify-v2": {
-        "demo/pb-tify-v2.html": "Componente di test"
+        "demo/pb-tify-v2.html": "Upgraded version of pb-tify with new features and improvements."
     }
 
 }
