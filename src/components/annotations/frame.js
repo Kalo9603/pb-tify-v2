@@ -30,8 +30,8 @@ export class CpAnFrame extends UtBase {
     this.url = "";
     this.annotations = [];
     this.zoom = 1;
-    this.maxZoom = 5;
-    this.minZoom = 0.5;
+    this.maxZoom = 25;
+    this.minZoom = 0.25;
     this.zoomStep = 0.05;
     this._zoomIntervalId = null;
     this.naturalWidth = 0;
@@ -365,7 +365,7 @@ export class CpAnFrame extends UtBase {
         <div class="image-scroll-container overflow-auto border border-gray-300 rounded-lg shadow mb-4"
              style="max-width: 100%; height: 405px; background: #eee; position: relative;">
           <div style="position: relative; width: ${zoomedWidth}px; height: ${zoomedHeight}px; transition: width 0.3s ease, height 0.3s ease; cursor: ${this.showCoordinates ? 'crosshair' : 'default'};">
-            <img src="${this.url}" style="width: 100%; height: 100%; display: block; pointer-events: none;" />
+            <img src="${this.url}" draggable="false" style="width: 100%; height: 100%; display: block; pointer-events: none; user-select: none" />
 
             ${this.scaledRects.map(rect => {
               if (rect.isDraft) {
@@ -517,9 +517,30 @@ export class CpAnFrame extends UtBase {
               <i class="fa-solid fa-minus"></i>
             </button>
 
-            <span class="font-medium text-gray-700 select-none">
-              ${(this.zoom * 100).toFixed(0)}%
-            </span>
+            <div class="inline-flex items-center border border-gray-300 rounded px-2 py-1 bg-white">
+              <input
+                type="number"
+                min="${this.minZoom * 100}"
+                max="${this.maxZoom * 100}"
+                .value="${(this.zoom * 100).toFixed(0)}"
+                @change="${(e) => {
+                  const val = parseFloat(e.target.value);
+                  if (!isNaN(val)) {
+                    const z = val / 100;
+                    if (z >= this.minZoom && z <= this.maxZoom) {
+                      this._applyZoom(z);
+                    } else {
+                      this._applyZoom(1);
+                    }
+                  } else {
+                    this._applyZoom(1);
+                  }
+                }}"
+                class="w-16 text-right font-medium text-gray-700 focus:outline-none"
+                style="border: none; outline: none;"
+              />
+              <span class="ml-1 text-gray-600 font-semibold">%</span>
+            </div>
 
             <button 
               @click="${this._zoomIn}"
