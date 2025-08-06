@@ -1,9 +1,5 @@
-import {
-	html
-} from "https://esm.sh/lit-element";
-import {
-	UtBase
-} from "../../../utilities/base.js";
+import { html } from "https://esm.sh/lit-element";
+import { UtBase } from "../../../utilities/base.js";
 import "./form/preview.js";
 import "./form/region.js";
 import "./form/rotation.js";
