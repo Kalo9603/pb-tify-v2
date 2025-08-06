@@ -23,8 +23,10 @@ import "./components/viewer/metadata.js";
 import "./components/viewer/pageMetadata.js";
 import "./components/viewer/title.js";
 
-export class PbTest extends UtBase {
+export class PbTifyV2 extends UtBase {
+
   static get properties() {
+
     return {
       manifestUrl: { type: String },
       manifestObject: { type: Object },
@@ -178,6 +180,17 @@ export class PbTest extends UtBase {
     this.frameData = { ...this.frameData, mode: newMode };
   }
 
+  handleFormClosed(e) {
+    this.draftRect = null;
+
+    const frame = this.renderRoot.querySelector("cp-anframe");
+    if (frame) {
+      frame.draftRect = null;
+    }
+
+    this.requestUpdate();
+  }
+
   showFrame(e) {
     const detail = e.detail || {};
     this.frameData = {
@@ -206,17 +219,6 @@ export class PbTest extends UtBase {
       chars: "",
       mode: ""
     };
-  }
-
-  handleFormClosed(e) {
-    this.draftRect = null;
-
-    const frame = this.renderRoot.querySelector("cp-anframe");
-    if (frame) {
-      frame.draftRect = null;
-    }
-
-    this.requestUpdate();
   }
 
   _onDraftChangeFrame(e) {
@@ -558,4 +560,4 @@ export class PbTest extends UtBase {
   }
 }
 
-customElements.define("pb-tify-v2", PbTest);
+customElements.define("pb-tify-v2", PbTifyV2);
