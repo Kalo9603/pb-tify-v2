@@ -33,6 +33,38 @@ export const config = {
     annotationDelete: getDeleteEndpoint
   },
 
+  canvas: {
+    canvasIndexDefault: 0,
+  },
+
+  snapshot: {
+    region: "full",
+    rotation: 0,
+    mirror: false,
+    quality: "default",
+    format: "jpg",
+    size: "full",
+    upscale: false
+  },
+
+  annotations: {
+    defaultAnnotationXYWH: [0, 0, 0, 0]
+  },
+
+  frame: {
+
+    naturalDimensions: [0, 0],
+    baseDimensions: [0, 0],
+
+    zoom: {
+      default: 1,
+      min: 0.25,
+      max: 25,
+      step: 0.05
+    },
+
+  },
+
   get motivations() {
     const base = [
                   "painting", "describing", "tagging", "linking", "assessing", 

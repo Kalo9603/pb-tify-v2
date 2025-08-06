@@ -1,6 +1,7 @@
 import { html } from "https://esm.sh/lit-element";
 import { UtBase } from "../../utilities/base.js";
 import { generateId } from "../../utilities/lib/utils.js";
+import { config } from "../../utilities/config.js";
 import "./view.js";
 import "./buttons/add.js";
 import "./buttons/filter.js";
@@ -26,7 +27,7 @@ export class CpAnnotations extends UtBase {
   constructor() {
     super();
     this.manifestObject = null;
-    this.canvasIndex = 0;
+    this.canvasIndex = config.canvas.canvasIndexDefault;
     this.annotationCount = 0;
     this.currentMode = "";
     this.localAnnotations = [];

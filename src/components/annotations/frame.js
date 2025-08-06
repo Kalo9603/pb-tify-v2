@@ -2,6 +2,7 @@ import { html } from "https://esm.sh/lit-element";
 import { UtBase } from "../../utilities/base.js";
 import { unsafeHTML } from "https://esm.sh/lit-html/directives/unsafe-html.js";
 import { getMotivationIcon, sanitizeHTML, getColorVariant } from "../../utilities/lib/utils.js";
+import { config } from "../../utilities/config.js";
 import "./buttons/coordinates.js";
 
 export class CpAnFrame extends UtBase {
@@ -29,15 +30,15 @@ export class CpAnFrame extends UtBase {
     super();
     this.url = "";
     this.annotations = [];
-    this.zoom = 1;
-    this.maxZoom = 25;
-    this.minZoom = 0.25;
-    this.zoomStep = 0.05;
+    this.zoom = config.frame.zoom.default;
+    this.maxZoom = config.frame.zoom.max;
+    this.minZoom = config.frame.zoom.min;
+    this.zoomStep = config.frame.zoom.step;
     this._zoomIntervalId = null;
-    this.naturalWidth = 0;
-    this.naturalHeight = 0;
-    this.baseWidth = 0;
-    this.baseHeight = 0;
+    this.naturalWidth = config.frame.naturalDimensions[0];
+    this.naturalHeight = config.frame.naturalDimensions[1];
+    this.baseWidth = config.frame.baseDimensions[0];
+    this.baseHeight = config.frame.baseDimensions[1];
     this.mode = "";
     this.draftRect = null;
     this.addRect = null;
@@ -54,7 +55,6 @@ export class CpAnFrame extends UtBase {
 
   firstUpdated() {
     const container = this.renderRoot.querySelector(".image-scroll-container");
-    
     this.addEventListener("coordinates-toggle", this._handleCoordinatesToggle.bind(this));
   }
 

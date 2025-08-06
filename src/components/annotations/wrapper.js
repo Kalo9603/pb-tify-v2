@@ -23,7 +23,7 @@ export class CpAnWrapper extends UtBase {
     constructor() {
         super();
         this.manifestObject = null;
-        this.canvasIndex = 0;
+        this.canvasIndex = config.canvas.canvasIndexDefault;
         this.annotationMode = "";
         this.annotationToEdit = null;
         this.localAnnotations = [];

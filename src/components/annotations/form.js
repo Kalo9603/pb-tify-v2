@@ -26,12 +26,12 @@ export class CpAnForm extends UtBase {
   constructor() {
     super();
     this.manifestObject = null;
-    this.canvasIndex = 0;
+    this.canvasIndex = config.canvas.canvasIndexDefault;
     this.mode = "add";
-    this.x = 0;
-    this.y = 0;
-    this.w = 0;
-    this.h = 0;
+    this.x = config.annotations.defaultAnnotationXYWH[0];
+    this.y = config.annotations.defaultAnnotationXYWH[1];
+    this.w = config.annotations.defaultAnnotationXYWH[2];
+    this.h = config.annotations.defaultAnnotationXYWH[3];
     this.color = "";
     this.motivation = "commenting";
     this.chars = "";

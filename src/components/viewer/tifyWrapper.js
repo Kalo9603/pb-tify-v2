@@ -1,6 +1,7 @@
 import { html } from "https://esm.sh/lit-element";
 import { UtBase } from "../../utilities/base.js";
 import { detectIIIFVersion, convertV3toV2 } from "../../utilities/lib/manifest.js";
+import { config } from "../../utilities/config.js";
 
 export class CpTifyWrapper extends UtBase {
   
@@ -17,7 +18,7 @@ export class CpTifyWrapper extends UtBase {
     super();
     this.manifestUrl = "";
     this.manifestObject = null;
-    this.canvasIndex = 0;
+    this.canvasIndex = config.canvas.canvasIndexDefault;
     this._viewer = null;
   }
 

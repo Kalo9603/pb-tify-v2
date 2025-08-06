@@ -2,6 +2,7 @@ import { html } from "https://esm.sh/lit-element";
 import { UtBase } from "../../utilities/base.js";
 import { sanitizeHTML } from "../../utilities/lib/utils.js";
 import { unsafeHTML } from "https://esm.sh/lit-html/directives/unsafe-html.js";
+import { config } from "../../utilities/config.js";
 
 export class CpPageMetadata extends UtBase {
   static get properties() {
@@ -15,7 +16,7 @@ export class CpPageMetadata extends UtBase {
   constructor() {
     super();
     this.manifestObject = null;
-    this.canvasIndex = 0;
+    this.canvasIndex = config.canvas.canvasIndexDefault;
     this.selectedLanguage = "en";
   }
 

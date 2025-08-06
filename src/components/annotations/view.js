@@ -2,6 +2,7 @@ import { html } from "https://esm.sh/lit-element";
 import { unsafeHTML } from "https://esm.sh/lit-html/directives/unsafe-html.js";
 import { UtBase } from "../../utilities/base.js";
 import { getMotivationIcon, generateId, isLocalUrl, parseMarkdownToHtml, sanitizeHTML } from "../../utilities/lib/utils.js";
+import { config } from "../../utilities/config.js";
 import "./buttons/duplicate.js";
 import "./buttons/edit.js";
 import "./buttons/delete.js";
@@ -26,7 +27,7 @@ export class CpAnViewer extends UtBase {
   constructor() {
     super();
     this.manifestObject = null;
-    this.canvasIndex = 0;
+    this.canvasIndex = config.canvas.canvasIndexDefault;
     this.currentMode = null;
     this.annotations = [];
     this.localAnnotations = [];

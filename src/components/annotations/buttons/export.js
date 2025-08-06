@@ -1,6 +1,7 @@
 import { html } from "https://esm.sh/lit-element";
 import { UtBase } from "../../../utilities/base.js";
 import { generateId } from "../../../utilities/lib/utils.js";
+import { config } from "../../../utilities/config.js";
 
 export class CpAnExport extends UtBase {
 
@@ -15,7 +16,7 @@ export class CpAnExport extends UtBase {
   constructor() {
     super();
     this.manifestObject = null;
-    this.canvasIndex = 0;
+    this.canvasIndex = config.canvas.canvasIndexDefault;
     this.localAnnotations = [];
   }
 
