@@ -74,6 +74,12 @@ export const config = {
     return ["commenting", ...base.sort()];
   },
 
+  manifestVersionColor: {
+    "1": "bg-green-600",
+    "2": "bg-blue-600",
+    "3": "bg-red-600"
+  },
+
   motivationIcons: {
     painting: "🎨",
     commenting: "💬",

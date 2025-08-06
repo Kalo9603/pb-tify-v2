@@ -28,6 +28,7 @@ export class PbTest extends UtBase {
     return {
       manifestUrl: { type: String },
       manifestObject: { type: Object },
+      manifestVersion: { type: String },
       isLocalManifest: { type: Boolean },
       selectedLanguage: { type: String },
       availableLanguages: { type: Array },
@@ -44,6 +45,7 @@ export class PbTest extends UtBase {
     super();
     this.manifestUrl = "";
     this.manifestObject = null;
+    this.manifestVersion = "";
     this.isLocalManifest = false;
     this.selectedLanguage = "";
     this.availableLanguages = [];
@@ -234,7 +236,9 @@ export class PbTest extends UtBase {
   }
 
   loadManifest(manifest, url = "", isLocal = false) {
+    
     const version = detectIIIFVersion(manifest);
+    this.manifestVersion = version;
     let processed;
     if (version === "3") processed = convertV3toV2(manifest);
     else if (version === "2") processed = manifest;
@@ -476,6 +480,17 @@ export class PbTest extends UtBase {
                   <i class="fas fa-folder-open text-3xl"></i>
                   <div class="absolute bottom-full mb-2 px-4 py-2 text-sm text-white bg-gray-800 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-all w-fit min-w-[16rem] text-center break-words">
                     This manifest has been imported locally.
+                  </div>
+                </div>
+              ` : null}
+              ${this.manifestVersion ? html`
+                <div class="relative group flex items-center justify-center w-12 h-12">
+                  <div class="rounded-full w-10 h-10 flex items-center justify-center 
+                              ${config.manifestVersionColor[this.manifestVersion] || "bg-gray-600"}">
+                    <i class="fas fa-${this.manifestVersion} text-white text-xl"></i>
+                  </div>
+                  <div class="absolute bottom-full mb-2 px-4 py-2 text-sm text-white bg-gray-800 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-all w-fit min-w-[16rem] text-center break-words">
+                    This Presentation API is Version ${this.manifestVersion}.
                   </div>
                 </div>
               ` : null}
