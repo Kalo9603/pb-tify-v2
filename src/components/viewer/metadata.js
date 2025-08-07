@@ -31,17 +31,66 @@ export class CpMetadata extends UtBase {
   }
 
   extractValue(value) {
-
     if (!value) return "";
 
     if (Array.isArray(value)) {
-      const parts = value
-        .map(v => this.filterByLanguage(v))
+      const filteredItems = this.filterArrayByLanguage(value);
+      
+      const parts = filteredItems
+        .map(item => this.getValueFromItem(item))
         .filter(str => str && str.length > 0);
+      
       return parts.join(", ");
     } else {
       return this.filterByLanguage(value);
     }
+  }
+
+  filterArrayByLanguage(array) {
+    if (!Array.isArray(array)) return [array];
+    
+    const targetLang = this.selectedLanguage?.toLowerCase();
+    
+    if (!targetLang) {
+      return array;
+    }
+    
+    const exactMatches = array.filter(item => {
+      const itemLang = this.getLanguageFromItem(item)?.toLowerCase();
+      return itemLang === targetLang;
+    });
+    
+    if (exactMatches.length > 0) {
+      return exactMatches;
+    }
+    
+    const fallbackMatches = array.filter(item => {
+      const itemLang = this.getLanguageFromItem(item)?.toLowerCase();
+      return ["none", "und", "zxx", ""].includes(itemLang) || !itemLang;
+    });
+    
+    if (fallbackMatches.length > 0) {
+      return fallbackMatches;
+    }
+    return array.slice(0, 1);
+  }
+
+  getLanguageFromItem(item) {
+    if (!item) return null;
+    if (typeof item === "string") return null;
+    if (typeof item === "object" && "@language" in item) {
+      return item["@language"];
+    }
+    return null;
+  }
+
+  getValueFromItem(item) {
+    if (!item) return "";
+    if (typeof item === "string") return item;
+    if (typeof item === "object" && "@value" in item) {
+      return item["@value"];
+    }
+    return String(item);
   }
 
   loadMetadata() {
@@ -92,20 +141,10 @@ export class CpMetadata extends UtBase {
     if (!input) return "";
 
     if (typeof input === "string") return input;
+    
     if (Array.isArray(input)) {
-      const matchLang = input.find(
-        (el) =>
-          el?.["@language"]?.toLowerCase() ===
-          this.selectedLanguage?.toLowerCase()
-      );
-      if (matchLang) return matchLang["@value"];
-
-      const fallback = input.find((el) =>
-        ["none", "und", "zxx"].includes(el?.["@language"]?.toLowerCase())
-      );
-      if (fallback) return fallback["@value"];
-
-      return input[0]?.["@value"] ?? "";
+      const filteredItems = this.filterArrayByLanguage(input);
+      return this.getValueFromItem(filteredItems[0]);
     }
 
     if (typeof input === "object" && "@value" in input) return input["@value"];
