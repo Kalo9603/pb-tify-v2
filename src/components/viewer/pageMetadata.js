@@ -40,10 +40,16 @@ export class CpPageMetadata extends UtBase {
 
     return html`
       <div class="overflow-auto max-h-[80vh] border border-gray-200 rounded-xl p-4 mt-4 shadow-sm bg-white">
-        <div class="flex justify-between items-center mb-4">
+        <div class="flex items-baseline justify-between gap-6 mb-4">
           <h2 class="text-lg font-semibold text-gray-800">
             🖼️ Page ${idx + 1} ― ${this._getLabel(canvas)}
           </h2>
+
+          ${this._getSequenceLabel()
+            ? html`<h2 class="text-lg text-gray-800 whitespace-nowrap">
+                📚 ${this._getSequenceLabel()}
+              </h2>`
+            : null}
         </div>
         <div class="overflow-x-auto">
           <table class="w-full text-sm text-left text-gray-700 border-collapse">
@@ -56,14 +62,24 @@ export class CpPageMetadata extends UtBase {
     `;
   }
 
-  _getLabel(canvas) {
-    const raw = canvas.label;
-    if (typeof raw === "string") return raw;
-    if (Array.isArray(raw)) {
-      const found = raw.find((l) => l["@language"] === this.selectedLanguage);
-      return found?.["@value"] || raw[0]?.["@value"] || `Page`;
+  _getLocalLabel(rawLabel, fallback = "") {
+    if (typeof rawLabel === "string") return rawLabel;
+
+    if (Array.isArray(rawLabel)) {
+      const found = rawLabel.find((l) => l["@language"] === this.selectedLanguage);
+      return found?.["@value"] || rawLabel[0]?.["@value"] || fallback;
     }
-    return raw?.["@value"] || `Page`;
+
+    return rawLabel?.["@value"] || fallback;
+  }
+
+  _getLabel(canvas) {
+    return this._getLocalLabel(canvas?.label, "Page");
+  }
+
+  _getSequenceLabel() {
+    const sequence = this.manifestObject?.sequences?.[0];
+    return this._getLocalLabel(sequence?.label, "");
   }
 
   _renderObjectAsRows(obj, level = 0) {
@@ -81,20 +97,20 @@ export class CpPageMetadata extends UtBase {
             </td>
             <td class="py-2 text-gray-600">
               ${val.map((v) =>
-                typeof v === "object"
-                  ? html`
+          typeof v === "object"
+            ? html`
                       <table class="w-full text-sm text-left text-gray-700 border-collapse mb-2">
                         <tbody>
                           ${this._renderObjectAsRows(v, level + 1)}
                         </tbody>
                       </table>
                     `
-                  : html`
+            : html`
                       <div class="pl-2 before:content-['•'] before:mr-2">
                         ${String(v)}
                       </div>
                     `
-              )}
+        )}
             </td>
           </tr>
         `;

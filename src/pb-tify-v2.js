@@ -488,7 +488,7 @@ export class PbTifyV2 extends UtBase {
               ${this.manifestVersion ? html`
                 <div class="relative group flex items-center justify-center w-12 h-12">
                   <div class="rounded-full w-10 h-10 flex items-center justify-center 
-                              ${config.manifestVersionColor[this.manifestVersion] || "bg-gray-600"}">
+                              ${config.manifestVersionColor[this.manifestVersion] || "bg-blue-600"}">
                     <i class="fas fa-${this.manifestVersion} text-white text-xl"></i>
                   </div>
                   <div class="absolute bottom-full mb-2 px-4 py-2 text-sm text-white bg-gray-800 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-all w-fit min-w-[16rem] text-center break-words">
@@ -544,6 +544,7 @@ export class PbTifyV2 extends UtBase {
               <cp-pgmdata
                 .manifestObject=${this.manifestObject}
                 .canvasIndex=${this.currentCanvasIndex}
+                .selectedLanguage=${this.selectedLanguage}
               ></cp-pgmdata>
 
               <cp-anframe
