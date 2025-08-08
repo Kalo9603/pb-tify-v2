@@ -500,7 +500,7 @@ export class PbTifyV2 extends UtBase {
               <cp-url-copy .url=${this.manifestUrl}></cp-url-copy>
               <cp-snap .manifestObject=${this.manifestObject} .canvasIndex=${this.currentCanvasIndex}></cp-snap>
             </div>
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-4 justify-end">
               ${showLangSelector ? html`
                 <cp-lselector
                   .availableLanguages=${this.availableLanguages}
