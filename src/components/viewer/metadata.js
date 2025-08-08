@@ -76,6 +76,7 @@ export class CpMetadata extends UtBase {
   }
 
   getLanguageFromItem(item) {
+
     if (!item) return null;
     if (typeof item === "string") return null;
     if (typeof item === "object" && "@language" in item) {
@@ -85,6 +86,7 @@ export class CpMetadata extends UtBase {
   }
 
   getValueFromItem(item) {
+
     if (!item) return "";
     if (typeof item === "string") return item;
     if (typeof item === "object" && "@value" in item) {
@@ -94,6 +96,7 @@ export class CpMetadata extends UtBase {
   }
 
   loadMetadata() {
+
     const m = this.manifestObject;
     if (!m) {
       this.entries = [];
@@ -104,7 +107,9 @@ export class CpMetadata extends UtBase {
     const entryMap = new Map();
 
     if (Array.isArray(m.metadata)) {
+
       m.metadata.forEach((entry) => {
+        
         const label = this.extractValue(entry.label);
         const value = this.extractValue(entry.value);
 
@@ -138,6 +143,7 @@ export class CpMetadata extends UtBase {
   }
 
   filterByLanguage(input) {
+
     if (!input) return "";
 
     if (typeof input === "string") return input;

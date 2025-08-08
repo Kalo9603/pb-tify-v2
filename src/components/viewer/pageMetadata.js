@@ -5,6 +5,7 @@ import { unsafeHTML } from "https://esm.sh/lit-html/directives/unsafe-html.js";
 import { config } from "../../utilities/config.js";
 
 export class CpPageMetadata extends UtBase {
+  
   static get properties() {
     return {
       manifestObject: { type: Object },
