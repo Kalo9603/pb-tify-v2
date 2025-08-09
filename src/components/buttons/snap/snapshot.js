@@ -1,5 +1,6 @@
 import { html } from "https://esm.sh/lit-element";
 import { UtBase } from "../../../utilities/base.js";
+import { parseImageAPI } from "../../../utilities/lib/parse.js";
 import "./snapForm.js";
 
 import {
@@ -15,6 +16,7 @@ export class CpSnap extends UtBase {
 
   static get properties() {
     return {
+      imageData: { type: Object },
       manifestObject: { type: Object },
       canvasIndex: { type: Number },
       showSnapshot: { type: Boolean },
@@ -196,7 +198,21 @@ export class CpSnap extends UtBase {
     this.drawHighlightOnViewer();
   }
 
-  updated(changedProps) {
+
+  async updated(changedProps) {
+
+  if (changedProps.has("manifestObject")) {
+    if (this.manifestObject) {
+      try {
+        this.imageData = await parseImageAPI(this.manifestObject);
+      } catch (e) {
+        console.error("Error fetching imageData:", e);
+        this.imageData = null;
+      }
+      this.requestUpdate();
+    }
+  }
+
     if (
       changedProps.has("regionSelection") ||
       changedProps.has("coordX1") ||
@@ -212,6 +228,7 @@ export class CpSnap extends UtBase {
     const resource = this.currentResource;
     const isActive = this.showSnapshot;
     const iconToShow = isActive && this.isHovered ? "close" : "camera";
+    console.log(this.imageData);
 
     const color = isActive && this.isHovered
       ? "bg-red-600"
@@ -261,6 +278,7 @@ export class CpSnap extends UtBase {
                   class="absolute z-40 top-full mt-4 left-0 bg-white border border-gray-300 rounded-lg shadow-xl p-4 max-w-4xl w-fit animate-fadeIn break-words flex flex-col gap-2"
                 >
                 <cp-snapform
+                    .imageData="${this.imageData}"
                     .region="${this.regionSelection}"
                     .width="${resource.width}"
                     .height="${resource.height}"

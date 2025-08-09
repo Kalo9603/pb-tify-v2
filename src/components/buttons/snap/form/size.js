@@ -4,6 +4,7 @@ import { UtBase } from "../../../../utilities/base.js";
 export class CpSnapFormSize extends UtBase {
   static get properties() {
     return {
+      sizes: { type: Object },
       mode: { type: String },
       width: { type: Number },
       height: { type: Number },
@@ -61,6 +62,26 @@ export class CpSnapFormSize extends UtBase {
   }
 
   render() {
+    if (!this.sizes) return html`Loading...`;
+
+    const supports = this.sizes.supports || [];
+
+    const modeSupportsMap = {
+      full: true,
+      max: true,
+      width: supports.includes("sizeByW"),
+      height: supports.includes("sizeByH"),
+      pct: supports.includes("sizeByPct"),
+      bestfit: supports.includes("sizeByConfinedWh"),
+      exact: supports.some(s =>
+        ["sizeByWh", "sizeByDistortedWh", "sizeByForcedWh"].includes(s)
+      ),
+    };
+
+    const modesToShow = Object.entries(modeSupportsMap)
+      .filter(([mode, supported]) => supported)
+      .map(([mode]) => mode);
+
     const needsWidth = ["width", "bestfit", "exact"].includes(this.mode);
     const needsHeight = ["height", "bestfit", "exact"].includes(this.mode);
     const needsPct = this.mode === "pct";
@@ -77,13 +98,9 @@ export class CpSnapFormSize extends UtBase {
             this._emitChange();
           }}"
         >
-          <option value="full">full</option>
-          <option value="max">max</option>
-          <option value="width">width</option>
-          <option value="height">height</option>
-          <option value="pct">percentage</option>
-          <option value="bestfit">best fit</option>
-          <option value="exact">exact</option>
+          ${modesToShow.map(mode => html`
+            <option value="${mode}" ?selected=${this.mode === mode}>${mode}</option>
+          `)}
         </select>
 
         ${needsPct ? html`

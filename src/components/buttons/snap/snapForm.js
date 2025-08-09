@@ -1,5 +1,12 @@
-import { html } from "https://esm.sh/lit-element";
-import { UtBase } from "../../../utilities/base.js";
+import {
+	html
+} from "https://esm.sh/lit-element";
+import {
+	UtBase
+} from "../../../utilities/base.js";
+import {
+	parseImageData
+} from "../../../utilities/lib/parse.js";
 import "./form/preview.js";
 import "./form/region.js";
 import "./form/rotation.js";
@@ -7,21 +14,66 @@ import "./form/qualityFormat.js";
 import "./form/size.js";
 
 export class CpSnapForm extends UtBase {
+
 	static get properties() {
 		return {
-			region: { type: String },
-			width: { type: Number },
-			height: { type: Number },
-			coordX1: { type: Number },
-			coordY1: { type: Number },
-			coordX2: { type: Number },
-			coordY2: { type: Number },
-			rotation: { type: Number },
-			mirror: { type: Boolean },
-			quality: { type: String },
-			format: { type: String },
-			size: { type: String },
-			upscale: { type: Boolean }
+			imageData: {
+				type: Object
+			},
+			region: {
+				type: String
+			},
+			width: {
+				type: Number
+			},
+			height: {
+				type: Number
+			},
+			coordX1: {
+				type: Number
+			},
+			coordY1: {
+				type: Number
+			},
+			coordX2: {
+				type: Number
+			},
+			coordY2: {
+				type: Number
+			},
+			rotation: {
+				type: Number
+			},
+			mirror: {
+				type: Boolean
+			},
+			quality: {
+				type: String
+			},
+			format: {
+				type: String
+			},
+			size: {
+				type: String
+			},
+			regions: {
+				type: Array
+			},
+			rotations: {
+				type: Array
+			},
+			sizes: {
+				type: Array
+			},
+			qualities: {
+				type: Array
+			},
+			formats: {
+				type: Array
+			},
+			upscale: {
+				type: Boolean
+			}
 		};
 	}
 
@@ -40,6 +92,11 @@ export class CpSnapForm extends UtBase {
 		this.format = "jpg";
 		this.size = "full";
 		this.upscale = false;
+		this.regions = [];
+		this.rotations = [];
+		this.sizes = [];
+		this.qualities = [];
+		this.formats = [];
 	}
 
 	_emitChange() {
@@ -64,85 +121,138 @@ export class CpSnapForm extends UtBase {
 		);
 	}
 
+	updated(changedProps) {
+		if (changedProps.has('imageData')) {
+			this.qualities = parseImageData(this.imageData, "quality");
+			this.formats = parseImageData(this.imageData, "format");
+			this.regions = parseImageData(this.imageData, "region");
+			this.rotations = parseImageData(this.imageData, "rotation");
+			this.sizes = parseImageData(this.imageData, "size");
+			console.log(this.sizes);
+		}
+	}
+
 	render() {
+
 		return html`
-    <div
-      class="flex flex-col gap-4"
-      style="min-width: 550px; margin: 0 auto; padding: 0 1rem;"
-    >
-      <div
-        class="flex flex-row flex-wrap gap-6"
-        style="align-items: flex-start;"
-      >
-        <cp-spregion
-          class="flex-grow min-w-[220px] max-w-full"
-          .region="${this.region}"
-          .width="${this.width}"
-          .height="${this.height}"
-          .coordX1="${this.coordX1}"
-          .coordY1="${this.coordY1}"
-          .coordX2="${this.coordX2}"
-          .coordY2="${this.coordY2}"
-          @region-updated="${(e) => {
-				const d = e.detail;
-				this.region = d.region;
-				this.coordX1 = d.coordX1;
-				this.coordY1 = d.coordY1;
-				this.coordX2 = d.coordX2;
-				this.coordY2 = d.coordY2;
-				this._emitChange();
-			}}"
-        ></cp-spregion>
+			<div
+			style="
+				display: flex;
+				gap: 5rem;
+				max-width: 700px;
+				margin: 0 auto;
+				padding: 1rem;
+			"
+			>
+			<div
+				style="
+				display: flex;
+				flex-direction: column;
+				justify-content: space-between;
+				flex-grow: 1;
+				width: fit-content;
+				height: fit-content;
+				"
+			>
+				<div
+				style="
+					display: flex;
+					flex-direction: column;
+					gap: 2.5rem;
+				"
+				>
+				${this.regions ? html`
+				<cp-spregion
+					.regionData="${this.regions}"
+					.region="${this.region}"
+					.width="${this.width}"
+					.height="${this.height}"
+					.coordX1="${this.coordX1}"
+					.coordY1="${this.coordY1}"
+					.coordX2="${this.coordX2}"
+					.coordY2="${this.coordY2}"
+					@region-updated="${(e) => {
+					const d = e.detail;
+					this.region = d.region;
+					this.coordX1 = d.coordX1;
+					this.coordY1 = d.coordY1;
+					this.coordX2 = d.coordX2;
+					this.coordY2 = d.coordY2;
+					this._emitChange();
+				}}"
+				></cp-spregion>
+									`
+				: null}
 
-        <cp-spsize
-          class="flex-grow min-w-[220px] max-w-full"
-          @size-updated="${(e) => {
-				this.size = e.detail.size;
-				this.upscale = e.detail.upscale;
-				this._emitChange();
-			}}"
-        ></cp-spsize>
+			${this.rotations ? html`
+				<cp-sprotation
+					.rotationData="${this.rotations}"
+					.rotation="${this.rotation}"
+					.mirror="${this.mirror}"
+					@rotation-updated="${(e) => {
+					this.rotation = e.detail.rotation;
+					this.mirror = e.detail.mirror;
+					this._emitChange();
+				}}"
+				></cp-sprotation> `
+				: null}
 
-        <cp-sprotation
-          class="flex-grow min-w-[220px] max-w-full"
-          .rotation="${this.rotation}"
-          .mirror="${this.mirror}"
-          @rotation-updated="${(e) => {
-				this.rotation = e.detail.rotation;
-				this.mirror = e.detail.mirror;
-				this._emitChange();
-			}}"
-        ></cp-sprotation>
+				</div>
+				<cp-preview
+					.region="${this.region}"
+					.width="${this.width}"
+					.height="${this.height}"
+					.coordX1="${this.coordX1}"
+					.coordY1="${this.coordY1}"
+					.coordX2="${this.coordX2}"
+					.coordY2="${this.coordY2}"
+					.rotation="${this.rotation}"
+					.mirror="${this.mirror}"
+					.quality="${this.quality}"
+					.size="${this.size}"
+					style="margin-top: 2rem;"
+				></cp-preview>
+			</div>
 
-        <cp-spqltfrmt
-          class="flex-grow min-w-[220px] max-w-full"
-          .quality="${this.quality}"
-          .format="${this.format}"
-          @quality-updated="${(e) => {
-				this.quality = e.detail.quality;
-				this.format = e.detail.format;
-				this._emitChange();
-			}}"
-        ></cp-spqltfrmt>
-      </div>
+			<div
+				style="
+				display: flex;
+				flex-direction: column;
+				gap: 2.5rem;
+				min-width: 220px;
+				max-width: 320px;
+				align-items: flex-start;
+				"
+			>
+			${this.sizes ? html`
+				<cp-spsize
+				.sizes = "${this.sizes}"
+				@size-updated="${(e) => {
+					this.size = e.detail.size;
+					this.upscale = e.detail.upscale;
+					this._emitChange();
+				}}"
+				></cp-spsize> `
+				: null}
 
-      <div class="self-start max-w-[250px]">
-        <cp-preview
-          .region="${this.region}"
-          .width="${this.width}"
-          .height="${this.height}"
-          .coordX1="${this.coordX1}"
-          .coordY1="${this.coordY1}"
-          .coordX2="${this.coordX2}"
-          .coordY2="${this.coordY2}"
-          .rotation="${this.rotation}"
-          .mirror="${this.mirror}"
-          .quality="${this.quality}"
-		  .size="${this.size}"
-        ></cp-preview>
-      </div>
-    </div>
-  `;
+				${this.qualities || this.formats
+				? html`
+					<cp-spqltfrmt
+						.qualities="${this.qualities}"
+						.formats="${this.formats}"
+						.quality="${this.quality}"
+						.format="${this.format}"
+						@quality-updated="${(e) => {
+						this.quality = e.detail.quality;
+						this.format = e.detail.format;
+						this._emitChange();
+					}}"
+					></cp-spqltfrmt>
+					`
+				: null}
+			</div>
+			</div>
+		`;
 	}
 
 }

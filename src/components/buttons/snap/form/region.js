@@ -12,6 +12,7 @@ export class CpSnapFormRegion extends UtBase {
       coordY1: { type: Number },
       coordX2: { type: Number },
       coordY2: { type: Number },
+      regionData: { type: Object }
     };
   }
 
@@ -20,6 +21,24 @@ export class CpSnapFormRegion extends UtBase {
     this.region = "full";
     this.width = this.height = 0;
     this.coordX1 = this.coordY1 = this.coordX2 = this.coordY2 = 0;
+    this.regionData = { supports: [] };
+  }
+
+  updated(changedProps) {
+    if (changedProps.has('regionData') || changedProps.has('region')) {
+      this._validateRegion();
+    }
+  }
+
+  _validateRegion() {
+    const supports = this.regionData?.supports || [];
+    if (this.region === "square" && !supports.includes("regionSquare")) {
+      this.region = "full";
+    } else if (this.region === "coordinates" && !supports.includes("regionByPx")) {
+      this.region = "full";
+    } else if (this.region === "coordinates%" && !supports.includes("regionByPct")) {
+      this.region = "full";
+    }
   }
 
   _emitChange() {
@@ -68,6 +87,19 @@ export class CpSnapFormRegion extends UtBase {
     const stepVal = this.region === "coordinates%" ? 0.01 : 1;
     const unit = this.region === "coordinates%" ? "%" : "px";
 
+    const supports = this.regionData?.supports || [];
+
+    const options = [
+      { value: "full", label: "full" },
+      supports.includes("regionSquare") ? { value: "square", label: "square" } : null,
+      supports.includes("regionByPx") ? { value: "coordinates", label: "coordinates" } : null,
+      supports.includes("regionByPct") ? { value: "coordinates%", label: "coordinates %" } : null,
+    ].filter(Boolean);
+
+    if (!options.find(o => o.value === this.region)) {
+      this.region = "full";
+    }
+
     return html`
       <div class="w-full">
         <label
@@ -80,12 +112,12 @@ export class CpSnapFormRegion extends UtBase {
           id="r-select"
           @change="${this.onRegionChange}"
           .value="${this.region}"
-          class="w-40 rounded-md border-2 border-blue-600 bg-white px-2 py-1 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600 hover:border-blue-700 transition-colors"
+          class="w-40 rounded-md border-2 border-blue-600 bg-white px-2 py-1 text-sm text-gray-900
+            focus:outline-none focus:ring-2 focus:ring-blue-600 hover:border-blue-700 transition-colors"
         >
-          <option value="full">full</option>
-          <option value="square">square</option>
-          <option value="coordinates">coordinates</option>
-          <option value="coordinates%">coordinates %</option>
+          ${options.map(
+            (opt) => html`<option value="${opt.value}">${opt.label}</option>`
+          )}
         </select>
       </div>
 
@@ -101,7 +133,8 @@ export class CpSnapFormRegion extends UtBase {
                       .value="${this.coordX1}"
                       step="${stepVal}"
                       @input="${(e) => this.onCoordChange(e, "coordX1")}"
-                      class="w-24 rounded border border-gray-300 px-2 py-1 text-sm text-gray-900 font-normal focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                      class="w-24 rounded border border-gray-300 px-2 py-1 text-sm text-gray-900 font-normal
+                        focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
                     />
                     <span class="text-sm font-normal text-gray-600">${unit}</span>
                   </div>
@@ -115,7 +148,8 @@ export class CpSnapFormRegion extends UtBase {
                       .value="${this.coordY1}"
                       step="${stepVal}"
                       @input="${(e) => this.onCoordChange(e, "coordY1")}"
-                      class="w-24 rounded border border-gray-300 px-2 py-1 text-sm text-gray-900 font-normal focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                      class="w-24 rounded border border-gray-300 px-2 py-1 text-sm text-gray-900 font-normal
+                        focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
                     />
                     <span class="text-sm font-normal text-gray-600">${unit}</span>
                   </div>
@@ -131,7 +165,8 @@ export class CpSnapFormRegion extends UtBase {
                       .value="${this.coordX2}"
                       step="${stepVal}"
                       @input="${(e) => this.onCoordChange(e, "coordX2")}"
-                      class="w-24 rounded border border-gray-300 px-2 py-1 text-sm text-gray-900 font-normal focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                      class="w-24 rounded border border-gray-300 px-2 py-1 text-sm text-gray-900 font-normal
+                        focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
                     />
                     <span class="text-sm font-normal text-gray-600">${unit}</span>
                   </div>
@@ -145,7 +180,8 @@ export class CpSnapFormRegion extends UtBase {
                       .value="${this.coordY2}"
                       step="${stepVal}"
                       @input="${(e) => this.onCoordChange(e, "coordY2")}"
-                      class="w-24 rounded border border-gray-300 px-2 py-1 text-sm text-gray-900 font-normal focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                      class="w-24 rounded border border-gray-300 px-2 py-1 text-sm text-gray-900 font-normal
+                        focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
                     />
                     <span class="text-sm font-normal text-gray-600">${unit}</span>
                   </div>
