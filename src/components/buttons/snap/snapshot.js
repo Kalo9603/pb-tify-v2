@@ -293,7 +293,7 @@ export class CpSnap extends UtBase {
                     }}"
                 ></cp-snapform>
 
-                <div class="flex justify-end mt-6">
+                <div class="flex justify-end">
                     <button
                     title="Snap!"
                     @click="${this.onSnapClick}"

@@ -68,7 +68,7 @@ export class CpSnapForm extends UtBase {
 		return html`
     <div
       class="flex flex-col gap-4"
-      style="min-width: 550px; margin: 0 auto; padding: 1rem;"
+      style="min-width: 550px; margin: 0 auto; padding: 0 1rem;"
     >
       <div
         class="flex flex-row flex-wrap gap-6"
