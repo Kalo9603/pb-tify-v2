@@ -147,7 +147,7 @@ export class CpLangSelector extends UtBase {
         <div
           class="absolute bottom-full mb-2 px-4 py-2 text-sm text-white bg-gray-800 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity w-fit min-w-[16rem] text-center break-words"
         >
-          This language is Machine Translated.
+          This translation is Machine Translated.
         </div>
       </div>
     `;
@@ -164,7 +164,7 @@ export class CpLangSelector extends UtBase {
                      hover:shadow-md transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-400
                      overflow-hidden h-10 origin-left
                      ${mt ? 'bg-green-700 text-white' : 'bg-blue-600 text-white'}
-                     ${this.isOpen ? 'w-[250px]' : 'w-[40px]'} hover:w-[250px]"
+                     ${this.isOpen ? 'w-[220px]' : 'w-[40px]'} hover:w-[220px]"
               style="margin-left:auto"
             >
               ${flag

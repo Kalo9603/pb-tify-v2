@@ -167,25 +167,27 @@ export class CpMetadata extends UtBase {
 
     return html`
       <div
-        class="overflow-auto max-h-[80vh] border border-gray-200 rounded-xl p-4 mb-4 shadow-sm bg-white"
+        class="flex flex-col overflow-hidden max-h-[80vh] border border-gray-200 rounded-xl p-4 mb-4 shadow-sm bg-white"
       >
-        <h2 class="text-lg font-semibold text-gray-800 mb-4">📄 Metadata</h2>
-        <table class="w-full text-sm text-left text-gray-700 border-collapse">
-          <tbody>
-            ${this.entries.map(
-              (entry) => html`
-                <tr class="hover:bg-gray-100 transition border-b border-gray-200">
-                  <td class="py-2 pr-4 font-semibold text-gray-900 whitespace-nowrap w-1/3">
-                    ${unsafeHTML(sanitizeHTML(getHTMLString(entry.label)))}
-                  </td>
-                  <td class="py-2 text-gray-600">
-                    ${unsafeHTML(sanitizeHTML(getHTMLString(entry.value)))}
-                  </td>
-                </tr>
-              `
-            )}
-          </tbody>
-        </table>
+        <header class="text-lg font-semibold text-gray-800 mb-4">📄 Metadata</header>
+        <div class="overflow-auto">
+          <table class="w-full text-sm text-left text-gray-700 border-collapse">
+            <tbody>
+              ${this.entries.map(
+                (entry) => html`
+                  <tr class="hover:bg-gray-100 transition border-b border-gray-200">
+                    <td class="py-2 pr-4 font-semibold text-gray-900 whitespace-nowrap w-1/3">
+                      ${unsafeHTML(sanitizeHTML(getHTMLString(entry.label)))}
+                    </td>
+                    <td class="py-2 text-gray-600">
+                      ${unsafeHTML(sanitizeHTML(getHTMLString(entry.value)))}
+                    </td>
+                  </tr>
+                `
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     `;
   }

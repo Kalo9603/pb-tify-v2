@@ -40,11 +40,11 @@ export class CpPageMetadata extends UtBase {
     const images = Array.isArray(canvas.images) ? canvas.images : [];
 
     return html`
-      <div class="overflow-auto max-h-[80vh] border border-gray-200 rounded-xl p-4 mt-4 shadow-sm bg-white">
+      <div class="overflow-hidden max-h-[80vh] border border-gray-200 rounded-xl p-4 mt-4 shadow-sm bg-white">
         <div class="flex items-baseline justify-between gap-6 mb-4">
-          <h2 class="text-lg font-semibold text-gray-800">
+          <header class="text-lg font-semibold text-gray-800">
             🖼️ Page ${idx + 1} ― ${this._getLabel(canvas)}
-          </h2>
+          </header>
 
           ${this._getSequenceLabel()
             ? html`<h2 class="text-lg text-gray-800 whitespace-nowrap">
