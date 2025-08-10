@@ -14,8 +14,7 @@ export class CpSnapFormQltFrmt extends UtBase {
 
   constructor() {
     super();
-    this.quality = "default";
-    this.format = "jpg";
+    // Rimuovi l'inizializzazione a null per permettere ai valori del padre di essere utilizzati
     this.qualities = [];
     this.formats = [];
   }
@@ -43,6 +42,14 @@ export class CpSnapFormQltFrmt extends UtBase {
     this._emitChange();
   }
 
+  // Aggiungi questo metodo per garantire che i valori iniziali siano emessi
+  firstUpdated() {
+    // Emetti i valori iniziali solo se sono stati impostati
+    if (this.quality || this.format) {
+      this._emitChange();
+    }
+  }
+
   render() {
     if (
       (!this.qualities || this.qualities.length === 0) &&
@@ -63,12 +70,12 @@ export class CpSnapFormQltFrmt extends UtBase {
                 >
                 <select
                   id="quality"
-                  .value="${this.quality}"
+                  .value="${this.quality || ''}"
                   @change="${this.onQualityChange}"
                   class="w-40 rounded border border-gray-400 bg-white px-2 py-1 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 transition-colors"
                 >
                   ${this.qualities.map(
-                    (q) => html`<option value="${q}">${q}</option>`
+                    (q) => html`<option value="${q}" ?selected="${q === this.quality}">${q}</option>`
                   )}
                 </select>
               </div>
@@ -85,12 +92,12 @@ export class CpSnapFormQltFrmt extends UtBase {
                 >
                 <select
                   id="format"
-                  .value="${this.format}"
+                  .value="${this.format || ''}"
                   @change="${this.onFormatChange}"
                   class="w-40 rounded border border-gray-400 bg-white px-2 py-1 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 transition-colors"
                 >
                   ${this.formats.map(
-                    (f) => html`<option value="${f}">${f}</option>`
+                    (f) => html`<option value="${f}" ?selected="${f === this.format}">${f}</option>`
                   )}
                 </select>
               </div>

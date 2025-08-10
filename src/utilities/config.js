@@ -38,6 +38,8 @@ export const config = {
   },
 
   snapshot: {
+    coords: { p1: [0, 0], p2: [0, 0] },
+    initialDimensions: { width: 0, height: 0 },
     region: "full",
     rotation: 0,
     mirror: false,
@@ -72,10 +74,10 @@ export const config = {
 
   get motivations() {
     const base = [
-                  "painting", "describing", "tagging", "linking", "assessing", 
-                  "bookmarking", "classifying", "editing", "highlighting", "identifying",
-                  "moderating", "questioning", "replying"
-                ];
+      "painting", "describing", "tagging", "linking", "assessing",
+      "bookmarking", "classifying", "editing", "highlighting", "identifying",
+      "moderating", "questioning", "replying"
+    ];
     return ["commenting", ...base.sort()];
   },
 

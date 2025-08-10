@@ -12,9 +12,13 @@ export class CpSnapFormRotation extends UtBase {
 
   constructor() {
     super();
-    this.rotation = 0;
-    this.mirror = false;
     this.rotationData = {};
+  }
+
+  firstUpdated() {
+    if (this.rotation !== undefined || this.mirror !== undefined) {
+      this._emitChange();
+    }
   }
 
   _emitChange() {
@@ -141,7 +145,7 @@ export class CpSnapFormRotation extends UtBase {
                             type="number"
                             min="0"
                             max="360"
-                            .value="${this.rotation}"
+                            .value="${this.rotation || 0}"
                             @input="${this.onRotationChange}"
                             class="w-[60px] rounded border border-gray-300 px-2 py-1 text-sm text-gray-900
                                   focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-colors duration-200 ease-linear"

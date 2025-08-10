@@ -3,14 +3,16 @@ import { UtBase } from "../../../utilities/base.js";
 import { parseImageAPI } from "../../../utilities/lib/parse.js";
 import "./snapForm.js";
 
+import { parseIIIFUrl } from "../../../utilities/lib/parse.js";
+
 import {
-  parseIIIFUrl,
   buildRegionString,
   getCurrentDateYYYYMMDD,
   sanitizeFilename,
   downloadImage,
   centerPopupPosition
 } from "../../../utilities/lib/utils.js";
+import { config } from "../../../utilities/config.js";
 
 export class CpSnap extends UtBase {
   static get properties() {
@@ -35,17 +37,17 @@ export class CpSnap extends UtBase {
   constructor() {
     super();
     this.manifestObject = null;
-    this.canvasIndex = 0;
+    this.canvasIndex = config.canvas.canvasIndexDefault;
     this.showSnapshot = false;
     this.isHovered = false;
-    this.regionSelection = "full";
-    this.coords = { p1: [0, 0], p2: [0, 0] };
-    this.rotation = 0;
-    this.mirror = false;
-    this.quality = "default";
-    this.format = "jpg";
-    this.size = "full";
-    this.upscale = false;
+    this.regionSelection = config.snapshot.region;
+    this.coords = config.snapshot.coords;
+    this.rotation = config.snapshot.rotation;
+    this.mirror = config.snapshot.mirror;
+    this.quality = config.snapshot.quality;
+    this.format = config.snapshot.format;
+    this.size = config.snapshot.size;
+    this.upscale = config.snapshot.upscale;
   }
 
   toggleSnapshot() {
@@ -70,63 +72,8 @@ export class CpSnap extends UtBase {
     return parseIIIFUrl(this.currentResource?.["@id"]);
   }
 
-  drawHighlightOnViewer() {
-    if (!this._viewer?._tify?.app) return;
-
-    const app = this._viewer._tify.app;
-    const canvasEl = app?.canvas;
-    if (!canvasEl) return;
-
-    const ctx = canvasEl.getContext("2d");
-    if (!ctx) return;
-
-    setTimeout(() => {
-      app.render();
-
-      const W = canvasEl.width;
-      const H = canvasEl.height;
-
-      ctx.save();
-      ctx.fillStyle = "rgba(0, 120, 215, 0.3)";
-      ctx.strokeStyle = "rgba(0, 120, 215, 0.9)";
-      ctx.lineWidth = 3;
-
-      if (this.regionSelection === "full") {
-        ctx.fillRect(0, 0, W, H);
-      } else if (this.regionSelection === "square") {
-        const side = Math.min(W, H);
-        const x = (W - side) / 2;
-        const y = (H - side) / 2;
-        ctx.fillRect(x, y, side, side);
-        ctx.strokeRect(x, y, side, side);
-      } else if (this.regionSelection === "coordinates" || this.regionSelection === "coordinates%") {
-        let x1, y1, x2, y2;
-
-        if (this.regionSelection === "coordinates") {
-          x1 = (this.coords.p1[0] / this.currentResource.width) * W;
-          y1 = (this.coords.p1[1] / this.currentResource.height) * H;
-          x2 = (this.coords.p2[0] / this.currentResource.width) * W;
-          y2 = (this.coords.p2[1] / this.currentResource.height) * H;
-        } else {
-          x1 = (this.coords.p1[0] / 100) * W;
-          y1 = (this.coords.p1[1] / 100) * H;
-          x2 = (this.coords.p2[0] / 100) * W;
-          y2 = (this.coords.p2[1] / 100) * H;
-        }
-
-        const rectX = Math.min(x1, x2);
-        const rectY = Math.min(y1, y2);
-        const rectW = Math.abs(x2 - x1);
-        const rectH = Math.abs(y2 - y1);
-
-        ctx.fillRect(rectX, rectY, rectW, rectH);
-        ctx.strokeRect(rectX, rectY, rectW, rectH);
-      }
-      ctx.restore();
-    }, 50);
-  }
-
   onSnapClick() {
+
     const parts = this.parsedIIIFParts;
     if (!parts) return;
 
@@ -187,7 +134,6 @@ export class CpSnap extends UtBase {
 
     this.regionSelection = regionStr;
     this.requestUpdate();
-    this.drawHighlightOnViewer();
   }
 
   async updated(changedProps) {
@@ -202,17 +148,12 @@ export class CpSnap extends UtBase {
         this.requestUpdate();
       }
     }
-
-    if (changedProps.has("regionSelection") || changedProps.has("coords")) {
-      this.drawHighlightOnViewer();
-    }
   }
 
   render() {
     const resource = this.currentResource;
     const isActive = this.showSnapshot;
     const iconToShow = isActive && this.isHovered ? "close" : "camera";
-    console.log(this.imageData);
 
     const color = isActive && this.isHovered
       ? "bg-red-600"

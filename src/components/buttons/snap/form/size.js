@@ -15,11 +15,13 @@ export class CpSnapFormSize extends UtBase {
 
   constructor() {
     super();
-    this.mode = "full";
-    this.width = 0;
-    this.height = 0;
-    this.percent = 100;
-    this.upscale = false;
+  }
+
+  firstUpdated() {
+    if (this.size) {
+      this._parseSizeToMode(this.size);
+    }
+    this._emitChange();
   }
 
   _emitChange() {
@@ -93,6 +95,7 @@ export class CpSnapFormSize extends UtBase {
 
         <select
           class="w-40 rounded border border-gray-300 px-2 py-1 text-sm text-gray-900"
+          .value="${this.mode || 'full'}"
           @change="${e => {
             this.mode = e.target.value;
             this._emitChange();
@@ -107,7 +110,7 @@ export class CpSnapFormSize extends UtBase {
           <label class="text-sm text-gray-800 font-semibold flex items-center gap-1">
             <input
               type="number"
-              .value="${this.percent}"
+              .value="${this.percent || 100}"
               @input="${e => {
                 this.percent = Number(e.target.value);
                 this._emitChange();
@@ -126,7 +129,7 @@ export class CpSnapFormSize extends UtBase {
                 <div class="flex items-center gap-1">
                   <input
                     type="number"
-                    .value="${this.width}"
+                    .value="${this.width || 0}"
                     @input="${e => {
                       this.width = Number(e.target.value);
                       this._emitChange();
@@ -143,7 +146,7 @@ export class CpSnapFormSize extends UtBase {
                 <div class="flex items-center gap-1">
                   <input
                     type="number"
-                    .value="${this.height}"
+                    .value="${this.height || 0}"
                     @input="${e => {
                       this.height = Number(e.target.value);
                       this._emitChange();
@@ -160,7 +163,7 @@ export class CpSnapFormSize extends UtBase {
           <label class="text-sm text-gray-800 font-semibold flex items-center gap-2">
             <input
               type="checkbox"
-              .checked="${this.upscale}"
+              .checked="${this.upscale || false}"
               @change="${e => {
                 this.upscale = e.target.checked;
                 this._emitChange();

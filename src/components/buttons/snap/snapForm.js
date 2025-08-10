@@ -1,6 +1,7 @@
 import { html } from "https://esm.sh/lit-element";
 import { UtBase } from "../../../utilities/base.js";
 import { parseImageData } from "../../../utilities/lib/parse.js";
+import { config } from "../../../utilities/config.js";
 import "./form/preview.js";
 import "./form/region.js";
 import "./form/rotation.js";
@@ -31,16 +32,16 @@ export class CpSnapForm extends UtBase {
 
   constructor() {
     super();
-    this.region = "full";
-    this.width = 0;
-    this.height = 0;
-    this.coords = { p1: [0, 0], p2: [0, 0] };
-    this.rotation = 0;
-    this.mirror = false;
-    this.quality = "default";
-    this.format = "jpg";
-    this.size = "full";
-    this.upscale = false;
+    this.region = config.snapshot.region;
+    this.width = config.snapshot.initialDimensions.width;
+    this.height = config.snapshot.initialDimensions.height;
+    this.coords = config.snapshot.coords;
+    this.rotation = config.snapshot.rotation;
+    this.mirror = config.snapshot.mirror;
+    this.quality = config.snapshot.quality;
+    this.format = config.snapshot.format;
+    this.size = config.snapshot.size;
+    this.upscale = config.snapshot.upscale;
     this.regions = [];
     this.rotations = [];
     this.sizes = [];

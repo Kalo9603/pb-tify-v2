@@ -15,10 +15,13 @@ export class CpSnapFormRegion extends UtBase {
 
   constructor() {
     super();
-    this.region = "full";
-    this.width = this.height = 0;
-    this.coords = { p1: [0, 0], p2: [0, 0] };
     this.regionData = { supports: [] };
+  }
+
+  firstUpdated() {
+    if (this.region) {
+      this._emitChange();
+    }
   }
 
   updated(changedProps) {
@@ -109,12 +112,12 @@ export class CpSnapFormRegion extends UtBase {
         <select
           id="r-select"
           @change="${this.onRegionChange}"
-          .value="${this.region}"
+          .value="${this.region || 'full'}"
           class="w-40 rounded-md border-2 border-blue-600 bg-white px-2 py-1 text-sm text-gray-900
             focus:outline-none focus:ring-2 focus:ring-blue-600 hover:border-blue-700 transition-colors"
         >
           ${options.map(
-            (opt) => html`<option value="${opt.value}">${opt.label}</option>`
+            (opt) => html`<option value="${opt.value}" ?selected="${opt.value === this.region}">${opt.label}</option>`
           )}
         </select>
       </div>
@@ -128,7 +131,7 @@ export class CpSnapFormRegion extends UtBase {
                   <div class="flex items-center gap-1">
                     <input
                       type="number"
-                      .value="${this.coords.p1[0]}"
+                      .value="${this.coords?.p1?.[0] || 0}"
                       step="${stepVal}"
                       @input="${(e) => this.onCoordChange(e, "p1", 0)}"
                       class="w-24 rounded border border-gray-300 px-2 py-1 text-sm text-gray-900 font-normal
@@ -143,7 +146,7 @@ export class CpSnapFormRegion extends UtBase {
                   <div class="flex items-center gap-1">
                     <input
                       type="number"
-                      .value="${this.coords.p1[1]}"
+                      .value="${this.coords?.p1?.[1] || 0}"
                       step="${stepVal}"
                       @input="${(e) => this.onCoordChange(e, "p1", 1)}"
                       class="w-24 rounded border border-gray-300 px-2 py-1 text-sm text-gray-900 font-normal
@@ -160,7 +163,7 @@ export class CpSnapFormRegion extends UtBase {
                   <div class="flex items-center gap-1">
                     <input
                       type="number"
-                      .value="${this.coords.p2[0]}"
+                      .value="${this.coords?.p2?.[0] || 0}"
                       step="${stepVal}"
                       @input="${(e) => this.onCoordChange(e, "p2", 0)}"
                       class="w-24 rounded border border-gray-300 px-2 py-1 text-sm text-gray-900 font-normal
@@ -175,7 +178,7 @@ export class CpSnapFormRegion extends UtBase {
                   <div class="flex items-center gap-1">
                     <input
                       type="number"
-                      .value="${this.coords.p2[1]}"
+                      .value="${this.coords?.p2?.[1] || 0}"
                       step="${stepVal}"
                       @input="${(e) => this.onCoordChange(e, "p2", 1)}"
                       class="w-24 rounded border border-gray-300 px-2 py-1 text-sm text-gray-900 font-normal
