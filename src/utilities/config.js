@@ -63,6 +63,11 @@ export const config = {
       step: 0.05
     },
 
+    scroll: {
+      speed: 15,
+      margin: 30
+    }
+
   },
 
   get motivations() {
