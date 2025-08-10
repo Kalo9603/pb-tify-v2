@@ -8,10 +8,7 @@ export class CpSnapFormRegion extends UtBase {
       region: { type: String },
       width: { type: Number },
       height: { type: Number },
-      coordX1: { type: Number },
-      coordY1: { type: Number },
-      coordX2: { type: Number },
-      coordY2: { type: Number },
+      coords: { type: Object },
       regionData: { type: Object }
     };
   }
@@ -20,7 +17,7 @@ export class CpSnapFormRegion extends UtBase {
     super();
     this.region = "full";
     this.width = this.height = 0;
-    this.coordX1 = this.coordY1 = this.coordX2 = this.coordY2 = 0;
+    this.coords = { p1: [0, 0], p2: [0, 0] };
     this.regionData = { supports: [] };
   }
 
@@ -46,10 +43,7 @@ export class CpSnapFormRegion extends UtBase {
       new CustomEvent("region-updated", {
         detail: {
           region: this.region,
-          coordX1: this.coordX1,
-          coordY1: this.coordY1,
-          coordX2: this.coordX2,
-          coordY2: this.coordY2,
+          coords: this.coords,
         },
         bubbles: true,
         composed: true,
@@ -60,26 +54,30 @@ export class CpSnapFormRegion extends UtBase {
   onRegionChange(e) {
     this.region = e.target.value;
     if (this.region !== "coordinates" && this.region !== "coordinates%") {
-      this.coordX1 = this.coordY1 = this.coordX2 = this.coordY2 = 0;
+      this.coords = { p1: [0, 0], p2: [0, 0] };
     }
     this._emitChange();
   }
 
-  onCoordChange(e, coordName) {
-    this[coordName] = Number(e.target.value);
+  onCoordChange(e, point, axis) {
+    const newCoords = { ...this.coords };
+    newCoords[point][axis] = Number(e.target.value);
+    
     const coords = validateCoordinates(
       this.region,
       this.width,
       this.height,
-      this.coordX1,
-      this.coordY1,
-      this.coordX2,
-      this.coordY2
+      newCoords.p1[0],
+      newCoords.p1[1],
+      newCoords.p2[0],
+      newCoords.p2[1]
     );
-    this.coordX1 = coords.x1;
-    this.coordY1 = coords.y1;
-    this.coordX2 = coords.x2;
-    this.coordY2 = coords.y2;
+    
+    this.coords = {
+      p1: [coords.x1, coords.y1],
+      p2: [coords.x2, coords.y2]
+    };
+    
     this._emitChange();
   }
 
@@ -130,9 +128,9 @@ export class CpSnapFormRegion extends UtBase {
                   <div class="flex items-center gap-1">
                     <input
                       type="number"
-                      .value="${this.coordX1}"
+                      .value="${this.coords.p1[0]}"
                       step="${stepVal}"
-                      @input="${(e) => this.onCoordChange(e, "coordX1")}"
+                      @input="${(e) => this.onCoordChange(e, "p1", 0)}"
                       class="w-24 rounded border border-gray-300 px-2 py-1 text-sm text-gray-900 font-normal
                         focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
                     />
@@ -145,9 +143,9 @@ export class CpSnapFormRegion extends UtBase {
                   <div class="flex items-center gap-1">
                     <input
                       type="number"
-                      .value="${this.coordY1}"
+                      .value="${this.coords.p1[1]}"
                       step="${stepVal}"
-                      @input="${(e) => this.onCoordChange(e, "coordY1")}"
+                      @input="${(e) => this.onCoordChange(e, "p1", 1)}"
                       class="w-24 rounded border border-gray-300 px-2 py-1 text-sm text-gray-900 font-normal
                         focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
                     />
@@ -162,9 +160,9 @@ export class CpSnapFormRegion extends UtBase {
                   <div class="flex items-center gap-1">
                     <input
                       type="number"
-                      .value="${this.coordX2}"
+                      .value="${this.coords.p2[0]}"
                       step="${stepVal}"
-                      @input="${(e) => this.onCoordChange(e, "coordX2")}"
+                      @input="${(e) => this.onCoordChange(e, "p2", 0)}"
                       class="w-24 rounded border border-gray-300 px-2 py-1 text-sm text-gray-900 font-normal
                         focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
                     />
@@ -177,9 +175,9 @@ export class CpSnapFormRegion extends UtBase {
                   <div class="flex items-center gap-1">
                     <input
                       type="number"
-                      .value="${this.coordY2}"
+                      .value="${this.coords.p2[1]}"
                       step="${stepVal}"
-                      @input="${(e) => this.onCoordChange(e, "coordY2")}"
+                      @input="${(e) => this.onCoordChange(e, "p2", 1)}"
                       class="w-24 rounded border border-gray-300 px-2 py-1 text-sm text-gray-900 font-normal
                         focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
                     />

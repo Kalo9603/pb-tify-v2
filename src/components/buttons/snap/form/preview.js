@@ -7,10 +7,7 @@ export class CpPreview extends UtBase {
       region: { type: String },
       width: { type: Number },
       height: { type: Number },
-      coordX1: { type: Number },
-      coordY1: { type: Number },
-      coordX2: { type: Number },
-      coordY2: { type: Number },
+      coords: { type: Object },
       quality: { type: String },
       rotation: { type: Number },
       mirror: { type: Boolean },
@@ -23,10 +20,7 @@ export class CpPreview extends UtBase {
     this.region = "full";
     this.width = 0;
     this.height = 0;
-    this.coordX1 = 0;
-    this.coordY1 = 0;
-    this.coordX2 = 0;
-    this.coordY2 = 0;
+    this.coords = { p1: [0, 0], p2: [0, 0] };
     this.quality = "default";
     this.rotation = 0;
     this.mirror = false;
@@ -38,10 +32,7 @@ export class CpPreview extends UtBase {
       changedProps.has("region") ||
       changedProps.has("width") ||
       changedProps.has("height") ||
-      changedProps.has("coordX1") ||
-      changedProps.has("coordY1") ||
-      changedProps.has("coordX2") ||
-      changedProps.has("coordY2") ||
+      changedProps.has("coords") ||
       changedProps.has("quality") ||
       changedProps.has("rotation") ||
       changedProps.has("mirror") ||
@@ -149,15 +140,15 @@ export class CpPreview extends UtBase {
       y = (H - side) / 2;
       w = side; h = side;
     } else if (this.region === "coordinates") {
-      x = (this.coordX1 / this.width) * W;
-      y = (this.coordY1 / this.height) * H;
-      w = ((this.coordX2 - this.coordX1) / this.width) * W;
-      h = ((this.coordY2 - this.coordY1) / this.height) * H;
+      x = (this.coords.p1[0] / this.width) * W;
+      y = (this.coords.p1[1] / this.height) * H;
+      w = ((this.coords.p2[0] - this.coords.p1[0]) / this.width) * W;
+      h = ((this.coords.p2[1] - this.coords.p1[1]) / this.height) * H;
     } else if (this.region === "coordinates%") {
-      x = (this.coordX1 / 100) * W;
-      y = (this.coordY1 / 100) * H;
-      w = ((this.coordX2 - this.coordX1) / 100) * W;
-      h = ((this.coordY2 - this.coordY1) / 100) * H;
+      x = (this.coords.p1[0] / 100) * W;
+      y = (this.coords.p1[1] / 100) * H;
+      w = ((this.coords.p2[0] - this.coords.p1[0]) / 100) * W;
+      h = ((this.coords.p2[1] - this.coords.p1[1]) / 100) * H;
     } else {
       x = 0; y = 0; w = W; h = H;
     }
@@ -207,7 +198,6 @@ export class CpPreview extends UtBase {
 
     ctx.fillStyle = brightness > 127 ? "#000" : "#fff";
     ctx.fillText(`${(scale * 100).toFixed(0)}%`, W - 10, H - 10);
-
   }
 
   render() {

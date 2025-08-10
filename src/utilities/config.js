@@ -65,7 +65,7 @@ export const config = {
 
     scroll: {
       speed: 15,
-      margin: 30
+      margin: 20
     }
 
   },

@@ -395,11 +395,12 @@ export class CpAnFrame extends UtBase {
             <i class="fa-solid fa-minus"></i></button>
 
           <div class="inline-flex items-center border border-gray-300 rounded px-2 py-1 bg-white">
+
             <input type="number" min="${config.frame.zoom.min * 100}" max="${config.frame.zoom.max * 100}" .value="${(this.zoom * 100).toFixed(0)}"
               @change="${(e) => {
                 const val = parseFloat(e.target.value);
                 this._applyZoom((!isNaN(val) && val >= config.frame.zoom.min * 100 && val <= config.frame.zoom.max * 100) ? val / 100 : 1);
-              }}" class="w-16 text-right font-medium text-gray-700 focus:outline-none" style="border: none; outline: none;" />
+              }}" class="w-12 text-right font-medium text-gray-700 focus:outline-none" style="border: none; outline: none;" />
             <span class="ml-1 text-gray-600 font-semibold">%</span></div>
 
           <button @click="${this._zoomIn}" @mousedown="${() => this._startZoom('in')}" @mouseup="${this._stopZoom}" @mouseleave="${this._stopZoom}"

@@ -13,7 +13,6 @@ import {
 } from "../../../utilities/lib/utils.js";
 
 export class CpSnap extends UtBase {
-
   static get properties() {
     return {
       imageData: { type: Object },
@@ -22,10 +21,7 @@ export class CpSnap extends UtBase {
       showSnapshot: { type: Boolean },
       isHovered: { type: Boolean },
       regionSelection: { type: String },
-      coordX1: { type: Number },
-      coordY1: { type: Number },
-      coordX2: { type: Number },
-      coordY2: { type: Number },
+      coords: { type: Object },
       rotation: { type: Number },
       mirror: { type: Boolean },
       quality: { type: String },
@@ -43,10 +39,7 @@ export class CpSnap extends UtBase {
     this.showSnapshot = false;
     this.isHovered = false;
     this.regionSelection = "full";
-    this.coordX1 = 0;
-    this.coordY1 = 0;
-    this.coordX2 = 0;
-    this.coordY2 = 0;
+    this.coords = { p1: [0, 0], p2: [0, 0] };
     this.rotation = 0;
     this.mirror = false;
     this.quality = "default";
@@ -88,7 +81,6 @@ export class CpSnap extends UtBase {
     if (!ctx) return;
 
     setTimeout(() => {
-
       app.render();
 
       const W = canvasEl.width;
@@ -111,15 +103,15 @@ export class CpSnap extends UtBase {
         let x1, y1, x2, y2;
 
         if (this.regionSelection === "coordinates") {
-          x1 = (this.coordX1 / this.currentResource.width) * W;
-          y1 = (this.coordY1 / this.currentResource.height) * H;
-          x2 = (this.coordX2 / this.currentResource.width) * W;
-          y2 = (this.coordY2 / this.currentResource.height) * H;
+          x1 = (this.coords.p1[0] / this.currentResource.width) * W;
+          y1 = (this.coords.p1[1] / this.currentResource.height) * H;
+          x2 = (this.coords.p2[0] / this.currentResource.width) * W;
+          y2 = (this.coords.p2[1] / this.currentResource.height) * H;
         } else {
-          x1 = (this.coordX1 / 100) * W;
-          y1 = (this.coordY1 / 100) * H;
-          x2 = (this.coordX2 / 100) * W;
-          y2 = (this.coordY2 / 100) * H;
+          x1 = (this.coords.p1[0] / 100) * W;
+          y1 = (this.coords.p1[1] / 100) * H;
+          x2 = (this.coords.p2[0] / 100) * W;
+          y2 = (this.coords.p2[1] / 100) * H;
         }
 
         const rectX = Math.min(x1, x2);
@@ -140,10 +132,10 @@ export class CpSnap extends UtBase {
 
     const regionStr = buildRegionString(
       this.regionSelection,
-      this.coordX1,
-      this.coordY1,
-      this.coordX2,
-      this.coordY2
+      this.coords.p1[0],
+      this.coords.p1[1],
+      this.coords.p2[0],
+      this.coords.p2[1]
     );
 
     let rotationStr = this.rotation === 0 ? "0" : this.rotation.toString();
@@ -166,11 +158,11 @@ export class CpSnap extends UtBase {
     } else if (this.regionSelection === "square") {
       regionWidth = regionHeight = Math.min(this.currentResource?.width ?? 0, this.currentResource?.height ?? 0);
     } else if (this.regionSelection === "coordinates") {
-      regionWidth = Math.abs(this.coordX2 - this.coordX1);
-      regionHeight = Math.abs(this.coordY2 - this.coordY1);
+      regionWidth = Math.abs(this.coords.p2[0] - this.coords.p1[0]);
+      regionHeight = Math.abs(this.coords.p2[1] - this.coords.p1[1]);
     } else if (this.regionSelection === "coordinates%") {
-      regionWidth = Math.abs(this.coordX2 - this.coordX1) * (this.currentResource?.width ?? 0) / 100;
-      regionHeight = Math.abs(this.coordY2 - this.coordY1) * (this.currentResource?.height ?? 0) / 100;
+      regionWidth = Math.abs(this.coords.p2[0] - this.coords.p1[0]) * (this.currentResource?.width ?? 0) / 100;
+      regionHeight = Math.abs(this.coords.p2[1] - this.coords.p1[1]) * (this.currentResource?.height ?? 0) / 100;
     }
 
     const { left, top } = centerPopupPosition(regionWidth, regionHeight);
@@ -198,28 +190,20 @@ export class CpSnap extends UtBase {
     this.drawHighlightOnViewer();
   }
 
-
   async updated(changedProps) {
-
-  if (changedProps.has("manifestObject")) {
-    if (this.manifestObject) {
-      try {
-        this.imageData = await parseImageAPI(this.manifestObject);
-      } catch (e) {
-        console.error("Error fetching imageData:", e);
-        this.imageData = null;
+    if (changedProps.has("manifestObject")) {
+      if (this.manifestObject) {
+        try {
+          this.imageData = await parseImageAPI(this.manifestObject);
+        } catch (e) {
+          console.error("Error fetching imageData:", e);
+          this.imageData = null;
+        }
+        this.requestUpdate();
       }
-      this.requestUpdate();
     }
-  }
 
-    if (
-      changedProps.has("regionSelection") ||
-      changedProps.has("coordX1") ||
-      changedProps.has("coordY1") ||
-      changedProps.has("coordX2") ||
-      changedProps.has("coordY2")
-    ) {
+    if (changedProps.has("regionSelection") || changedProps.has("coords")) {
       this.drawHighlightOnViewer();
     }
   }
@@ -249,51 +233,37 @@ export class CpSnap extends UtBase {
           class="group flex items-center rounded-full shadow-xl transition-all duration-300 px-3 py-2 w-12 ${hoverWidth} overflow-hidden h-10
             ${color} text-white hover:shadow-md"
         >
-          <div
-            class="flex items-center justify-center w-full transition-all duration-300 group-hover:justify-start group-hover:gap-2"
-          >
+          <div class="flex items-center justify-center w-full transition-all duration-300 group-hover:justify-start group-hover:gap-2">
             ${iconToShow === "camera"
               ? html`<i class="fa-solid fa-camera fa-lg"></i>`
               : html`<i class="fa-solid fa-xmark fa-lg"></i>`}
 
-            <span
-              class="text-sm font-medium whitespace-nowrap transition-all duration-300
-              opacity-0 w-0 overflow-hidden group-hover:opacity-100 group-hover:w-auto group-hover:ml-2"
-            >
+            <span class="text-sm font-medium whitespace-nowrap transition-all duration-300
+              opacity-0 w-0 overflow-hidden group-hover:opacity-100 group-hover:w-auto group-hover:ml-2">
               ${this.showSnapshot ? "Close" : "Snapshot"}
             </span>
           </div>
         </button>
 
         ${this.showSnapshot && resource && parts
-            ? html`
-                <div
-                  class="absolute z-40 top-full mt-4 left-0 bg-white border border-gray-300 rounded-lg shadow-xl p-4 max-w-4xl w-fit animate-fadeIn break-words flex flex-col gap-2"
-                >
+          ? html`
+              <div class="absolute z-40 top-full mt-4 left-0 bg-white border border-gray-300 rounded-lg shadow-xl p-4 max-w-4xl w-fit animate-fadeIn break-words flex flex-col gap-2">
                 <cp-snapform
-                    .imageData="${this.imageData}"
-                    .region="${this.regionSelection}"
-                    .width="${resource.width}"
-                    .height="${resource.height}"
-                    .coordX1="${this.coordX1}"
-                    .coordY1="${this.coordY1}"
-                    .coordX2="${this.coordX2}"
-                    .coordY2="${this.coordY2}"
-                    .rotation="${this.rotation}"
-                    .mirror="${this.mirror}"
-                    .quality="${this.quality}"
-                    .format="${this.format}"
-                    .size="${this.size}"
-                    .upscale="${this.upscale}"
-
-                    @region-change="${e => {
-
+                  .imageData="${this.imageData}"
+                  .region="${this.regionSelection}"
+                  .width="${resource.width}"
+                  .height="${resource.height}"
+                  .coords="${this.coords}"
+                  .rotation="${this.rotation}"
+                  .mirror="${this.mirror}"
+                  .quality="${this.quality}"
+                  .format="${this.format}"
+                  .size="${this.size}"
+                  .upscale="${this.upscale}"
+                  @region-change="${e => {
                     const detail = e.detail;
                     this.regionSelection = detail.region;
-                    this.coordX1 = detail.coordX1;
-                    this.coordY1 = detail.coordY1;
-                    this.coordX2 = detail.coordX2;
-                    this.coordY2 = detail.coordY2;
+                    this.coords = detail.coords;
                     this.rotation = detail.rotation;
                     this.mirror = detail.mirror;
                     this.quality = detail.quality;
@@ -301,22 +271,22 @@ export class CpSnap extends UtBase {
                     this.size = detail.size;
                     this.upscale = detail.upscale ?? false;
                     this.requestUpdate();
-                    }}"
+                  }}"
                 ></cp-snapform>
 
                 <div class="flex justify-end">
-                    <button
+                  <button
                     title="Snap!"
                     @click="${this.onSnapClick}"
                     class="flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600 text-white shadow-md hover:shadow-lg hover:bg-blue-700 transition-all"
-                    >
+                  >
                     <i class="fa-solid fa-camera fa-sm mr-2"></i>
                     <span class="text-sm font-semibold">Snap!</span>
-                    </button>
+                  </button>
                 </div>
-                </div>
+              </div>
             `
-            : null}
+          : null}
       </div>
     `;
   }
