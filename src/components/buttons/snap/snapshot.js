@@ -99,6 +99,7 @@ export class CpSnap extends UtBase {
 
     let regionWidth = 0;
     let regionHeight = 0;
+    
     if (this.regionSelection === "full") {
       regionWidth = this.currentResource?.width ?? 0;
       regionHeight = this.currentResource?.height ?? 0;

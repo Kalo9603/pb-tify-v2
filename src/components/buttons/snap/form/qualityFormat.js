@@ -14,7 +14,6 @@ export class CpSnapFormQltFrmt extends UtBase {
 
   constructor() {
     super();
-    // Rimuovi l'inizializzazione a null per permettere ai valori del padre di essere utilizzati
     this.qualities = [];
     this.formats = [];
   }
@@ -42,9 +41,7 @@ export class CpSnapFormQltFrmt extends UtBase {
     this._emitChange();
   }
 
-  // Aggiungi questo metodo per garantire che i valori iniziali siano emessi
   firstUpdated() {
-    // Emetti i valori iniziali solo se sono stati impostati
     if (this.quality || this.format) {
       this._emitChange();
     }

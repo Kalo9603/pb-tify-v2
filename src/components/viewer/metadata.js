@@ -128,7 +128,7 @@ export class CpMetadata extends UtBase {
       Description: m.description,
       Attribution: m.attribution,
       License: m.license,
-      SeeAlso: m.seeAlso,
+      // SeeAlso: m.seeAlso,
       Related: m.related,
       Within: m.within,
     };
