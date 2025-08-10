@@ -188,16 +188,11 @@ export class CpLangSelector extends UtBase {
                 ${this._capitalize(currentLabel)}
               </span>
 
-              <svg
-                class="ml-2 h-5 w-5 flex-shrink-0 transform transition-transform duration-300"
-                style="opacity: ${this.isOpen ? 1 : 0}; transform: rotate(${this.isOpen ? 180 : 0}deg);"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-              >
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
+              <i
+                class="fa-solid fa-chevron-up ml-3 flex-shrink-0 transition-transform duration-300"
+                style="opacity: ${this.isOpen ? 1 : 0}; transform: rotate(${this.isOpen ? 180 : 0}deg); font-size: 1rem;"
+                aria-hidden="true"
+              ></i>
             </button>
           </div>
         </div>

@@ -29,21 +29,7 @@ export class CpClose extends UtBase {
           <div
             class="flex items-center justify-center w-full transition-all duration-300 group-hover:justify-start group-hover:gap-2"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-7 w-7 flex-shrink-0 transition-transform duration-300"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              stroke-width="3"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-
+            <i class="fa-solid fa-xmark fa-lg flex-shrink-0 transition-transform duration-300"></i>
             <span
               class="text-sm font-medium whitespace-nowrap transition-all duration-300
                 opacity-0 w-0 overflow-hidden group-hover:opacity-100 group-hover:w-auto group-hover:ml-2"

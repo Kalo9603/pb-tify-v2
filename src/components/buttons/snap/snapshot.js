@@ -253,15 +253,8 @@ export class CpSnap extends UtBase {
             class="flex items-center justify-center w-full transition-all duration-300 group-hover:justify-start group-hover:gap-2"
           >
             ${iconToShow === "camera"
-              ? html`
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 7h4l2-3h6l2 3h4v12H3V7z" />
-                  <circle cx="12" cy="13" r="3" stroke="currentColor" stroke-width="2" />
-                </svg>`
-              : html`
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>`}
+              ? html`<i class="fa-solid fa-camera fa-lg"></i>`
+              : html`<i class="fa-solid fa-xmark fa-lg"></i>`}
 
             <span
               class="text-sm font-medium whitespace-nowrap transition-all duration-300
@@ -317,17 +310,7 @@ export class CpSnap extends UtBase {
                     @click="${this.onSnapClick}"
                     class="flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600 text-white shadow-md hover:shadow-lg hover:bg-blue-700 transition-all"
                     >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-5 w-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="2"
-                    >
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 7h4l2-3h6l2 3h4v12H3V7z" />
-                        <circle cx="12" cy="13" r="3" stroke="currentColor" stroke-width="2" />
-                    </svg>
+                    <i class="fa-solid fa-camera fa-sm mr-2"></i>
                     <span class="text-sm font-semibold">Snap!</span>
                     </button>
                 </div>

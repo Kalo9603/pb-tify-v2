@@ -40,7 +40,7 @@ export class CpUrlCopy extends UtBase {
         <button
           @click="${this.handleCopy}"
           title="Copy manifest URL"
-          class="group flex items-center rounded-full shadow-xl transition-all duration-300 px-3 py-2 w-12 hover:w-36 overflow-hidden h-10
+          class="group flex items-center rounded-full shadow-xl transition-all duration-300 px-3 py-2 w-12 hover:w-32 overflow-hidden h-10
             ${this.copied ? "bg-green-600" : "bg-blue-600"} text-white hover:shadow-md"
           "
           type="button"
@@ -48,20 +48,11 @@ export class CpUrlCopy extends UtBase {
           <div
             class="flex items-center justify-center w-full transition-all duration-300 group-hover:justify-start group-hover:gap-2"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-7 w-7 flex-shrink-0 transition-transform duration-300"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              stroke-width="3"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M8 16h8m-4-4h4m-8 4V8a2 2 0 012-2h4a2 2 0 012 2v8"
-              />
-            </svg>
+            <i
+              class="fa-solid fa-clone flex-shrink-0 transition-transform duration-300"
+              style="font-size: 1rem;"
+              aria-hidden="true"
+            ></i>
 
             <span
               class="text-sm font-medium whitespace-nowrap transition-all duration-300
