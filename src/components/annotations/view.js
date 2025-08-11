@@ -331,7 +331,7 @@ export class CpAnViewer extends UtBase {
                   <div class="flex-1 px-3 py-2 ${baseHoverClass} text-[13px] leading-snug transition-colors duration-300 ease-in-out">
                     <div class="flex justify-between items-center">
                       <div class="flex flex-col flex-grow pr-4">
-                        <div class="pt-1 flex items-center gap-3">
+                        <div class="py-2 flex items-center gap-3">
                           <span class="inline-flex items-center justify-center rounded-full bg-gray-200 w-6 h-6 text-lg"
                             title="${Array.isArray(ann.motivation) ? ann.motivation[0] : ann.motivation}">
                             ${getMotivationIcon(ann.motivation)}
