@@ -134,7 +134,7 @@ export class CpSnapFormRegion extends UtBase {
                       .value="${this.coords?.p1?.[0] || 0}"
                       step="${stepVal}"
                       @input="${(e) => this.onCoordChange(e, "p1", 0)}"
-                      class="w-24 rounded border border-gray-300 px-2 py-1 text-sm text-gray-900 font-normal
+                      class="w-[60px] rounded border border-gray-300 px-2 py-1 text-sm text-gray-900 font-normal
                         focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
                     />
                     <span class="text-sm font-normal text-gray-600">${unit}</span>
@@ -149,7 +149,7 @@ export class CpSnapFormRegion extends UtBase {
                       .value="${this.coords?.p1?.[1] || 0}"
                       step="${stepVal}"
                       @input="${(e) => this.onCoordChange(e, "p1", 1)}"
-                      class="w-24 rounded border border-gray-300 px-2 py-1 text-sm text-gray-900 font-normal
+                      class="w-[60px] rounded border border-gray-300 px-2 py-1 text-sm text-gray-900 font-normal
                         focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
                     />
                     <span class="text-sm font-normal text-gray-600">${unit}</span>
@@ -166,7 +166,7 @@ export class CpSnapFormRegion extends UtBase {
                       .value="${this.coords?.p2?.[0] || 0}"
                       step="${stepVal}"
                       @input="${(e) => this.onCoordChange(e, "p2", 0)}"
-                      class="w-24 rounded border border-gray-300 px-2 py-1 text-sm text-gray-900 font-normal
+                      class="w-[60px] rounded border border-gray-300 px-2 py-1 text-sm text-gray-900 font-normal
                         focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
                     />
                     <span class="text-sm font-normal text-gray-600">${unit}</span>
@@ -181,7 +181,7 @@ export class CpSnapFormRegion extends UtBase {
                       .value="${this.coords?.p2?.[1] || 0}"
                       step="${stepVal}"
                       @input="${(e) => this.onCoordChange(e, "p2", 1)}"
-                      class="w-24 rounded border border-gray-300 px-2 py-1 text-sm text-gray-900 font-normal
+                      class="w-[60px] rounded border border-gray-300 px-2 py-1 text-sm text-gray-900 font-normal
                         focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
                     />
                     <span class="text-sm font-normal text-gray-600">${unit}</span>

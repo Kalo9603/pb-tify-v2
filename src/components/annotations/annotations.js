@@ -200,8 +200,8 @@ export class CpAnnotations extends UtBase {
           <cp-anhideall
             .activeAnnotations=${this.activeAnnotations}
             @hide-all-annotations=${() => {
-        this.dispatchEvent(new CustomEvent("hide-all-annotations", { bubbles: true, composed: true }));
-      }}
+              this.dispatchEvent(new CustomEvent("hide-all-annotations", { bubbles: true, composed: true }));
+            }}
           ></cp-anhideall>
 
           ${this.annotationCount > 0 ? html`

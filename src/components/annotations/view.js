@@ -1,7 +1,8 @@
 import { html } from "https://esm.sh/lit-element";
 import { unsafeHTML } from "https://esm.sh/lit-html/directives/unsafe-html.js";
 import { UtBase } from "../../utilities/base.js";
-import { getMotivationIcon, generateId, isLocalUrl, parseMarkdownToHtml, sanitizeHTML } from "../../utilities/lib/utils.js";
+import { getMotivationIcon, generateId, isLocalUrl, 
+        parseMarkdownToHtml, sanitizeHTML, getColorVariant } from "../../utilities/lib/utils.js";
 import { config } from "../../utilities/config.js";
 import "./buttons/duplicate.js";
 import "./buttons/edit.js";
@@ -291,7 +292,6 @@ export class CpAnViewer extends UtBase {
   }
 
   render() {
-
     const multipleActive = this.activeAnnotations.length > 1;
 
     const filteredAnnotations = this.annotations
@@ -301,85 +301,97 @@ export class CpAnViewer extends UtBase {
         return !this.filterQuery || text.includes(this.filterQuery);
       });
 
-
     return html`
       ${this.annotations.length === 0
         ? html`<div class="text-gray-500 italic">No annotations available.</div>`
         : html`
-        <ul class="space-y-4">
-          ${filteredAnnotations.map(({ ann, originalIndex }, i) => {
-          const annId = ann.full["@id"] || `local-${originalIndex}`;
-          const activeObj = this.activeAnnotations.find(a => a.id === annId);
-          const isActive = !!activeObj;
-          const annotationColorClass = activeObj?.color || "";
-          const annotationType = this._getAnnotationType(ann);
+          <ul class="space-y-4">
+            ${filteredAnnotations.map(({ ann, originalIndex }, i) => {
+              const annId = ann.full["@id"] || `local-${originalIndex}`;
+              const activeObj = this.activeAnnotations.find(a => a.id === annId);
+              const isActive = !!activeObj;
+              const annotationColorClass = activeObj?.color || "";
+              const annotationType = this._getAnnotationType(ann);
 
-          return html`
-              <li class="text-sm text-gray-700 border-b pb-2 relative transition-colors duration-300 rounded-md px-2 hover:bg-yellow-100
-                ${isActive ? annotationColorClass : ""}">
-                
-                <div class="flex justify-between items-start">
-                  <div class="flex flex-col flex-grow pr-4">
-                    <div class="pt-1 flex items-center gap-3 text-sm">
-                      <span class="inline-flex items-center justify-center rounded-full bg-gray-200 w-7 h-7 text-xl"
-                        title="${Array.isArray(ann.motivation) ? ann.motivation[0] : ann.motivation}">
-                        ${getMotivationIcon(ann.motivation)}
-                      </span>
-                      <strong>#${i + 1}</strong>
-                      ${ann.isLocal
-              ? html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-green-600">Local</span>`
-              : annotationType === "remote"
-                ? html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-purple-600">Remote</span>`
-                : html`<span class="ml-2 px-2 py-0.5 rounded text-[10px] font-sans uppercase font-semibold text-white bg-blue-500">Source</span>`}
+              const barColorClass = isActive
+                ? getColorVariant(annotationColorClass, "bg", 200)
+                : "bg-gray-400";
+
+              const baseHoverClass = isActive
+                ? `${getColorVariant(annotationColorClass, "bg", -400)} hover:${getColorVariant(annotationColorClass, "bg", -200)}`
+                : `bg-white hover:bg-gray-300`;
+
+              return html`
+                <li class="relative flex rounded-md overflow-hidden border transition-colors duration-300">
+                  
+                  <div class="flex items-center justify-center w-10 text-white font-bold ${barColorClass}">
+                    ${i + 1}
+                  </div>
+
+                  <div class="flex-1 px-3 py-2 ${baseHoverClass} text-[13px] leading-snug transition-colors duration-300 ease-in-out">
+                    <div class="flex justify-between items-center">
+                      <div class="flex flex-col flex-grow pr-4">
+                        <div class="pt-1 flex items-center gap-3">
+                          <span class="inline-flex items-center justify-center rounded-full bg-gray-200 w-6 h-6 text-lg"
+                            title="${Array.isArray(ann.motivation) ? ann.motivation[0] : ann.motivation}">
+                            ${getMotivationIcon(ann.motivation)}
+                          </span>
+
+                          ${ann.isLocal
+                            ? html`<span class="ml-2 px-2 py-1 rounded text-[10px] font-sans uppercase font-semibold text-white bg-green-600">Local</span>`
+                            : annotationType === "remote"
+                              ? html`<span class="ml-2 px-2 py-1 rounded text-[10px] font-sans uppercase font-semibold text-white bg-purple-600">Remote</span>`
+                              : html`<span class="ml-2 px-2 py-1 rounded text-[10px] font-sans uppercase font-semibold text-white bg-blue-500">Source</span>`}
+                        </div>
+
+                        ${ann.chars ? html`
+                          <div class="prose prose-sm max-w-none pt-1">
+                            ${unsafeHTML(sanitizeHTML(ann.chars))}
+                          </div>
+                        ` : null}
+                      </div>
+
+                      <div class="flex flex-row items-center gap-2">
+                        <button
+                          @click=${() => this.toggleAnnotation(originalIndex)}
+                          class="group flex items-center rounded-full shadow-xl transition-all duration-300 px-3 py-2 w-12 hover:w-28 overflow-hidden h-9
+                            ${isActive ? "bg-red-600" : "bg-blue-600"} text-white hover:bg-red-800">
+                          <div class="flex items-center justify-center w-full transition-all duration-300 group-hover:justify-start group-hover:gap-2">
+                            <i class="fa-solid ${isActive ? "fa-eye-slash" : "fa-magnifying-glass"}
+                              text-lg flex-shrink-0 transition-transform duration-300"></i>
+                            <span class="text-sm font-medium whitespace-nowrap transition-all duration-300 opacity-0 w-0 overflow-hidden group-hover:opacity-100 group-hover:w-auto group-hover:ml-2">
+                              ${isActive ? "Hide" : "Show"}
+                            </span>
+                          </div>
+                        </button>
+
+                        ${isActive ? html`
+                          <cp-anduplicate
+                            .annotation=${ann.full}
+                            .currentMode=${this.currentMode}
+                          ></cp-anduplicate>
+
+                          ${(!multipleActive && (annotationType === "local" || annotationType === "remote")) ? html`
+                            <cp-anedit
+                              .annotation=${ann.full}
+                              .currentMode=${this.currentMode}
+                              @mode-toggle=${e => this._forwardModeToggle(e)}
+                            ></cp-anedit>
+                            <cp-andelete
+                              .annotation=${ann.full}
+                              .currentMode=${this.currentMode}
+                              @mode-toggle=${e => this._forwardModeToggle(e)}
+                            ></cp-andelete>
+                          ` : null}
+                        ` : null}
+                      </div>
                     </div>
-
-                    ${ann.chars ? html`
-                      <div class="prose prose-sm max-w-none pt-2">
-                        ${unsafeHTML(sanitizeHTML(ann.chars))}
-                      </div>
-                    ` : null}
                   </div>
-
-                  <div class="flex flex-row items-end gap-2">
-                    <button
-                      @click=${() => this.toggleAnnotation(originalIndex)}
-                      class="group flex items-center rounded-full shadow-xl transition-all duration-300 px-3 py-2 w-12 hover:w-28 overflow-hidden h-10
-                        ${isActive ? "bg-red-600" : "bg-blue-600"} text-white hover:bg-red-800">
-                      <div class="flex items-center justify-center w-full transition-all duration-300 group-hover:justify-start group-hover:gap-2">
-                        <i class="fa-solid ${isActive ? "fa-eye-slash" : "fa-magnifying-glass"}
-                          text-lg flex-shrink-0 transition-transform duration-300"></i>
-                        <span class="text-sm font-medium whitespace-nowrap transition-all duration-300 opacity-0 w-0 overflow-hidden group-hover:opacity-100 group-hover:w-auto group-hover:ml-2">
-                          ${isActive ? "Hide" : "Show"}
-                        </span>
-                      </div>
-                    </button>
-
-                    ${isActive ? html`
-                      <cp-anduplicate
-                        .annotation=${ann.full}
-                        .currentMode=${this.currentMode}
-                      ></cp-anduplicate>
-
-                      ${(!multipleActive && (annotationType === "local" || annotationType === "remote")) ? html`
-                        <cp-anedit
-                          .annotation=${ann.full}
-                          .currentMode=${this.currentMode}
-                          @mode-toggle=${e => this._forwardModeToggle(e)}
-                        ></cp-anedit>
-                        <cp-andelete
-                          .annotation=${ann.full}
-                          .currentMode=${this.currentMode}
-                          @mode-toggle=${e => this._forwardModeToggle(e)}
-                        ></cp-andelete>
-                      ` : null}
-                    ` : null}
-                  </div>
-                </div>
-              </li>
-            `;
-        })}
-        </ul>
-      `}
+                </li>
+              `;
+            })}
+          </ul>
+        `}
     `;
   }
 }

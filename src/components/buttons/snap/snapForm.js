@@ -131,6 +131,8 @@ export class CpSnapForm extends UtBase {
           ${this.sizes ? html`
             <cp-spsize
               .sizes="${this.sizes}"
+              .imageWidth="${this.width}"
+              .imageHeight="${this.height}"
               @size-updated="${(e) => {
                 this.size = e.detail.size;
                 this.upscale = e.detail.upscale;
