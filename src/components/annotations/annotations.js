@@ -59,6 +59,7 @@ export class CpAnnotations extends UtBase {
     this.manifestObject = e.detail.manifestObject;
     this._refreshViewer();
   }
+  
   _onFilterAnnotations = (e) => {
     this.filterQuery = e.detail.query;
   }
@@ -85,7 +86,7 @@ export class CpAnnotations extends UtBase {
           });
         }
       } catch (err) {
-        console.warn("⚠️ Impossibile caricare annotazioni da URL:", err);
+        console.warn("⚠️ Unable to load annotations:", err);
       }
     }
 
@@ -180,7 +181,6 @@ export class CpAnnotations extends UtBase {
   }
 
   render() {
-
     const sortedAnnotations = [...(this.activeAnnotations || [])].sort((a, b) => {
       const indexA = this._getOriginalAnnotationIndex(a) ?? 0;
       const indexB = this._getOriginalAnnotationIndex(b) ?? 0;
@@ -188,11 +188,9 @@ export class CpAnnotations extends UtBase {
     });
 
     return html`
-    
       <div class="flex flex-col max-h-[80vh] border border-gray-200 rounded-xl bg-white shadow-sm overflow-hidden">
 
-      <header class="p-4 text-lg font-semibold text-gray-800">
-
+        <header class="p-4 text-lg font-semibold text-gray-800">
           <div class="flex items-center gap-2 mb-2">
             <span class="flex items-center justify-center w-6 h-6">✍🏻</span>
             <span>Annotations</span>
@@ -202,19 +200,15 @@ export class CpAnnotations extends UtBase {
             <div class="flex gap-2 flex-wrap">
               ${sortedAnnotations.map((ann) => {
                 const originalIndex = this._getOriginalAnnotationIndex(ann);
+                const baseBg = getColorVariant(ann.color, "bg", 100);
+                const hoverBg = getColorVariant(ann.color, "bg", -100);
+                const borderClass = getColorVariant(ann.color, "border", 0);
+
                 return html`
                   <div
                     class="flex items-center justify-center rounded-full text-white text-sm font-semibold select-none
-                          w-7 h-7 border-2 cursor-pointer transition-all duration-200 hover:shadow-lg ${getColorVariant(ann.color, "bg", 100)}"
+                          w-7 h-7 border-2 cursor-pointer transition-all duration-200 transform ${baseBg} ${borderClass} hover:${hoverBg} hover:shadow-[0_0_12px_3px_rgba(0,0,0,0.15)] hover:scale-105"
                     @click=${() => this._scrollToAnnotation(ann.id)}
-                    @mouseover=${(e) => {
-                      e.target.classList.add('shadow-[0_0_12px_3px_rgba(0,0,0,0.25)]');
-                      e.target.style.transform = 'scale(1.05)';
-                    }}
-                    @mouseout=${(e) => {
-                      e.target.classList.remove('shadow-[0_0_12px_3px_rgba(0,0,0,0.25)]');
-                      e.target.style.transform = 'scale(1)';
-                    }}
                   >
                     ${originalIndex || '—'}
                   </div>
