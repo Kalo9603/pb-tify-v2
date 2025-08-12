@@ -3,14 +3,16 @@ import { UtBase } from "../../utilities/base.js";
 import { sanitizeHTML } from "../../utilities/lib/utils.js";
 import { unsafeHTML } from "https://esm.sh/lit-html/directives/unsafe-html.js";
 import { config } from "../../utilities/config.js";
+import { getRandomRectColor, getColorVariant } from "../../utilities/lib/utils.js";
 
 export class CpPageMetadata extends UtBase {
-  
+
   static get properties() {
     return {
       manifestObject: { type: Object },
       canvasIndex: { type: Number },
       selectedLanguage: { type: String },
+      barColor: { type: String }
     };
   }
 
@@ -19,6 +21,14 @@ export class CpPageMetadata extends UtBase {
     this.manifestObject = null;
     this.canvasIndex = config.canvas.canvasIndexDefault;
     this.selectedLanguage = "en";
+    this.barColor = "bg-blue-700";
+  }
+
+  updated(changedProps) {
+    if (changedProps.has("canvasIndex")) {
+      let baseColor = getRandomRectColor();
+      this.barColor = getColorVariant(baseColor, "bg", 100); 
+    }
   }
 
   render() {
@@ -40,26 +50,36 @@ export class CpPageMetadata extends UtBase {
     const images = Array.isArray(canvas.images) ? canvas.images : [];
 
     return html`
-      <div class="overflow-hidden max-h-[80vh] border border-gray-200 rounded-xl p-4 mt-4 shadow-sm bg-white">
-        <div class="flex items-baseline justify-between gap-6 mb-4">
-          <header class="text-lg font-semibold text-gray-800">
-            🖼️ Page ${idx + 1} ― ${this._getLabel(canvas)}
-          </header>
+      <div class="relative overflow-hidden max-h-[80vh] border border-gray-200 rounded-xl shadow-sm bg-white mt-4">
+        <div class="absolute inset-y-0 left-0 w-10 ${this.barColor} flex items-center justify-center">
+          <span class="text-white font-bold text-lg drop-shadow-md">${idx + 1}</span>
+        </div>
 
-          ${this._getSequenceLabel()
-            ? html`<h2 class="text-lg text-gray-800 whitespace-nowrap">
-                📚 ${this._getSequenceLabel()}
-              </h2>`
-            : null}
+        <div class="pl-14">
+          <div class="border-b border-gray-200 px-4 py-3 space-y-1 bg-gray-50">
+            ${this._getSequenceLabel()
+              ? html`
+                <h1 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                  <span class="flex items-center justify-center w-6 h-6">📚</span>
+                  <span>${this._getSequenceLabel()}</span>
+                </h1>
+              `
+              : null}
+
+            <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+              <span class="flex items-center justify-center w-6 h-6">🖼️</span>
+              <span>${this._getLabel(canvas)}</span>
+            </h2>
+          </div>
+
+          <div class="p-4 overflow-x-auto">
+            <table class="w-full text-sm text-left text-gray-700 border-collapse">
+              <tbody>
+                ${images.flatMap((img) => this._renderObjectAsRows(img, 0))}
+              </tbody>
+            </table>
+          </div>
         </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm text-left text-gray-700 border-collapse">
-            <tbody>
-              ${images.flatMap((img) => this._renderObjectAsRows(img, 0))}
-            </tbody>
-          </table>
-        </div>
-      </div>
     `;
   }
 

@@ -110,10 +110,12 @@ export class CpMetadata extends UtBase {
 
       m.metadata.forEach((entry) => {
         
-        const label = this.extractValue(entry.label);
+        let label = this.extractValue(entry.label);
         const value = this.extractValue(entry.value);
 
         if (!label) return;
+
+        label = label.charAt(0).toUpperCase() + label.slice(1);
 
         if (entryMap.has(label)) {
           const prev = entryMap.get(label);
@@ -128,7 +130,7 @@ export class CpMetadata extends UtBase {
       Description: m.description,
       Attribution: m.attribution,
       License: m.license,
-      // SeeAlso: m.seeAlso,
+      SeeAlso: m.seeAlso,
       Related: m.related,
       Within: m.within,
     };
@@ -169,7 +171,10 @@ export class CpMetadata extends UtBase {
       <div
         class="flex flex-col overflow-hidden max-h-[80vh] border border-gray-200 rounded-xl p-4 mb-4 shadow-sm bg-white"
       >
-        <header class="text-lg font-semibold text-gray-800 mb-4">📄 Metadata</header>
+        <header class="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-4">
+          <span class="flex items-center justify-center w-6 h-6">📄</span>
+          <span>Metadata</span>
+        </header>
         <div class="overflow-auto">
           <table class="w-full text-sm text-left text-gray-700 border-collapse">
             <tbody>

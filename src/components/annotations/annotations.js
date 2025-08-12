@@ -162,8 +162,13 @@ export class CpAnnotations extends UtBase {
 
   render() {
     return html`
+    
       <div class="flex flex-col max-h-[80vh] border border-gray-200 rounded-xl bg-white shadow-sm overflow-hidden">
-        <header class="p-4 text-lg font-semibold text-gray-800 font-semibold">✍🏻 Annotations</header>
+      
+        <header class="p-4 text-lg font-semibold text-gray-800 flex items-center gap-2">
+          <span class="flex items-center justify-center w-6 h-6">✍🏻</span>
+          <span>Annotations</span>
+        </header>
 
         <section class="p-4 overflow-auto max-h-[60vh]">
           <cp-anviewer
