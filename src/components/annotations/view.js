@@ -281,6 +281,36 @@ export class CpAnViewer extends UtBase {
     }
   }
 
+  scrollToAnnotation(annotationId) {
+    this.updateComplete.then(() => {
+      const annotationElements = this.renderRoot.querySelectorAll('li[data-annotation-id]');
+      const container = this.closest('section.overflow-auto');
+      for (const element of annotationElements) {
+        if (element.dataset.annotationId === annotationId) {
+
+          if (container) {
+            const containerRect = container.getBoundingClientRect();
+            const elemRect = element.getBoundingClientRect();
+            const offset = elemRect.top - containerRect.top - container.clientHeight / 2 + elemRect.height / 2;
+
+            container.scrollBy({ top: offset, behavior: 'smooth' });
+          } else {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+          }
+
+          element.style.transition = 'background-color 0.3s ease';
+          const originalBg = element.style.backgroundColor;
+          element.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+          setTimeout(() => {
+            element.style.backgroundColor = originalBg;
+          }, 1000);
+
+          break;
+        }
+      }
+    });
+  }
+
   _resetUI() {
     this.currentMode = null;
     this.requestUpdate();
@@ -322,7 +352,8 @@ export class CpAnViewer extends UtBase {
                 : `bg-white hover:bg-gray-300`;
 
               return html`
-                <li class="relative flex rounded-md overflow-hidden border transition-colors duration-300">
+                <li class="relative flex rounded-md overflow-hidden border transition-colors duration-300"
+                          data-annotation-id=${ann.full["@id"] || `local-${originalIndex}`}>
                   
                   <div class="flex items-center justify-center w-10 text-white font-bold ${barColorClass}">
                     ${i + 1}

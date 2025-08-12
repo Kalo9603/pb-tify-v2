@@ -1,6 +1,6 @@
 import { html } from "https://esm.sh/lit-element";
 import { UtBase } from "../../utilities/base.js";
-import { generateId } from "../../utilities/lib/utils.js";
+import { generateId, getColorVariant } from "../../utilities/lib/utils.js";
 import { config } from "../../utilities/config.js";
 import "./view.js";
 import "./buttons/add.js";
@@ -160,14 +160,68 @@ export class CpAnnotations extends UtBase {
     this.requestUpdate();
   }
 
+  _scrollToAnnotation = (annotationId) => {
+    const viewer = this.renderRoot.querySelector("cp-anviewer");
+    if (viewer) {
+      viewer.scrollToAnnotation(annotationId);
+    }
+  }
+
+  _getOriginalAnnotationIndex = (activeAnnotation) => {
+    const viewer = this.renderRoot.querySelector("cp-anviewer");
+    if (viewer && viewer.annotations) {
+      const foundIndex = viewer.annotations.findIndex(ann => {
+        const annId = ann.full["@id"] || `local-${viewer.annotations.indexOf(ann)}`;
+        return annId === activeAnnotation.id;
+      });
+      return foundIndex !== -1 ? foundIndex + 1 : null;
+    }
+    return null;
+  }
+
   render() {
+
+    const sortedAnnotations = [...(this.activeAnnotations || [])].sort((a, b) => {
+      const indexA = this._getOriginalAnnotationIndex(a) ?? 0;
+      const indexB = this._getOriginalAnnotationIndex(b) ?? 0;
+      return indexA - indexB;
+    });
+
     return html`
     
       <div class="flex flex-col max-h-[80vh] border border-gray-200 rounded-xl bg-white shadow-sm overflow-hidden">
-      
-        <header class="p-4 text-lg font-semibold text-gray-800 flex items-center gap-2">
-          <span class="flex items-center justify-center w-6 h-6">✍🏻</span>
-          <span>Annotations</span>
+
+      <header class="p-4 text-lg font-semibold text-gray-800">
+
+          <div class="flex items-center gap-2 mb-2">
+            <span class="flex items-center justify-center w-6 h-6">✍🏻</span>
+            <span>Annotations</span>
+          </div>
+          
+          ${sortedAnnotations?.length > 0 ? html`
+            <div class="flex gap-2 flex-wrap">
+              ${sortedAnnotations.map((ann) => {
+                const originalIndex = this._getOriginalAnnotationIndex(ann);
+                return html`
+                  <div
+                    class="flex items-center justify-center rounded-full text-white text-sm font-semibold select-none
+                          w-7 h-7 border-2 cursor-pointer transition-all duration-200 hover:shadow-lg ${getColorVariant(ann.color, "bg", 100)}"
+                    @click=${() => this._scrollToAnnotation(ann.id)}
+                    @mouseover=${(e) => {
+                      e.target.classList.add('shadow-[0_0_12px_3px_rgba(0,0,0,0.25)]');
+                      e.target.style.transform = 'scale(1.05)';
+                    }}
+                    @mouseout=${(e) => {
+                      e.target.classList.remove('shadow-[0_0_12px_3px_rgba(0,0,0,0.25)]');
+                      e.target.style.transform = 'scale(1)';
+                    }}
+                  >
+                    ${originalIndex || '—'}
+                  </div>
+                `;
+              })}
+            </div>
+          ` : ''}
         </header>
 
         <section class="p-4 overflow-auto max-h-[60vh]">
