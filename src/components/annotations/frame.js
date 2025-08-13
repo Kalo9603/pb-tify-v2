@@ -26,7 +26,6 @@ export class CpAnFrame extends UtBase {
   }
 
   constructor() {
-    
     super();
 
     this.url = "";
@@ -80,6 +79,7 @@ export class CpAnFrame extends UtBase {
       container.addEventListener("mousemove", this._onMouseMove.bind(this));
       container.addEventListener("mouseleave", this._onMouseLeave.bind(this));
       container.addEventListener("click", this._onImageClick.bind(this));
+      container.addEventListener("contextmenu", this._onImageRightClick.bind(this));
     }
   }
 
@@ -94,6 +94,17 @@ export class CpAnFrame extends UtBase {
   _resetCoordinates() {
     this._cursorCoords = this._fixedPoint = this._relativeCoords = this._coordinateRect = null;
     this.requestUpdate();
+  }
+
+  _hideCoordinates() {
+    this.showCoordinates = false;
+    this._resetCoordinates();
+    this._stopAutoScroll();
+    
+    const coordsButton = this.renderRoot.querySelector("cp-ancoords");
+    if (coordsButton) {
+      coordsButton.active = false;
+    }
   }
 
   _checkAutoScroll(clientX, clientY) {
@@ -143,10 +154,8 @@ export class CpAnFrame extends UtBase {
     }
   }
 
-  _onMouseMove(e) {
-    this._checkAutoScroll(e.clientX, e.clientY);
-    
-    if (!this.showCoordinates || !this.naturalWidth || !this.naturalHeight) return;
+  _getImageCoords(e) {
+    if (!this.naturalWidth || !this.naturalHeight) return null;
 
     const container = this.renderRoot.querySelector(".image-scroll-container");
     const imageRect = container.firstElementChild.getBoundingClientRect();
@@ -162,26 +171,53 @@ export class CpAnFrame extends UtBase {
     const absoluteY = Math.round(offsetY * scaleY);
 
     if (absoluteX < 0 || absoluteY < 0 || absoluteX > this.naturalWidth || absoluteY > this.naturalHeight) {
-      this._cursorCoords = this._relativeCoords = this._coordinateRect = null;
+      return null;
+    }
+
+    return { x: absoluteX, y: absoluteY, screenX: offsetX, screenY: offsetY };
+  }
+
+  _updateCoordinateRect() {
+    if (!this._fixedPoint || !this._cursorCoords) {
+      this._coordinateRect = null;
       return;
     }
 
-    this._cursorCoords = { x: absoluteX, y: absoluteY, screenX: offsetX, screenY: offsetY };
+    const x1 = Math.min(this._fixedPoint.x, this._cursorCoords.x);
+    const y1 = Math.min(this._fixedPoint.y, this._cursorCoords.y);
+    
+    this._coordinateRect = {
+      x: x1, 
+      y: y1, 
+      w: Math.max(this._fixedPoint.x, this._cursorCoords.x) - x1, 
+      h: Math.max(this._fixedPoint.y, this._cursorCoords.y) - y1, 
+      color: this._fixedPoint.color
+    };
+  }
+
+  _onMouseMove(e) {
+    this._checkAutoScroll(e.clientX, e.clientY);
+    
+    if (!this.showCoordinates) return;
+
+    const coords = this._getImageCoords(e);
+    if (!coords) {
+      this._cursorCoords = this._relativeCoords = this._coordinateRect = null;
+      this.requestUpdate();
+      return;
+    }
+
+    this._cursorCoords = coords;
 
     if (this._fixedPoint) {
-      const dx = absoluteX - this._fixedPoint.x;
-      const dy = absoluteY - this._fixedPoint.y;
+      const dx = coords.x - this._fixedPoint.x;
+      const dy = coords.y - this._fixedPoint.y;
       this._relativeCoords = { dx, dy };
-      
-      const x1 = Math.min(this._fixedPoint.x, absoluteX);
-      const y1 = Math.min(this._fixedPoint.y, absoluteY);
-      this._coordinateRect = {
-        x: x1, y: y1, w: Math.max(this._fixedPoint.x, absoluteX) - x1, 
-        h: Math.max(this._fixedPoint.y, absoluteY) - y1, color: this._fixedPoint.color
-      };
+      this._updateCoordinateRect();
     } else {
       this._relativeCoords = this._coordinateRect = null;
     }
+    
     this.requestUpdate();
   }
 
@@ -206,6 +242,22 @@ export class CpAnFrame extends UtBase {
     this.requestUpdate();
   }
 
+  _onImageRightClick(e) {
+    e.preventDefault(); // Previeni il menu contestuale del browser
+    
+    if (!this.showCoordinates) return;
+
+    // Se siamo in modalità tracciamento rettangolo, torniamo alla modalità indicatore
+    if (this._fixedPoint) {
+      this._fixedPoint = null;
+      this._relativeCoords = this._coordinateRect = null;
+      this.requestUpdate();
+    } else {
+      // Altrimenti nascondiamo completamente le coordinate
+      this._hideCoordinates();
+    }
+  }
+
   _applyZoom(newZoom) {
     newZoom = Math.max(config.frame.zoom.min, Math.min(config.frame.zoom.max, newZoom));
     const container = this.renderRoot.querySelector(".image-scroll-container");
@@ -218,9 +270,17 @@ export class CpAnFrame extends UtBase {
     });
   }
 
-  _zoomIn() { this._applyZoom(this.zoom + config.frame.zoom.step); }
-  _zoomOut() { this._applyZoom(this.zoom - config.frame.zoom.step); }
-  _zoomReset() { this._applyZoom(config.frame.zoom.default); }
+  _zoomIn() { 
+    this._applyZoom(this.zoom + config.frame.zoom.step); 
+  }
+
+  _zoomOut() { 
+    this._applyZoom(this.zoom - config.frame.zoom.step); 
+  }
+
+  _zoomReset() { 
+    this._applyZoom(config.frame.zoom.default); 
+  }
 
   _startZoom(direction) {
     if (this._zoomIntervalId) return;
@@ -242,29 +302,45 @@ export class CpAnFrame extends UtBase {
     const scaleY = (this.baseHeight * this.zoom) / this.naturalHeight;
 
     let rects = this.annotations.map(a => ({
-      ...a, left: a.x * scaleX, top: a.y * scaleY, 
-      width: a.w * scaleX, height: a.h * scaleY, isAnnotation: true
+      ...a, 
+      left: a.x * scaleX, 
+      top: a.y * scaleY, 
+      width: a.w * scaleX, 
+      height: a.h * scaleY, 
+      isAnnotation: true
     }));
 
     if (this.addRect && (this.mode === "add" || this.mode === "edit")) {
       rects.push({
-        ...this.addRect, left: this.addRect.x * scaleX, top: this.addRect.y * scaleY,
-        width: this.addRect.w * scaleX, height: this.addRect.h * scaleY,
-        isAddRect: true, color: this.mode === "add" ? "green" : "orange"
+        ...this.addRect, 
+        left: this.addRect.x * scaleX, 
+        top: this.addRect.y * scaleY,
+        width: this.addRect.w * scaleX, 
+        height: this.addRect.h * scaleY,
+        isAddRect: true, 
+        color: this.mode === "add" ? "green" : "orange"
       });
     }
 
     if (this.draftRect) {
       rects.push({
-        ...this.draftRect, left: this.draftRect.x * scaleX, top: this.draftRect.y * scaleY,
-        width: this.draftRect.w * scaleX, height: this.draftRect.h * scaleY, isDraft: true
+        ...this.draftRect, 
+        left: this.draftRect.x * scaleX, 
+        top: this.draftRect.y * scaleY,
+        width: this.draftRect.w * scaleX, 
+        height: this.draftRect.h * scaleY, 
+        isDraft: true
       });
     }
 
     if (this._coordinateRect && this.showCoordinates) {
       rects.push({
-        ...this._coordinateRect, left: this._coordinateRect.x * scaleX, top: this._coordinateRect.y * scaleY,
-        width: this._coordinateRect.w * scaleX, height: this._coordinateRect.h * scaleY, isCoordinateRect: true
+        ...this._coordinateRect, 
+        left: this._coordinateRect.x * scaleX, 
+        top: this._coordinateRect.y * scaleY,
+        width: this._coordinateRect.w * scaleX, 
+        height: this._coordinateRect.h * scaleY, 
+        isCoordinateRect: true
       });
     }
 
@@ -302,16 +378,126 @@ export class CpAnFrame extends UtBase {
     this._hoveredAnnotation = ann;
   }
 
-  _hideTooltip() { this._hoveredAnnotation = null; }
+  _hideTooltip() { 
+    this._hoveredAnnotation = null; 
+  }
 
   _getDraftStyle(color) {
     const styles = {
-      green: "border-green-700 bg-green-500/40", orange: "border-orange-700 bg-orange-500/40",
-      red: "border-red-700 bg-red-500/40", blue: "border-blue-700 bg-blue-500/40",
-      purple: "border-purple-700 bg-purple-500/40", pink: "border-pink-700 bg-pink-500/40",
-      yellow: "border-yellow-700 bg-yellow-500/40", cyan: "border-cyan-700 bg-cyan-500/40"
+      green: "border-green-700 bg-green-500/40", 
+      orange: "border-orange-700 bg-orange-500/40",
+      red: "border-red-700 bg-red-500/40", 
+      blue: "border-blue-700 bg-blue-500/40",
+      purple: "border-purple-700 bg-purple-500/40", 
+      pink: "border-pink-700 bg-pink-500/40",
+      yellow: "border-yellow-700 bg-yellow-500/40", 
+      cyan: "border-cyan-700 bg-cyan-500/40"
     };
     return styles[color] || styles.red;
+  }
+
+  _renderRect(rect) {
+    const baseClasses = "absolute z-10 rounded-sm box-border border-2";
+    const style = `left: ${rect.left}px; top: ${rect.top}px; width: ${rect.width}px; height: ${rect.height}px;`;
+    
+    if (rect.isDraft) {
+      return html`
+        <div class="${baseClasses} border-dashed opacity-70 ${this._getDraftStyle(rect.color || "red")} transition-all duration-300 ease-in-out pointer-events-auto"
+          style="${style}"
+          @mouseenter="${e => this._showTooltip(e, rect)}" 
+          @mouseleave="${this._hideTooltip}">
+        </div>
+      `;
+    } 
+    
+    if (rect.isAddRect) {
+      return html`
+        <div class="${baseClasses} ${this._getDraftStyle(rect.color)} opacity-80 transition-opacity duration-200 pointer-events-none"
+          style="${style}">
+        </div>
+      `;
+    } 
+    
+    if (rect.isCoordinateRect) {
+      return html`
+        <div class="${baseClasses} z-20 border-dashed ${this._getDraftStyle(rect.color)} opacity-60 transition-opacity duration-200 pointer-events-none"
+          style="${style}">
+        </div>
+      `;
+    } 
+    
+    return html`
+      <div class="${baseClasses} ${rect.color || "border-red-600"} hover:shadow-xl transition-all duration-300 ease-in-out pointer-events-auto"
+        style="${style}"
+        @mouseenter="${e => this._showTooltip(e, rect)}" 
+        @mouseleave="${this._hideTooltip}">
+      </div>
+    `;
+  }
+
+  _renderCoordinateIndicators(zoomedWidth, zoomedHeight) {
+    if (!this.showCoordinates) return null;
+
+    const indicators = [];
+
+    if (this._fixedPoint) {
+      const leftPos = (this._fixedPoint.x / this.naturalWidth) * zoomedWidth - 6;
+      const topPos = (this._fixedPoint.y / this.naturalHeight) * zoomedHeight - 6;
+      
+      indicators.push(html`
+        <div class="absolute w-3 h-3 rounded-full border-2 border-white shadow-lg pointer-events-none z-30 bg-${this._fixedPoint.color}-500"
+          style="left: ${leftPos}px; top: ${topPos}px;">
+        </div>
+        <div class="absolute px-2 py-1 text-xs bg-black/90 text-white rounded shadow pointer-events-none select-none z-30"
+          style="left: ${leftPos + 6}px; top: ${topPos - 24}px; transform: translateX(-50%); white-space: nowrap;">
+          (${this._fixedPoint.x}px, ${this._fixedPoint.y}px)
+        </div>
+      `);
+    }
+
+    if (!this._fixedPoint && this._cursorCoords) {
+      indicators.push(html`
+        <div class="absolute px-2 py-1 text-xs bg-black/80 text-white rounded shadow pointer-events-none select-none z-20"
+          style="left: ${this._cursorCoords.screenX + 10}px; top: ${this._cursorCoords.screenY + 10}px; white-space: nowrap;">
+          (${this._cursorCoords.x}px, ${this._cursorCoords.y}px)
+        </div>
+      `);
+    }
+
+    if (this._relativeCoords && this._cursorCoords) {
+      const sign = (val) => val < 0 ? '-' : '';
+      indicators.push(html`
+        <div class="absolute px-2 py-1 text-xs bg-yellow-700 text-white rounded shadow pointer-events-none select-none z-20"
+          style="left: ${this._cursorCoords.screenX + 10}px; top: ${this._cursorCoords.screenY + 30}px; white-space: nowrap;">
+          (${sign(this._relativeCoords.dx)}${Math.abs(this._relativeCoords.dx)}px, ${sign(this._relativeCoords.dy)}${Math.abs(this._relativeCoords.dy)}px)
+        </div>
+      `);
+    }
+
+    return indicators;
+  }
+
+  _renderTooltip() {
+    if (!this._hoveredAnnotation || 
+        this._hoveredAnnotation.isDraft || 
+        this._hoveredAnnotation.isAddRect || 
+        this._hoveredAnnotation.isCoordinateRect) {
+      return null;
+    }
+
+    return html`
+      <div class="absolute tooltip-animate-in px-3 py-2 text-xs text-white rounded-md shadow-lg pointer-events-none min-w-[10rem] max-w-[24rem] text-center break-words z-30
+        ${getColorVariant(this._hoveredAnnotation.color, 'bg', 200)} ${getColorVariant(this._hoveredAnnotation.color, 'border', 300)}"
+        style="left: ${this._tooltipPosition.x}px; top: ${this._tooltipPosition.y - 30}px; transform: translateX(-50%);">
+        <span class="mr-1 text-sm">${getMotivationIcon(this._hoveredAnnotation.motivation)}</span>
+        <span class="font-medium [&_a]:!text-white [&_a]:no-underline hover:[&_a]:underline [&_a]:transition-all [&_a]:duration-200">
+          ${unsafeHTML(sanitizeHTML(this._hoveredAnnotation.chars || ''))}
+        </span>
+        <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-l-transparent border-r-transparent"
+             style="border-top-color: rgba(31, 41, 55, 0.95); margin-top: -1px;">
+        </div>
+      </div>
+    `;
   }
 
   render() {
@@ -327,7 +513,9 @@ export class CpAnFrame extends UtBase {
             0% { opacity: 0; transform: translateX(-50%) translateY(8px) scale(0.95); }
             100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
           }
-          .tooltip-animate-in { animation: tooltipFadeIn 0.2s ease forwards; }
+          .tooltip-animate-in { 
+            animation: tooltipFadeIn 0.2s ease forwards; 
+          }
         </style>
 
         <div class="flex justify-between items-center mb-4">
@@ -337,80 +525,57 @@ export class CpAnFrame extends UtBase {
 
         <div class="image-scroll-container overflow-auto border border-gray-300 rounded-lg shadow mb-4"
              style="max-width: 100%; height: 405px; background: #eee; position: relative;">
+          
           <div style="position: relative; width: ${zoomedWidth}px; height: ${zoomedHeight}px; transition: width 0.3s ease, height 0.3s ease; cursor: ${this.showCoordinates ? 'crosshair' : 'default'};">
-            <img src="${this.url}" draggable="false" style="width: 100%; height: 100%; display: block; pointer-events: none; user-select: none" />
+            
+            <img src="${this.url}" 
+                 draggable="false" 
+                 style="width: 100%; height: 100%; display: block; pointer-events: none; user-select: none" />
 
-            ${this.scaledRects.map(rect => {
-              const baseClasses = "absolute z-10 rounded-sm box-border border-2";
-              
-              if (rect.isDraft) {
-                return html`<div class="${baseClasses} border-dashed opacity-70 ${this._getDraftStyle(rect.color || "red")} transition-all duration-300 ease-in-out pointer-events-auto"
-                  style="left: ${rect.left}px; top: ${rect.top}px; width: ${rect.width}px; height: ${rect.height}px;"
-                  @mouseenter="${e => this._showTooltip(e, rect)}" @mouseleave="${this._hideTooltip}"></div>`;
-              } else if (rect.isAddRect) {
-                return html`<div class="${baseClasses} ${this._getDraftStyle(rect.color)} opacity-80 transition-opacity duration-200 pointer-events-none"
-                  style="left: ${rect.left}px; top: ${rect.top}px; width: ${rect.width}px; height: ${rect.height}px;"></div>`;
-              } else if (rect.isCoordinateRect) {
-                return html`<div class="${baseClasses} z-20 border-dashed ${this._getDraftStyle(rect.color)} opacity-60 transition-opacity duration-200 pointer-events-none"
-                  style="left: ${rect.left}px; top: ${rect.top}px; width: ${rect.width}px; height: ${rect.height}px;"></div>`;
-              } else {
-                return html`<div class="${baseClasses} ${rect.color || "border-red-600"} hover:shadow-xl transition-all duration-300 ease-in-out pointer-events-auto"
-                  style="left: ${rect.left}px; top: ${rect.top}px; width: ${rect.width}px; height: ${rect.height}px;"
-                  @mouseenter="${e => this._showTooltip(e, rect)}" @mouseleave="${this._hideTooltip}"></div>`;
-              }
-            })}
-
-            ${this.showCoordinates && this._fixedPoint ? html`
-              <div class="absolute w-3 h-3 rounded-full border-2 border-white shadow-lg pointer-events-none z-30 bg-${this._fixedPoint.color}-500"
-                style="left: ${(this._fixedPoint.x / this.naturalWidth) * zoomedWidth - 6}px; top: ${(this._fixedPoint.y / this.naturalHeight) * zoomedHeight - 6}px;"></div>
-              <div class="absolute px-2 py-1 text-xs bg-black/90 text-white rounded shadow pointer-events-none select-none z-30"
-                style="left: ${(this._fixedPoint.x / this.naturalWidth) * zoomedWidth}px; top: ${(this._fixedPoint.y / this.naturalHeight) * zoomedHeight - 30}px; transform: translateX(-50%); white-space: nowrap;">
-                (${this._fixedPoint.x}px, ${this._fixedPoint.y}px)</div>` : null}
-
-            ${this.showCoordinates && !this._fixedPoint && this._cursorCoords ? html`
-              <div class="absolute px-2 py-1 text-xs bg-black/80 text-white rounded shadow pointer-events-none select-none z-20"
-                style="left: ${this._cursorCoords.screenX + 10}px; top: ${this._cursorCoords.screenY + 10}px; white-space: nowrap;">
-                (${this._cursorCoords.x}px, ${this._cursorCoords.y}px)</div>` : null}
-
-            ${this.showCoordinates && this._relativeCoords && this._cursorCoords ? html`
-              <div class="absolute px-2 py-1 text-xs bg-yellow-700 text-white rounded shadow pointer-events-none select-none z-20"
-                style="left: ${this._cursorCoords.screenX + 10}px; top: ${this._cursorCoords.screenY + 30}px; white-space: nowrap;">
-                (${this._relativeCoords.dx < 0 ? '-' : ''}${this._relativeCoords.dx}px, ${this._relativeCoords.dy < 0 ? '-' : ''}${this._relativeCoords.dy}px)</div>` : null}
-
-            ${this._hoveredAnnotation && !this._hoveredAnnotation.isDraft && !this._hoveredAnnotation.isAddRect && !this._hoveredAnnotation.isCoordinateRect ? html`
-              <div class="absolute tooltip-animate-in px-3 py-2 text-xs text-white rounded-md shadow-lg pointer-events-none min-w-[10rem] max-w-[24rem] text-center break-words z-30
-                ${getColorVariant(this._hoveredAnnotation.color, 'bg', 200)} ${getColorVariant(this._hoveredAnnotation.color, 'border', 300)}"
-                style="left: ${this._tooltipPosition.x}px; top: ${this._tooltipPosition.y - 30}px;">
-                <span class="mr-1 text-sm">${getMotivationIcon(this._hoveredAnnotation.motivation)}</span>
-                <span class="font-medium">${unsafeHTML(sanitizeHTML(this._hoveredAnnotation.chars || ''))}</span>
-                <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-l-transparent border-r-transparent"
-                     style="border-top-color: rgba(31, 41, 55, 0.95); margin-top: -1px;"></div></div>` : null}
+            ${this.scaledRects.map(rect => this._renderRect(rect))}
+            ${this._renderCoordinateIndicators(zoomedWidth, zoomedHeight)}
+            ${this._renderTooltip()}
+            
           </div>
         </div>
 
         <div class="flex flex-wrap justify-center items-center gap-4">
-          <button @click="${this._zoomOut}" @mousedown="${() => this._startZoom('out')}" @mouseup="${this._stopZoom}" @mouseleave="${this._stopZoom}"
-            ?disabled="${this.zoom <= config.frame.zoom.min}"
-            class="rounded-full bg-blue-600 text-white shadow-md px-4 py-2 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
-            <i class="fa-solid fa-minus"></i></button>
+          <button @click="${this._zoomOut}" 
+                  @mousedown="${() => this._startZoom('out')}" 
+                  @mouseup="${this._stopZoom}" 
+                  @mouseleave="${this._stopZoom}"
+                  ?disabled="${this.zoom <= config.frame.zoom.min}"
+                  class="rounded-full bg-blue-600 text-white shadow-md px-4 py-2 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+            <i class="fa-solid fa-minus"></i>
+          </button>
 
           <div class="inline-flex items-center border border-gray-300 rounded px-2 py-1 bg-white">
+            <input type="number" 
+                   min="${config.frame.zoom.min * 100}" 
+                   max="${config.frame.zoom.max * 100}" 
+                   .value="${(this.zoom * 100).toFixed(0)}"
+                   @change="${(e) => {
+                     const val = parseFloat(e.target.value);
+                     this._applyZoom((!isNaN(val) && val >= config.frame.zoom.min * 100 && val <= config.frame.zoom.max * 100) ? val / 100 : 1);
+                   }}" 
+                   class="w-12 text-right font-medium text-gray-700 focus:outline-none" 
+                   style="border: none; outline: none;" />
+            <span class="ml-1 text-gray-600 font-semibold">%</span>
+          </div>
 
-            <input type="number" min="${config.frame.zoom.min * 100}" max="${config.frame.zoom.max * 100}" .value="${(this.zoom * 100).toFixed(0)}"
-              @change="${(e) => {
-                const val = parseFloat(e.target.value);
-                this._applyZoom((!isNaN(val) && val >= config.frame.zoom.min * 100 && val <= config.frame.zoom.max * 100) ? val / 100 : 1);
-              }}" class="w-12 text-right font-medium text-gray-700 focus:outline-none" style="border: none; outline: none;" />
-            <span class="ml-1 text-gray-600 font-semibold">%</span></div>
-
-          <button @click="${this._zoomIn}" @mousedown="${() => this._startZoom('in')}" @mouseup="${this._stopZoom}" @mouseleave="${this._stopZoom}"
-            ?disabled="${this.zoom >= config.frame.zoom.max}"
-            class="rounded-full bg-blue-600 text-white shadow-md px-4 py-2 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
-            <i class="fa-solid fa-plus"></i></button>
+          <button @click="${this._zoomIn}" 
+                  @mousedown="${() => this._startZoom('in')}" 
+                  @mouseup="${this._stopZoom}" 
+                  @mouseleave="${this._stopZoom}"
+                  ?disabled="${this.zoom >= config.frame.zoom.max}"
+                  class="rounded-full bg-blue-600 text-white shadow-md px-4 py-2 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+            <i class="fa-solid fa-plus"></i>
+          </button>
 
           <button @click="${this._zoomReset}"
-            class="rounded-full bg-gray-500 text-white shadow-md px-4 py-2 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-colors duration-300">
-            <i class="fa-solid fa-rotate-left"></i></button>
+                  class="rounded-full bg-gray-500 text-white shadow-md px-4 py-2 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-colors duration-300">
+            <i class="fa-solid fa-rotate-left"></i>
+          </button>
         </div>
       </div>
     `;

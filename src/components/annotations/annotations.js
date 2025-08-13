@@ -181,6 +181,7 @@ export class CpAnnotations extends UtBase {
   }
 
   render() {
+
     const sortedAnnotations = [...(this.activeAnnotations || [])].sort((a, b) => {
       const indexA = this._getOriginalAnnotationIndex(a) ?? 0;
       const indexB = this._getOriginalAnnotationIndex(b) ?? 0;
@@ -188,6 +189,7 @@ export class CpAnnotations extends UtBase {
     });
 
     return html`
+
       <div class="flex flex-col max-h-[80vh] border border-gray-200 rounded-xl bg-white shadow-sm overflow-hidden">
 
         <header class="p-4 text-lg font-semibold text-gray-800">
@@ -197,8 +199,11 @@ export class CpAnnotations extends UtBase {
           </div>
           
           ${sortedAnnotations?.length > 0 ? html`
+          
             <div class="flex gap-2 flex-wrap">
+
               ${sortedAnnotations.map((ann) => {
+                
                 const originalIndex = this._getOriginalAnnotationIndex(ann);
                 const baseBg = getColorVariant(ann.color, "bg", 100);
                 const hoverBg = getColorVariant(ann.color, "bg", -100);

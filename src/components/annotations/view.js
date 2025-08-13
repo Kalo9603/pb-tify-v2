@@ -1,8 +1,10 @@
 import { html } from "https://esm.sh/lit-element";
 import { unsafeHTML } from "https://esm.sh/lit-html/directives/unsafe-html.js";
 import { UtBase } from "../../utilities/base.js";
-import { getMotivationIcon, generateId, isLocalUrl, 
-        parseMarkdownToHtml, sanitizeHTML, getColorVariant } from "../../utilities/lib/utils.js";
+import {
+  getMotivationIcon, generateId, isLocalUrl,
+  parseMarkdownToHtml, sanitizeHTML, getColorVariant
+} from "../../utilities/lib/utils.js";
 import { config } from "../../utilities/config.js";
 import "./buttons/duplicate.js";
 import "./buttons/edit.js";
@@ -66,7 +68,6 @@ export class CpAnViewer extends UtBase {
 
   _filterAnnotations(e) {
     this.filterQuery = e.detail.query;
-    console.log("🔍 Filtro ricevuto:", this.filterQuery);
     this.requestUpdate("filterQuery");
   }
 
@@ -159,7 +160,7 @@ export class CpAnViewer extends UtBase {
   }
 
   async fetchAnnotations() {
-    
+
     if (!this.manifestObject) {
       console.warn("No manifest object available.");
       return;
@@ -298,14 +299,8 @@ export class CpAnViewer extends UtBase {
             element.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
           }
 
-          element.style.transition = 'background-color 0.3s ease';
-          const originalBg = element.style.backgroundColor;
-          element.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
-          setTimeout(() => {
-            element.style.backgroundColor = originalBg;
-          }, 1000);
-
           break;
+
         }
       }
     });
@@ -337,21 +332,21 @@ export class CpAnViewer extends UtBase {
         : html`
           <ul class="space-y-4">
             ${filteredAnnotations.map(({ ann, originalIndex }, i) => {
-              const annId = ann.full["@id"] || `local-${originalIndex}`;
-              const activeObj = this.activeAnnotations.find(a => a.id === annId);
-              const isActive = !!activeObj;
-              const annotationColorClass = activeObj?.color || "";
-              const annotationType = this._getAnnotationType(ann);
+          const annId = ann.full["@id"] || `local-${originalIndex}`;
+          const activeObj = this.activeAnnotations.find(a => a.id === annId);
+          const isActive = !!activeObj;
+          const annotationColorClass = activeObj?.color || "";
+          const annotationType = this._getAnnotationType(ann);
 
-              const barColorClass = isActive
-                ? getColorVariant(annotationColorClass, "bg", 200)
-                : "bg-gray-400";
+          const barColorClass = isActive
+            ? getColorVariant(annotationColorClass, "bg", 200)
+            : "bg-gray-400";
 
-              const baseHoverClass = isActive
-                ? `${getColorVariant(annotationColorClass, "bg", -400)} hover:${getColorVariant(annotationColorClass, "bg", -200)}`
-                : `bg-white hover:bg-gray-300`;
+          const baseHoverClass = isActive
+            ? `${getColorVariant(annotationColorClass, "bg", -400)} hover:${getColorVariant(annotationColorClass, "bg", -200)}`
+            : `bg-white hover:bg-gray-300`;
 
-              return html`
+          return html`
                 <li class="relative flex rounded-md overflow-hidden border transition-colors duration-300"
                           data-annotation-id=${ann.full["@id"] || `local-${originalIndex}`}>
                   
@@ -369,10 +364,10 @@ export class CpAnViewer extends UtBase {
                           </span>
 
                           ${ann.isLocal
-                            ? html`<span class="ml-2 px-2 py-1 rounded text-[10px] font-sans uppercase font-semibold text-white bg-green-600">Local</span>`
-                            : annotationType === "remote"
-                              ? html`<span class="ml-2 px-2 py-1 rounded text-[10px] font-sans uppercase font-semibold text-white bg-purple-600">Remote</span>`
-                              : html`<span class="ml-2 px-2 py-1 rounded text-[10px] font-sans uppercase font-semibold text-white bg-blue-500">Source</span>`}
+              ? html`<span class="ml-2 px-2 py-1 rounded text-[10px] font-sans uppercase font-semibold text-white bg-green-600">Local</span>`
+              : annotationType === "remote"
+                ? html`<span class="ml-2 px-2 py-1 rounded text-[10px] font-sans uppercase font-semibold text-white bg-purple-600">Remote</span>`
+                : html`<span class="ml-2 px-2 py-1 rounded text-[10px] font-sans uppercase font-semibold text-white bg-blue-500">Source</span>`}
                         </div>
 
                         ${ann.chars ? html`
@@ -420,7 +415,7 @@ export class CpAnViewer extends UtBase {
                   </div>
                 </li>
               `;
-            })}
+        })}
           </ul>
         `}
     `;
