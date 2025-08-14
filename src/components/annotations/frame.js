@@ -233,7 +233,7 @@ export class CpAnFrame extends UtBase {
   _onImageClick(e) {
     if (!this.showCoordinates || !this._cursorCoords) return;
     
-    const colors = ['red', 'blue', 'green', 'purple', 'orange', 'pink', 'yellow', 'cyan'];
+    const colors = config.colors;
     this._fixedPoint = {
       ...this._cursorCoords,
       color: colors[Math.floor(Math.random() * colors.length)]
@@ -243,17 +243,15 @@ export class CpAnFrame extends UtBase {
   }
 
   _onImageRightClick(e) {
-    e.preventDefault(); // Previeni il menu contestuale del browser
+    e.preventDefault();
     
     if (!this.showCoordinates) return;
 
-    // Se siamo in modalità tracciamento rettangolo, torniamo alla modalità indicatore
     if (this._fixedPoint) {
       this._fixedPoint = null;
       this._relativeCoords = this._coordinateRect = null;
       this.requestUpdate();
     } else {
-      // Altrimenti nascondiamo completamente le coordinate
       this._hideCoordinates();
     }
   }
@@ -383,17 +381,13 @@ export class CpAnFrame extends UtBase {
   }
 
   _getDraftStyle(color) {
-    const styles = {
-      green: "border-green-700 bg-green-500/40", 
-      orange: "border-orange-700 bg-orange-500/40",
-      red: "border-red-700 bg-red-500/40", 
-      blue: "border-blue-700 bg-blue-500/40",
-      purple: "border-purple-700 bg-purple-500/40", 
-      pink: "border-pink-700 bg-pink-500/40",
-      yellow: "border-yellow-700 bg-yellow-500/40", 
-      cyan: "border-cyan-700 bg-cyan-500/40"
-    };
-    return styles[color] || styles.red;
+
+    const styles = new Map(
+      config.colors.map(c => [c, `border-${c}-700 bg-${c}-500/40`])
+    );
+
+    return styles.get(color) || styles.get("red");
+    
   }
 
   _renderRect(rect) {
