@@ -283,7 +283,7 @@ export class CpAnFrame extends UtBase {
   _startZoom(direction) {
     if (this._zoomIntervalId) return;
     direction === 'in' ? this._zoomIn() : this._zoomOut();
-    this._zoomIntervalId = setInterval(() => direction === 'in' ? this._zoomIn() : this._zoomOut(), 100);
+    this._zoomIntervalId = setInterval(() => direction === 'in' ? this._zoomIn() : this._zoomOut(), config.frame.zoom.timing);
   }
 
   _stopZoom() {

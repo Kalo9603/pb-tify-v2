@@ -62,7 +62,8 @@ export const config = {
       default: 1,
       min: 0.25,
       max: 25,
-      step: 0.05
+      step: 0.05,
+      timing: 250   // ms
     },
 
     scroll: {
