@@ -420,11 +420,6 @@ export class PbTifyV2 extends UtBase {
       }
     ];
 
-    this.dispatchEvent(new CustomEvent("annotation-color-updated", {
-      detail: { id: detail.id, color: this.activeAnnotations.find(a => a.id === detail.id).color },
-      bubbles: true, composed: true
-    }));
-
     this._updateFrameData();
 
   }
