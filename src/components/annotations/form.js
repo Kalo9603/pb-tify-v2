@@ -198,47 +198,53 @@ export class CpAnForm extends UtBase {
     }
 
     if (this.mode === "delete") {
-      return html`
-        <div class="flex flex-col items-center gap-4 pt-2 border-t border-gray-200">
-          <label
-            class="flex items-center gap-3 text-sm text-red-800 font-semibold cursor-pointer select-none
-                  transition-colors duration-200 hover:text-red-600"
-          >
-            <input
-              type="checkbox"
-              class="form-checkbox h-5 w-5 text-red-700 border-2 border-red-500 rounded focus:ring-2 focus:ring-red-400"
-              .checked=${this.confirmDelete}
-              @change=${e => this.confirmDelete = e.target.checked}
-            />
-            <span>I'm sure I want to delete this annotation.</span>
-          </label>
-
-            ${makeButton(
-        "Delete",
-        "fa-solid fa-trash",
-        `bg-red-600 ${!this.confirmDelete ? "opacity-50 cursor-not-allowed" : ""}`,
-        this.confirmDelete ? this.deleteAnnotation : () => { }
-      )}
-        </div>
-      `;
-    }
-
-    if (this.mode === "export") {
-      return html`
+      return html `
         <div class="flex items-center justify-center gap-6 pt-2 border-t border-gray-200">
-          ${makeButton("Export", "fa-solid fa-download", "bg-blue-600", () => {
-        this.dispatchEvent(new CustomEvent("annotation-export", {
-          bubbles: true,
-          composed: true
-        }));
-      })}
-        </div>
-      `;
-    }
+
+          <button
+            type="button"
+            class="group flex items-center rounded-full shadow-xl transition-all duration-300 px-3 py-2 w-12
+                  ${this.confirmDelete ? 'bg-green-600' : 'bg-gray-600'} text-white hover:shadow-md overflow-hidden h-10 hover:w-[150px]"
+            @click=${() => {
+              if (!this.confirmDelete) {
+                this.confirmDelete = true;
+                const btn = this.shadowRoot.querySelector('#confirm-btn');
+                btn.classList.remove('bg-green-600');
+                btn.classList.add('bg-red-700');
+                setTimeout(() => {
+                  btn.classList.remove('bg-red-700');
+                  btn.classList.add('bg-green-600');
+                  this.requestUpdate();
+                }, 2000);
+              } else {
+                this.confirmDelete = false;
+              }
+            }}
+            id="confirm-btn"
+          >
+            <div class="flex items-center justify-center w-full transition-all duration-300 group-hover:justify-start group-hover:gap-2">
+              <i class="fa-solid ${this.confirmDelete ? 'fa-check' : 'fa-xmark'} flex-shrink-0 transition-transform duration-300"></i>
+              <span
+                class="text-sm font-medium whitespace-nowrap transition-all duration-300
+                      opacity-0 w-0 overflow-hidden group-hover:opacity-100 group-hover:w-auto group-hover:ml-2"
+              >
+                ${this.confirmDelete ? "I'm not sure" : "Confirm Delete"}
+              </span>
+            </div>
+          </button>
+
+          ${makeButton(
+            "Delete",
+            "fa-solid fa-trash",
+            `bg-red-600 ${!this.confirmDelete ? "opacity-50 cursor-not-allowed" : ""}`,
+            this.confirmDelete ? this.deleteAnnotation : () => {}
+          )}
+        </div> ` 
+      
+      }
 
     return null;
   }
-
 
   render() {
     const titleMap = {
