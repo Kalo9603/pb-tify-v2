@@ -63,7 +63,15 @@ export class CpAnImport extends UtBase {
     const filtered = newAnnotations.filter(ann => {
       const annId = ann["@id"];
       const withinId = ann.on?.within?.["@id"];
-      return annId && withinId === manifestId;
+      const onTarget = typeof ann.on === "string"
+        ? ann.on
+        : ann.on?.full || ann.on?.["@id"] || ann.on?.id;
+
+      return (
+        annId &&
+        withinId === manifestId &&
+        onTarget === canvasId
+      );
     });
 
     if (filtered.length === 0) {
