@@ -87,7 +87,7 @@ export class CpLangSelector extends UtBase {
   }
 
   _handleClickOutside(event) {
-    if (!this.shadowRoot) return;
+    if (!this.renderRoot) return;
     const path = event.composedPath();
     if (!path.includes(this)) {
       this.closeDropdown();

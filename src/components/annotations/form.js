@@ -202,7 +202,7 @@ export class CpAnForm extends UtBase {
             @click=${() => {
               if (!this.confirmDelete) {
                 this.confirmDelete = true;
-                const btn = this.shadowRoot.querySelector('#confirm-btn');
+                const btn = this.renderRoot.querySelector('#confirm-btn');
                 btn.classList.remove('bg-green-600');
                 btn.classList.add('bg-red-700');
                 setTimeout(() => {
