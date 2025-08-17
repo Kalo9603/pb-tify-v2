@@ -146,12 +146,6 @@ export class CpAnForm extends UtBase {
     this.chars = "";
     this.annotationToEdit = null;
     this.requestUpdate();
-
-    this.dispatchEvent(new CustomEvent("form-closed", {
-      bubbles: true,
-      composed: true
-    }));
-
   };
 
   _resetToOriginal = () => {
