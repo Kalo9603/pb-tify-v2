@@ -385,6 +385,11 @@ export class CpAnForm extends UtBase {
       composed: true
     }));
 
+    this.dispatchEvent(new CustomEvent("hide-all-annotations", { 
+      bubbles: true, 
+      composed: true 
+    }));
+
     this._resetForm();
   };
 
@@ -397,7 +402,13 @@ export class CpAnForm extends UtBase {
       composed: true
     }));
 
+    this.dispatchEvent(new CustomEvent("hide-all-annotations", { 
+      bubbles: true, 
+      composed: true 
+    }));
+
     this._resetForm();
+
   };
 
 }

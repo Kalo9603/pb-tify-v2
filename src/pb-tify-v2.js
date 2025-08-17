@@ -235,6 +235,10 @@ export class PbTifyV2 extends UtBase {
 
   _onCanvasChange(e) {
     this.currentCanvasIndex = e.detail.canvasIndex;
+    this.dispatchEvent(new CustomEvent("hide-all-annotations", { 
+      bubbles: true, 
+      composed: true 
+    }));
   }
 
   loadManifest(manifest, url = "", isLocal = false) {
@@ -260,6 +264,12 @@ export class PbTifyV2 extends UtBase {
     this.availableLanguages = langs;
     this.selectedLanguage = langs[0] || "";
     this.currentCanvasIndex = 0;
+
+    this.dispatchEvent(new CustomEvent("hide-all-annotations", { 
+      bubbles: true, 
+      composed: true 
+    }));
+
   }
 
   clearManifest() {
@@ -304,6 +314,11 @@ export class PbTifyV2 extends UtBase {
     this._updateFrameData();
 
     this.dispatchEvent(new CustomEvent("reset-ui", { bubbles: true, composed: true }));
+
+    this.dispatchEvent(new CustomEvent("hide-all-annotations", { 
+      bubbles: true, 
+      composed: true 
+    }));
 
     this.requestUpdate();
 
