@@ -24,10 +24,27 @@ blockquote {
   font-style: italic;
   position: relative;
   transition: border-left-color 0.3s ease, background-color 0.3s ease;
+  overflow: hidden;
+}
+
+blockquote::before {
+  content: "\f10d";
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  position: absolute;
+  top: 10%;
+  left: 80%;
+  font-size: 5rem;
+  color: rgba(0, 0, 0, 0.05);
+  pointer-events: none;
+  transform: translate(-50%, -50%) rotate(10deg);
+  z-index: 0;
 }
 
 blockquote p {
   margin: 0;
+  position: relative;
+  z-index: 1;
 }
 
 blockquote p:not(:last-child) {
