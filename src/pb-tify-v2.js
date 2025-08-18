@@ -161,7 +161,7 @@ export class PbTifyV2 extends UtBase {
     if (frame) {
       frame.mode = newMode;
 
-      if (newMode === "edit" && annotation) {
+      if (newMode !== "add" && annotation) {
         const selector = annotation.on?.selector?.value?.replace("xywh=", "").split(",").map(Number);
         if (selector && selector.length >= 4) {
           frame.draftRect = {
@@ -169,7 +169,7 @@ export class PbTifyV2 extends UtBase {
             y: selector[1] || 0,
             w: selector[2] || 0,
             h: selector[3] || 0,
-            color: "orange"
+            color: "orange"       // default value
           };
         }
       } else if (newMode !== "edit") {
