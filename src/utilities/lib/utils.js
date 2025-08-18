@@ -25,7 +25,8 @@ export function sanitizeHTML(input) {
   return DOMPurify.sanitize(input, {
     ALLOWED_TAGS: [
       "a", "b", "i", "u", "em", "strong", "br", "p",
-      "ul", "ol", "li", "span", "code", "pre", "blockquote"
+      "ul", "ol", "li", "span", "code", "pre", "blockquote", "del", "mark", "sup", "sub",
+      "h1", "h2", "h3", "h4", "h5", "h6"
     ],
     ALLOWED_ATTR: ["href", "title", "target", "rel", "class"]
   });
@@ -220,6 +221,10 @@ export function parseMarkdownToHtml(markdown) {
   html = html.replace(/^\s*\d+\. (.*)$/gm, "<ol><li>$1</li></ol>");
   html = html.replace(/<\/ol>\s*<ol>/g, "");
 
+  // Apice e pedice
+  html = html.replace(/_\((.*?)\)/g, "<sub>$1</sub>");
+  html = html.replace(/\^\((.*?)\)/g, "<sup>$1</sup>");
+
   // Grassetto e corsivo combinati
   html = html.replace(/\*\*\*(.*?)\*\*\*/g, "<strong><em>$1</em></strong>");
   html = html.replace(/___(.*?)___/g, "<strong><em>$1</em></strong>");
@@ -231,6 +236,12 @@ export function parseMarkdownToHtml(markdown) {
   // Corsivo
   html = html.replace(/\*(.*?)\*/g, "<em>$1</em>");
   html = html.replace(/_(.*?)_/g, "<em>$1</em>");
+
+  // Barrato
+  html = html.replace(/~~(.*?)~~/g, "<del>$1</del>"),
+
+  // Evidenziato
+  html = html.replace(/==(.*?)==/g, "<mark>$1</mark>"),
 
   // Link
   html = html.replace(/\[(.*?)\]\((.*?)\)/g, `<a href="$2" target="_blank" 

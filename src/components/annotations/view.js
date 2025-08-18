@@ -371,7 +371,7 @@ export class CpAnViewer extends UtBase {
                         </div>
 
                         ${ann.chars ? html`
-                          <div class="prose prose-sm max-w-none pt-1">
+                          <div class="prose prose-sm max-w-none pt-1" id="annotation-${annId}">
                             ${unsafeHTML(sanitizeHTML(ann.chars))}
                           </div>
                         ` : null}

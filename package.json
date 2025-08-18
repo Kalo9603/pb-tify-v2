@@ -16,7 +16,8 @@
   "repository": "https://github.com/Kalo9603/pb-tify-v2/tree/test",
   "dependencies": {
     "@teipublisher/pb-components": "latest",
-    "dompurify": "^3.2.6"
+    "dompurify": "^3.2.6",
+    "tailwind-colors-vars": "^1.0.1"
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.18.6",
