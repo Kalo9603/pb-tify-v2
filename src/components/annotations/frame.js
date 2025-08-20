@@ -234,10 +234,36 @@ export class CpAnFrame extends UtBase {
     if (!this.showCoordinates || !this._cursorCoords) return;
     
     const colors = config.colors;
+
     this._fixedPoint = {
       ...this._cursorCoords,
       color: colors[Math.floor(Math.random() * colors.length)]
     };
+
+    if (this._coordinateRect && (this.mode === "add" || this.mode === "edit")) {
+
+      let finalX = this._coordinateRect.x;
+      let finalY = this._coordinateRect.y;
+      let finalW = this._coordinateRect.w;
+      let finalH = this._coordinateRect.h;
+      
+      if (finalW < 0) {
+        finalX += finalW;
+        finalW = Math.abs(finalW);
+      }
+      
+      if (finalH < 0) {
+        finalY += finalH;
+        finalH = Math.abs(finalH);
+      }
+      
+      document.dispatchEvent(new CustomEvent("coordinates-to-form", {
+        detail: { x: finalX, y: finalY, w: finalW, h: finalH },
+        bubbles: true,
+        composed: true
+      }));
+    }
+  
     this._coordinateRect = null;
     this.requestUpdate();
   }

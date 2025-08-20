@@ -40,6 +40,16 @@ export class CpAnForm extends UtBase {
     this.confirmDelete = false;
   }
 
+  firstUpdated() {
+    super.firstUpdated?.();
+    document.addEventListener("coordinates-to-form", this._handleCoordinatesFromFrame.bind(this));
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    document.removeEventListener("coordinates-to-form", this._handleCoordinatesFromFrame.bind(this));
+}
+
   get imageUrl() {
     const canvas = this.manifestObject?.sequences?.[0]?.canvases?.[this.canvasIndex];
     return canvas?.images?.[0]?.resource?.["@id"] ?? "";
@@ -121,6 +131,15 @@ export class CpAnForm extends UtBase {
     if (prop === "h" && intVal <= H - this.y) {
       this.h = intVal;
     }
+  }
+
+  _handleCoordinatesFromFrame(e) {
+    const { x, y, w, h } = e.detail;
+    this.x = x;
+    this.y = y; 
+    this.w = w;
+    this.h = h;
+    this.requestUpdate();
   }
 
   setAnnotationData(annotation) {
