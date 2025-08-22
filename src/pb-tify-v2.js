@@ -208,6 +208,8 @@ export class PbTifyV2 extends UtBase {
   }
 
   hideFrame() {
+    const frame = this.renderRoot.querySelector("cp-anframe");
+    frame.hideCoordinates();
     this.frameData = {
       url: "",
       x: 0,
@@ -312,6 +314,13 @@ export class PbTifyV2 extends UtBase {
     this.activeAnnotations = [];
 
     this._updateFrameData();
+
+    const frame = this.renderRoot.querySelector("cp-anframe");
+    
+    if (frame) {
+      frame.hideCoordinates();
+      frame.resetFrame();
+    }
 
     this.dispatchEvent(new CustomEvent("reset-ui", { bubbles: true, composed: true }));
 
@@ -447,6 +456,8 @@ export class PbTifyV2 extends UtBase {
   _hideAllAnnotations() {
     this.activeAnnotations = [];
     this._updateFrameData();
+    const frame = this.renderRoot.querySelector("cp-anframe");
+    frame.hideCoordinates();
   }
 
   _updateFrameData() {

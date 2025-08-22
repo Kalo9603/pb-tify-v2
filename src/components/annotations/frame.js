@@ -96,7 +96,7 @@ export class CpAnFrame extends UtBase {
     this.requestUpdate();
   }
 
-  _hideCoordinates() {
+  hideCoordinates() {
     this.showCoordinates = false;
     this._resetCoordinates();
     this._stopAutoScroll();
@@ -278,7 +278,7 @@ export class CpAnFrame extends UtBase {
       this._relativeCoords = this._coordinateRect = null;
       this.requestUpdate();
     } else {
-      this._hideCoordinates();
+      this.hideCoordinates();
     }
   }
 
@@ -388,6 +388,7 @@ export class CpAnFrame extends UtBase {
     this.clearAddRect();
     this.draftRect = null;
     this._stopAutoScroll();
+    this._zoomReset();
   }
 
   disconnectedCallback() {
