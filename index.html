@@ -1,21 +1,30 @@
 <html>
     <head>
-        <title>Using pb-clipboard</title>
-        <style>
-            pb-clipboard {
-                margin-bottom: 20px;
-            }
-        </style>
-        <script type="module" src="node_modules/@teipublisher/pb-components/src/pb-page.js"></script>
-        <script type="module" src="src/pb-clipboard.js"></script>
+        <title>Progetto Apollon - pb-tify-v2</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="./src/style/main.css">
     </head>
     <body>
-        <h1>Using pb-clipboard</h1>
 
-        <pb-page locales="./i18n/{{ns}}/{{lng}}.json">
-            <pb-clipboard>John Doe: "The miracles of foobar", Paradise Publishers, Little Village, Stardate 46254.7</pb-clipboard>
-        </pb-page>
+        <cp-header></cp-header>
 
-        <input type="text" name="test-clipboard" value="" size="60">
+        <cp-main-text></cp-main-text>
+
+        <pb-tify-v2></pb-tify-v2>
+
+
+        <cp-footer></cp-footer>
+
+        <!-- Page Components -->
+
+        <script type="module" src="./src/components/main/header.js"></script>
+        <script type="module" src="./src/components/main/footer.js"></script>
+        <script type="module" src="./src/components/main/mainText.js"></script>
+
+        <script type="module" src="./src/pb-tify-v2.js"></script>
+
+
     </body>
+
 </html>

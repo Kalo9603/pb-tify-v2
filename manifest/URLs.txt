@@ -1,0 +1,9 @@
+https://api.cultural.jp/iiif/metmuseum-39799/manifest
+https://iiif.harvardartmuseums.org/manifests/object/299843
+https://fragmentarium.ms/metadata/iiif/F-zvl4/manifest.json
+https://digi.vatlib.it/iiif/MSS_Capp.Sist.Diari.222/manifest.json
+https://api.dc.library.northwestern.edu/api/v2/works/b5ac1e24-af33-47a3-b585-1f23c6eef72a?as=iiif
+https://cdm21059.contentdm.oclc.org/iiif/con-soppressi:5775/manifest.json
+https://e-codices.ch/metadata/iiif/dab-B0004/manifest.json
+https://digi.vatlib.it/iiif/MSS_Urb.lat.365/manifest.json
+https://iiif.lib.harvard.edu/manifests/drs:2586740

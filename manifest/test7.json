@@ -1,0 +1,604 @@
+{
+  "@context": "http://iiif.io/api/presentation/2/context.json",
+  "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/manifest.json",
+  "@type": "sc:Manifest",
+  "label": "Bever, Dorfarchiv Bever, B 4",
+  "metadata": [
+    {
+      "label": "Location",
+      "value": "Bever"
+    },
+    {
+      "label": "Collection Name",
+      "value": "Dorfarchiv Bever"
+    },
+    {
+      "label": "Shelfmark",
+      "value": "B 4"
+    },
+    {
+      "label": "Document Type",
+      "value": "Manuscript"
+    },
+    {
+      "label": "DOI",
+      "value": "10.5076/e-codices-dab-B0004"
+    },
+    {
+      "label": "Title (English)",
+      "value": "Artichels del 1558 (Statutes of the community of Bever)"
+    },
+    {
+      "label": "Material",
+      "value": "Paper"
+    },
+    {
+      "label": "Place of Origin (English)",
+      "value": "Bever"
+    },
+    {
+      "label": "Date of Origin (English)",
+      "value": "1558-1562"
+    },
+    {
+      "label": "Number of Pages",
+      "value": "8"
+    },
+    {
+      "label": "Dimensions",
+      "value": "22 x 16 cm"
+    },
+    {
+      "label": "Online Since",
+      "value": "2017-12-14"
+    },
+    {
+      "label": "Summary (English)",
+      "value": "This manuscript contains the statutes of the community of Bever from 1558 (ff. <a href=\"http://www.e-codices.unifr.ch/en/dab/B0004\">1r</a>-<a href=\"http://www.e-codices.unifr.ch/en/dab/B0004/5v/0/Sequence-2585\">5v</a>). After 1560, these were used as the basis for developing new statutes; in the course of this, the articles were sometimes supplemented and crossed out after having been copied, but without any loss of text. The draft of the new statutes was continued on blank pages; a fair copy of this text has not survived."
+    },
+    {
+      "label": "Century",
+      "value": "16th century"
+    },
+    {
+      "label": "Dated",
+      "value": "1558-1562"
+    },
+    {
+      "label": "Text Language",
+      "value": "Romansh"
+    }
+  ],
+  "description": [
+    {
+      "@value": "This manuscript contains the statutes of the community of Bever from 1558 (ff. 1r-5v). After 1560, these were used as the basis for developing new statutes; in the course of this, the articles were sometimes supplemented and crossed out after having been copied, but without any loss of text. The draft of the new statutes was continued on blank pages; a fair copy of this text has not survived.",
+      "@language": "en"
+    }
+  ],
+  "license": "http://creativecommons.org/licenses/by-nc/4.0/",
+  "attribution": "e-codices - Virtual Manuscript Library of Switzerland",
+  "logo": "https://www.e-codices.ch/img/logo-for-iiif-manifest.png",
+  "service": [
+    {
+      "@context": "https://www.w3.org/ns/webmention",
+      "@id": "https://e-codices.ch/webmention/receive",
+      "profile": "https://www.w3.org/ns/webmention",
+      "label": "e-codices Webmention Service"
+    }
+  ],
+  "related": "https://www.e-codices.ch/en/list/one/dab/B0004",
+  "within": "https://www.e-codices.ch/en/list/dab",
+  "sequences": [
+    {
+      "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/sequence/Sequence-2585.json",
+      "@type": "sc:Sequence",
+      "label": [
+        {
+          "@value": "Standardabfolge",
+          "@language": "de"
+        },
+        {
+          "@value": "Normal Sequence",
+          "@language": "en"
+        },
+        {
+          "@value": "Séquence normale",
+          "@language": "fr"
+        },
+        {
+          "@value": "Sequenza normale",
+          "@language": "it"
+        }
+      ],
+      "canvases": [
+        {
+          "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_0001r.json",
+          "@type": "sc:Canvas",
+          "label": "1r",
+          "height": 8176,
+          "width": 6132,
+          "images": [
+            {
+              "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/annotation/dab-B0004_0001r.json",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "on": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_0001r.json",
+              "resource": {
+                "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_0001r.jp2/full/full/0/default/jpg",
+                "@type": "dctypes:Image",
+                "format": "image/jpeg",
+                "height": 8176,
+                "width": 6132,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_0001r.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_0001v.json",
+          "@type": "sc:Canvas",
+          "label": "1v",
+          "height": 8176,
+          "width": 6132,
+          "images": [
+            {
+              "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/annotation/dab-B0004_0001v.json",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "on": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_0001v.json",
+              "resource": {
+                "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_0001v.jp2/full/full/0/default/jpg",
+                "@type": "dctypes:Image",
+                "format": "image/jpeg",
+                "height": 8176,
+                "width": 6132,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_0001v.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_0002r.json",
+          "@type": "sc:Canvas",
+          "label": "2r",
+          "height": 8176,
+          "width": 6132,
+          "images": [
+            {
+              "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/annotation/dab-B0004_0002r.json",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "on": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_0002r.json",
+              "resource": {
+                "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_0002r.jp2/full/full/0/default/jpg",
+                "@type": "dctypes:Image",
+                "format": "image/jpeg",
+                "height": 8176,
+                "width": 6132,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_0002r.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_0002v.json",
+          "@type": "sc:Canvas",
+          "label": "2v",
+          "height": 8176,
+          "width": 6132,
+          "images": [
+            {
+              "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/annotation/dab-B0004_0002v.json",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "on": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_0002v.json",
+              "resource": {
+                "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_0002v.jp2/full/full/0/default/jpg",
+                "@type": "dctypes:Image",
+                "format": "image/jpeg",
+                "height": 8176,
+                "width": 6132,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_0002v.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_0003r.json",
+          "@type": "sc:Canvas",
+          "label": "3r",
+          "height": 8176,
+          "width": 6132,
+          "images": [
+            {
+              "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/annotation/dab-B0004_0003r.json",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "on": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_0003r.json",
+              "resource": {
+                "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_0003r.jp2/full/full/0/default/jpg",
+                "@type": "dctypes:Image",
+                "format": "image/jpeg",
+                "height": 8176,
+                "width": 6132,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_0003r.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_0003v.json",
+          "@type": "sc:Canvas",
+          "label": "3v",
+          "height": 8176,
+          "width": 6132,
+          "images": [
+            {
+              "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/annotation/dab-B0004_0003v.json",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "on": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_0003v.json",
+              "resource": {
+                "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_0003v.jp2/full/full/0/default/jpg",
+                "@type": "dctypes:Image",
+                "format": "image/jpeg",
+                "height": 8176,
+                "width": 6132,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_0003v.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_0004r.json",
+          "@type": "sc:Canvas",
+          "label": "4r",
+          "height": 8176,
+          "width": 6132,
+          "images": [
+            {
+              "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/annotation/dab-B0004_0004r.json",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "on": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_0004r.json",
+              "resource": {
+                "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_0004r.jp2/full/full/0/default/jpg",
+                "@type": "dctypes:Image",
+                "format": "image/jpeg",
+                "height": 8176,
+                "width": 6132,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_0004r.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_0004v.json",
+          "@type": "sc:Canvas",
+          "label": "4v",
+          "height": 8176,
+          "width": 6132,
+          "images": [
+            {
+              "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/annotation/dab-B0004_0004v.json",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "on": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_0004v.json",
+              "resource": {
+                "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_0004v.jp2/full/full/0/default/jpg",
+                "@type": "dctypes:Image",
+                "format": "image/jpeg",
+                "height": 8176,
+                "width": 6132,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_0004v.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_0005r.json",
+          "@type": "sc:Canvas",
+          "label": "5r",
+          "height": 8176,
+          "width": 6132,
+          "images": [
+            {
+              "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/annotation/dab-B0004_0005r.json",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "on": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_0005r.json",
+              "resource": {
+                "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_0005r.jp2/full/full/0/default/jpg",
+                "@type": "dctypes:Image",
+                "format": "image/jpeg",
+                "height": 8176,
+                "width": 6132,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_0005r.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_0005v.json",
+          "@type": "sc:Canvas",
+          "label": "5v",
+          "height": 8176,
+          "width": 6132,
+          "images": [
+            {
+              "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/annotation/dab-B0004_0005v.json",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "on": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_0005v.json",
+              "resource": {
+                "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_0005v.jp2/full/full/0/default/jpg",
+                "@type": "dctypes:Image",
+                "format": "image/jpeg",
+                "height": 8176,
+                "width": 6132,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_0005v.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_0006r.json",
+          "@type": "sc:Canvas",
+          "label": "6r",
+          "height": 8176,
+          "width": 6132,
+          "images": [
+            {
+              "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/annotation/dab-B0004_0006r.json",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "on": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_0006r.json",
+              "resource": {
+                "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_0006r.jp2/full/full/0/default/jpg",
+                "@type": "dctypes:Image",
+                "format": "image/jpeg",
+                "height": 8176,
+                "width": 6132,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_0006r.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_0006v.json",
+          "@type": "sc:Canvas",
+          "label": "6v",
+          "height": 8176,
+          "width": 6132,
+          "images": [
+            {
+              "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/annotation/dab-B0004_0006v.json",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "on": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_0006v.json",
+              "resource": {
+                "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_0006v.jp2/full/full/0/default/jpg",
+                "@type": "dctypes:Image",
+                "format": "image/jpeg",
+                "height": 8176,
+                "width": 6132,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_0006v.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_0007r.json",
+          "@type": "sc:Canvas",
+          "label": "7r",
+          "height": 8176,
+          "width": 6132,
+          "images": [
+            {
+              "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/annotation/dab-B0004_0007r.json",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "on": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_0007r.json",
+              "resource": {
+                "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_0007r.jp2/full/full/0/default/jpg",
+                "@type": "dctypes:Image",
+                "format": "image/jpeg",
+                "height": 8176,
+                "width": 6132,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_0007r.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_0007v.json",
+          "@type": "sc:Canvas",
+          "label": "7v",
+          "height": 8176,
+          "width": 6132,
+          "images": [
+            {
+              "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/annotation/dab-B0004_0007v.json",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "on": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_0007v.json",
+              "resource": {
+                "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_0007v.jp2/full/full/0/default/jpg",
+                "@type": "dctypes:Image",
+                "format": "image/jpeg",
+                "height": 8176,
+                "width": 6132,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_0007v.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_0008r.json",
+          "@type": "sc:Canvas",
+          "label": "8r",
+          "height": 8176,
+          "width": 6132,
+          "images": [
+            {
+              "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/annotation/dab-B0004_0008r.json",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "on": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_0008r.json",
+              "resource": {
+                "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_0008r.jp2/full/full/0/default/jpg",
+                "@type": "dctypes:Image",
+                "format": "image/jpeg",
+                "height": 8176,
+                "width": 6132,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_0008r.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_0008v.json",
+          "@type": "sc:Canvas",
+          "label": "8v",
+          "height": 8176,
+          "width": 6132,
+          "images": [
+            {
+              "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/annotation/dab-B0004_0008v.json",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "on": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_0008v.json",
+              "resource": {
+                "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_0008v.jp2/full/full/0/default/jpg",
+                "@type": "dctypes:Image",
+                "format": "image/jpeg",
+                "height": 8176,
+                "width": 6132,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_0008v.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_MassS.json",
+          "@type": "sc:Canvas",
+          "label": "Ruler on page",
+          "height": 8176,
+          "width": 6132,
+          "images": [
+            {
+              "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/annotation/dab-B0004_MassS.json",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "on": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_MassS.json",
+              "resource": {
+                "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_MassS.jp2/full/full/0/default/jpg",
+                "@type": "dctypes:Image",
+                "format": "image/jpeg",
+                "height": 8176,
+                "width": 6132,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_MassS.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_ProfilS.json",
+          "@type": "sc:Canvas",
+          "label": "QP card on page",
+          "height": 8176,
+          "width": 6132,
+          "images": [
+            {
+              "@id": "https://e-codices.ch/metadata/iiif/dab-B0004/annotation/dab-B0004_ProfilS.json",
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "on": "https://e-codices.ch/metadata/iiif/dab-B0004/canvas/dab-B0004_ProfilS.json",
+              "resource": {
+                "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_ProfilS.jp2/full/full/0/default/jpg",
+                "@type": "dctypes:Image",
+                "format": "image/jpeg",
+                "height": 8176,
+                "width": 6132,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "https://e-codices.ch/loris/dab/dab-B0004/dab-B0004_ProfilS.jp2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "structures": []
+}
