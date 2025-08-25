@@ -80,6 +80,7 @@ To use **pb-tify-v2** in a TEI Publisher app:
 
 ## 🛠 Roadmap
 
+- Bugfixes
 - Add further resource exploration tools  
 - Extend UI/UX for annotation management  
 - Provide demo datasets for testing  
