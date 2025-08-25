@@ -42,15 +42,15 @@ It is developed as an extension of TEI Publisher’s component ecosystem and pro
 
 ### Installation
 
-```git clone https://github.com/Kalo9603/pb-tify-v2.git
-npm start```
+`git clone https://github.com/Kalo9603/pb-tify-v2.git
+npm start`
 
 * `index.html` – demo interface with components
 * `api.html` – generated API documentation
 
 ### Build
 
-```npm run build:production```
+`npm run build:production`
 
 The bundled files will be placed in the `dist/` directory.
 
@@ -71,11 +71,11 @@ To use **pb-tify-v2** in a TEI Publisher app:
 1. Add the dependency in your app’s `package.json`:
    `"pb-tify-v2": "git+https://github.com/Kalo9603/pb-tify-v2.git#master" `
 2. In build.properties`, set:
-    ``` scripts.dir=dist ```
+    ` scripts.dir=dist `
 3. In `modules/config.xqm`, ensure:
-    ``` declare variable $config:webcomponents := "local"; ```
+    ` declare variable $config:webcomponents := "local"; `
 4. Rebuild your app with:
-    ``` ant xar-local ```
+    ` ant xar-local `
 5. If needed, copy translation files into `resources/i18n` to enable internationalization.
 
 ## 🛠 Roadmap
