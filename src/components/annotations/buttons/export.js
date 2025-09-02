@@ -21,9 +21,10 @@ export class CpAnExport extends UtBase {
   }
 
   async _exportAnnotations() {
+
     const canvas = this.manifestObject?.sequences?.[0]?.canvases?.[this.canvasIndex];
     if (!canvas) {
-      console.warn("Canvas not found.");
+      this.showAlert("critical", "noManifest");
       return;
     }
 
@@ -36,7 +37,7 @@ export class CpAnExport extends UtBase {
     if (ocEntry) {
       try {
         const response = await fetch(ocEntry["@id"]);
-        if (!response.ok) throw new Error("Failed to fetch remote annotations.");
+        if (!response.ok) this.showAlert("critical", "noRemoteAnnotations");
 
         const data = await response.json();
         baseAnnotations = data.resources || [];
@@ -81,6 +82,7 @@ export class CpAnExport extends UtBase {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    this.showAlert("success", "annotationsExported");
   }
 
   render() {

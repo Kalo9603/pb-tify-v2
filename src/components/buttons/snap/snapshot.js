@@ -75,7 +75,10 @@ export class CpSnap extends UtBase {
   onSnapClick() {
 
     const parts = this.parsedIIIFParts;
-    if (!parts) return;
+    if (!parts) {
+      this.showAlert('error', 'snapshotFail', { mode: 'parsing IIIF URL' });
+      return;
+    }
 
     const regionStr = buildRegionString(
       this.regionSelection,
@@ -132,6 +135,7 @@ export class CpSnap extends UtBase {
     win.document.close();
 
     downloadImage(newUrl, filename);
+    this.showAlert('success', 'snapshotSaved');
     this.requestUpdate();
   }
 

@@ -104,6 +104,7 @@ export class CpAnFrame extends UtBase {
     const coordsButton = this.renderRoot.querySelector("cp-ancoords");
     if (coordsButton) {
       coordsButton.active = false;
+      this.showAlert("info", "coordinatesClosed");
     }
   }
 
@@ -231,7 +232,11 @@ export class CpAnFrame extends UtBase {
   }
 
   _onImageClick(e) {
-    if (!this.showCoordinates || !this._cursorCoords) return;
+
+    if (!this.showCoordinates || !this._cursorCoords) {
+      this.showAlert("warning", "invalidInput");
+      return;
+    }
     
     const colors = config.colors;
 
@@ -276,14 +281,22 @@ export class CpAnFrame extends UtBase {
     if (this._fixedPoint) {
       this._fixedPoint = null;
       this._relativeCoords = this._coordinateRect = null;
+      this.showAlert("info", "coordinatesRectClosed");
       this.requestUpdate();
     } else {
       this.hideCoordinates();
+      this.showAlert("info", "coordinatesClosed");
     }
   }
 
   _applyZoom(newZoom) {
+
     newZoom = Math.max(config.frame.zoom.min, Math.min(config.frame.zoom.max, newZoom));
+
+    if (newZoom === config.frame.zoom.min || newZoom === config.frame.zoom.max) {
+      this.showAlert("tip", "navigationShortcut");
+    }
+
     const container = this.renderRoot.querySelector(".image-scroll-container");
     const ratio = newZoom / this.zoom;
     
@@ -295,7 +308,7 @@ export class CpAnFrame extends UtBase {
   }
 
   _zoomIn() { 
-    this._applyZoom(this.zoom + config.frame.zoom.step); 
+    this._applyZoom(this.zoom + config.frame.zoom.step);
   }
 
   _zoomOut() { 
@@ -303,7 +316,8 @@ export class CpAnFrame extends UtBase {
   }
 
   _zoomReset() { 
-    this._applyZoom(config.frame.zoom.default); 
+    this._applyZoom(config.frame.zoom.default);
+    this.showAlert("info", "zoomReset", { percent: (config.frame.zoom.default * 100).toFixed(0) });
   }
 
   _startZoom(direction) {
@@ -389,6 +403,7 @@ export class CpAnFrame extends UtBase {
     this.draftRect = null;
     this._stopAutoScroll();
     this._zoomReset();
+    this.showAlert("info", "frameClosed");
   }
 
   disconnectedCallback() {

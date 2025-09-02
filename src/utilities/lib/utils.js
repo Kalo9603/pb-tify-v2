@@ -240,11 +240,11 @@ export function parseMarkdownToHtml(markdown) {
   // Barrato
   html = html.replace(/~~(.*?)~~/g, "<del>$1</del>"),
 
-  // Evidenziato
-  html = html.replace(/==(.*?)==/g, "<mark>$1</mark>"),
+    // Evidenziato
+    html = html.replace(/==(.*?)==/g, "<mark>$1</mark>"),
 
-  // Link
-  html = html.replace(/\[(.*?)\]\((.*?)\)/g, `<a href="$2" target="_blank" 
+    // Link
+    html = html.replace(/\[(.*?)\]\((.*?)\)/g, `<a href="$2" target="_blank" 
    style="color: blue; text-decoration: none; transition: color 0.3s ease;" 
    onmouseover="this.style.color='darkblue'" 
    onmouseout="this.style.color='blue'">
@@ -257,9 +257,9 @@ export function parseMarkdownToHtml(markdown) {
 }
 
 export function getRandomRectColor() {
-  
+
   const colors = config.colors;
-  
+
   const random = colors[Math.floor(Math.random() * colors.length)];
   return `border-${random}-600 bg-${random}-600/30`;
 }
@@ -279,7 +279,7 @@ export function getColorVariant(originalClass, target = "bg", increment = 200) {
   intensity = Math.min(intensity + increment, 900);
 
   return `${target}-${colorName}-${intensity}`;
-  
+
 }
 
 export function generateId(prefix = "annotation") {

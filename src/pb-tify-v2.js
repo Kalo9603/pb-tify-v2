@@ -6,6 +6,8 @@ import { saveToDb } from "./utilities/lib/db.js";
 import { normalizeAnnotation, isValidAnnotation } from "./utilities/lib/parse.js";
 import { config } from "./utilities/config.js";
 
+import "./components/ui/alert.js";
+
 import "./components/load/inputBar.js";
 import "./components/load/manifestImport.js";
 
@@ -26,7 +28,6 @@ import "./components/viewer/title.js";
 export class PbTifyV2 extends UtBase {
 
   static get properties() {
-
     return {
       manifestUrl: { type: String },
       manifestObject: { type: Object },
@@ -93,6 +94,7 @@ export class PbTifyV2 extends UtBase {
     this.addEventListener("hide-all-annotations", this._hideAllAnnotations);
     this.addEventListener("mode-toggle", this._handleModeToggle);
     this.addEventListener("form-closed", this.handleFormClosed);
+    this.addEventListener("show-alert", e => this.showMessage(e.detail.type, e.detail.text, e.detail.values));
   }
 
   disconnectedCallback() {
@@ -108,17 +110,42 @@ export class PbTifyV2 extends UtBase {
     this.removeEventListener("hide-annotation", e => this._removeActiveAnnotation(e.detail.id));
     this.removeEventListener("mode-toggle", this._handleModeToggle);
     this.removeEventListener("form-closed", this.handleFormClosed);
+    this.removeEventListener("show-alert", e => this.showMessage(e.detail.type, e.detail.text, e.detail.values));
+  }
+
+  showMessage(category, keyOrMessage, values = {}) {
+
+    const alert = this.renderRoot.querySelector("#alerts");
+    if (!alert) return;
+
+    if (!keyOrMessage) {
+      console.warn("showMessage called with undefined message");
+      return;
+    }
+
+    const template = config.messages[category]?.[keyOrMessage] ?? keyOrMessage;
+    const text = String(template).replace(/\{(\w+)\}/g, (_, key) => values[key] ?? `{${key}}`);
+
+    const icon = config.messageIcons?.[category] || "ℹ️";
+    const color = config.messageColors?.[category] || null;
+
+    alert.show(category, text, { icon, color });
   }
 
   async handleURLSubmit(e) {
     const url = e.detail.url;
     try {
       const res = await fetch(url);
-      if (!res.ok) throw new Error("Failed to fetch manifest");
+      if (!res.ok) {
+        this.showMessage("error", "manifestURLLoad");
+        return;
+      }
       const manifest = await res.json();
       this.loadManifest(manifest, url, false);
+      this.showMessage("success", "manifestLoaded");
     } catch (err) {
       console.error(err);
+      this.showMessage("error", "manifestLoad");
       this.clearManifest();
     }
   }
@@ -126,17 +153,17 @@ export class PbTifyV2 extends UtBase {
   handleManifestLoad(e) {
     const manifest = e.detail.manifestData;
     this.loadManifest(manifest, "", true);
+    this.showMessage("success", "manifestLoadedByFile");
   }
 
   handleLanguageChange(e) {
     this.selectedLanguage = e.detail.language;
+    this.showMessage("info", "languageChange", { language: this.selectedLanguage });
   }
 
   _handleModeToggle(e) {
-
     const newMode = e.detail.mode || "";
     const annotation = e.detail.annotation || null;
-
     const exitingMode = this.annotationMode && newMode === "";
 
     if (exitingMode) {
@@ -145,10 +172,7 @@ export class PbTifyV2 extends UtBase {
       this.hideFrame();
 
       const frame = this.renderRoot.querySelector("cp-anframe");
-      if (frame) {
-        frame.draftRect = null;
-        frame.mode = "";
-      }
+      if (frame) frame.draftRect = null;
 
       this.frameData = { ...this.frameData, mode: "" };
       return;
@@ -163,32 +187,20 @@ export class PbTifyV2 extends UtBase {
 
       if (newMode !== "add" && annotation) {
         const selector = annotation.on?.selector?.value?.replace("xywh=", "").split(",").map(Number);
-        if (selector && selector.length >= 4) {
-          frame.draftRect = {
-            x: selector[0] || 0,
-            y: selector[1] || 0,
-            w: selector[2] || 0,
-            h: selector[3] || 0,
-            color: "orange"       // default value
-          };
+        if (selector?.length >= 4) {
+          frame.draftRect = { x: selector[0], y: selector[1], w: selector[2], h: selector[3], color: "orange" };
         }
-      } else if (newMode !== "edit") {
-        frame.draftRect = null;
-      }
+      } else if (newMode !== "edit") frame.draftRect = null;
     }
 
     this.frameData = { ...this.frameData, mode: newMode };
   }
 
   handleFormClosed(e) {
-    this.draftRect = null;
-
     const frame = this.renderRoot.querySelector("cp-anframe");
-    if (frame) {
-      frame.draftRect = null;
-    }
-
+    if (frame) frame.draftRect = null;
     this.requestUpdate();
+    this.showMessage("info", "annotationFormClosed");
   }
 
   showFrame(e) {
@@ -209,69 +221,44 @@ export class PbTifyV2 extends UtBase {
 
   hideFrame() {
     const frame = this.renderRoot.querySelector("cp-anframe");
-    frame.hideCoordinates();
-    this.frameData = {
-      url: "",
-      x: 0,
-      y: 0,
-      w: 0,
-      h: 0,
-      visible: false,
-      motivation: "",
-      chars: "",
-      mode: ""
-    };
+    if (frame) frame.hideCoordinates();
+    this.frameData = { url: "", x: 0, y: 0, w: 0, h: 0, visible: false, motivation: "", chars: "", mode: "" };
   }
 
   _onDraftChangeFrame(e) {
     const { url, x, y, w, h, color } = e.detail;
     const frame = this.renderRoot.querySelector("cp-anframe");
     if (frame) {
-      const draftRect = { x, y, w, h, color };
-      frame.draftRect = draftRect;
+      frame.draftRect = { x, y, w, h, color };
       frame.url = url;
-
-      this.frameData = { ...this.frameData, draftRect };
+      this.frameData = { ...this.frameData, draftRect: { x, y, w, h, color } };
     }
   }
 
   _onCanvasChange(e) {
     this.currentCanvasIndex = e.detail.canvasIndex;
-    this.dispatchEvent(new CustomEvent("hide-all-annotations", { 
-      bubbles: true, 
-      composed: true 
-    }));
+    this.dispatchEvent(new CustomEvent("hide-all-annotations", { bubbles: true, composed: true }));
+    this.showMessage("info", "canvasChange", { index: this.currentCanvasIndex + 1 });
   }
 
   loadManifest(manifest, url = "", isLocal = false) {
-    
     const version = detectIIIFVersion(manifest);
     this.manifestVersion = version;
     let processed;
     if (version === "3") processed = convertV3toV2(manifest);
     else if (version === "2") processed = manifest;
-    else {
-      console.warn("Unknown IIIF version");
-      this.clearManifest();
-      return;
-    }
+    else { this.clearManifest(); return; }
 
     this.manifestObject = processed;
     this.isLocalManifest = isLocal;
-    this.manifestUrl = isLocal
-      ? this.extractFirstId(processed) || ""
-      : url;
+    this.manifestUrl = isLocal ? this.extractFirstId(processed) || "" : url;
 
     const langs = getLanguages(processed);
     this.availableLanguages = langs;
     this.selectedLanguage = langs[0] || "";
     this.currentCanvasIndex = 0;
 
-    this.dispatchEvent(new CustomEvent("hide-all-annotations", { 
-      bubbles: true, 
-      composed: true 
-    }));
-
+    this.dispatchEvent(new CustomEvent("hide-all-annotations", { bubbles: true, composed: true }));
   }
 
   clearManifest() {
@@ -292,92 +279,48 @@ export class PbTifyV2 extends UtBase {
   }
 
   handleClose() {
-
     this.clearManifest();
-
     this.currentCanvasIndex = 0;
     this.annotationMode = "";
     this.localAnnotations = [];
-
-    this.frameData = {
-      url: "",
-      x: 0,
-      y: 0,
-      w: 0,
-      h: 0,
-      visible: false,
-      motivation: "",
-      chars: ""
-    };
-
+    this.frameData = { url: "", x: 0, y: 0, w: 0, h: 0, visible: false, motivation: "", chars: "" };
     this.annotationToEdit = null;
     this.activeAnnotations = [];
-
     this._updateFrameData();
 
     const frame = this.renderRoot.querySelector("cp-anframe");
-    
-    if (frame) {
-      frame.hideCoordinates();
-      frame.resetFrame();
-    }
+    if (frame) { frame.hideCoordinates(); frame.resetFrame(); }
 
     this.dispatchEvent(new CustomEvent("reset-ui", { bubbles: true, composed: true }));
-
-    this.dispatchEvent(new CustomEvent("hide-all-annotations", { 
-      bubbles: true, 
-      composed: true 
-    }));
+    this.dispatchEvent(new CustomEvent("hide-all-annotations", { bubbles: true, composed: true }));
 
     this.requestUpdate();
-
+    this.showMessage("info", "close");
   }
 
   async _saveLocalAnnotation(e) {
-
     let newAnnotation = e.detail.annotation;
-
-    if (!isValidAnnotation(newAnnotation)) {
-      console.warn("❌ Annotazione non valida, provo a normalizzarla.");
-      newAnnotation = normalizeAnnotation(newAnnotation, this.manifestUrl, canvasId);
-      if (!isValidAnnotation(newAnnotation)) {
-        console.error("🚫 Annotazione ancora non valida dopo normalizzazione. Abort.");
-        return;
-      }
-    }
-
     const canvas = this.manifestObject?.sequences?.[0]?.canvases?.[this.currentCanvasIndex];
     if (!canvas) return;
-
     const canvasId = canvas["@id"] || `canvas${this.currentCanvasIndex}`;
 
-    if (!newAnnotation["@id"]) {
-      newAnnotation["@id"] = generateId("annotation");
-    }
+    if (!isValidAnnotation(newAnnotation)) newAnnotation = normalizeAnnotation(newAnnotation, this.manifestUrl, canvasId);
+    if (!isValidAnnotation(newAnnotation)) return;
 
+    if (!newAnnotation["@id"]) newAnnotation["@id"] = generateId("annotation");
     this.localAnnotations = [...this.localAnnotations, { canvasId, annotation: newAnnotation }];
 
-    this.dispatchEvent(new CustomEvent("refresh-annotations", {
-      bubbles: true, composed: true
-    }));
+    this.dispatchEvent(new CustomEvent("refresh-annotations", { bubbles: true, composed: true }));
 
     if (isLocalUrl(this.manifestUrl)) {
       const manifestId = this.manifestObject["@id"].split("/").pop();
       const canvasShortId = canvasId.split("/").pop();
       const listId = `${config.baseUrl}:${config.ports.existDb}${config.paths.annotations(config.componentName)}/${manifestId}/${canvasShortId}.json`;
 
-      const payload = {
-        annotation: newAnnotation,
-        listId,
-        manifestId,
-        canvasId: canvasShortId
-      };
-
-      console.log(payload);
+      const payload = { annotation: newAnnotation, listId, manifestId, canvasId: canvasShortId };
       const res = await saveToDb(payload);
-      if (res?.ok) console.log("✅ Annotazione salvata su eXist-db.");
-      else console.warn("⚠️ Salvataggio su eXist-db fallito.");
     }
+
   }
 
   async _editLocalAnnotation(e) {
@@ -385,67 +328,30 @@ export class PbTifyV2 extends UtBase {
     const edited = e.detail.edited;
     const canvas = this.manifestObject?.sequences?.[0]?.canvases?.[this.currentCanvasIndex];
     if (!canvas) return;
-
     const canvasId = canvas["@id"] || `canvas${this.currentCanvasIndex}`;
 
-    this.localAnnotations = this.localAnnotations.filter(
-      entry => entry.annotation["@id"] !== edited["@id"]
-    );
+    this.localAnnotations = this.localAnnotations.filter(entry => entry.annotation["@id"] !== edited["@id"]);
+    this.localAnnotations = [...this.localAnnotations, { canvasId, annotation: edited }];
 
-    this.localAnnotations = [
-      ...this.localAnnotations,
-      { canvasId, annotation: edited }
-    ];
-
-    this.dispatchEvent(new CustomEvent("refresh-annotations", {
-      bubbles: true,
-      composed: true
-    }));
+    this.dispatchEvent(new CustomEvent("refresh-annotations", { bubbles: true, composed: true }));
 
     if (isLocalUrl(this.manifestUrl)) {
       const manifestId = this.manifestObject["@id"].split("/").pop();
       const canvasShortId = canvasId.split("/").pop();
       const listId = `${config.baseUrl}:${config.ports.existDb}${config.paths.annotations(config.componentName)}/${manifestId}/${canvasShortId}.json`;
 
-      const payload = {
-        annotation: edited,
-        listId,
-        manifestId,
-        canvasId: canvasShortId
-      };
-
+      const payload = { annotation: edited, listId, manifestId, canvasId: canvasShortId };
       const res = await saveToDb(payload);
-      if (res?.ok) console.log("✏️ Annotazione modificata e salvata su eXist-db.");
-      else console.warn("⚠️ Salvataggio modifica su eXist-db fallito.");
-    } else {
-      console.log("✏️ Annotazione modificata (non salvata su eXist perché manifest remoto).");
     }
 
     this.annotationMode = "";
   }
 
   _addActiveAnnotation(detail) {
-
     const exists = this.activeAnnotations.find(a => a.id === detail.id);
     if (exists) return;
-
-    this.activeAnnotations = [
-
-      ...this.activeAnnotations,
-      {
-        id: detail.id,
-        x: detail.x,
-        y: detail.y,
-        w: detail.w,
-        h: detail.h,
-        chars: detail.chars,
-        motivation: detail.motivation,
-        color: getRandomRectColor()
-      }
-    ];
-
+    this.activeAnnotations = [...this.activeAnnotations, { ...detail, color: getRandomRectColor() }];
     this._updateFrameData();
-
   }
 
   _removeActiveAnnotation(id) {
@@ -455,33 +361,24 @@ export class PbTifyV2 extends UtBase {
 
   _hideAllAnnotations() {
     this.activeAnnotations = [];
+    this.showMessage("warning", "allAnnotationsHidden");
     this._updateFrameData();
     const frame = this.renderRoot.querySelector("cp-anframe");
-    frame.hideCoordinates();
+    if (frame) frame.hideCoordinates();
   }
 
   _updateFrameData() {
-
     const hasActive = this.activeAnnotations.length > 0;
     let url = "";
-
     if (hasActive && this.manifestObject) {
       const canvas = this.manifestObject.sequences?.[0]?.canvases?.[this.currentCanvasIndex];
       url = canvas?.images?.[0]?.resource?.["@id"] || "";
     }
-
-    this.frameData = {
-      ...this.frameData,
-      url,
-      visible: hasActive
-    };
+    this.frameData = { ...this.frameData, url, visible: hasActive };
   }
 
   _exportAnnotations() {
-    this.dispatchEvent(new CustomEvent("annotation-export", {
-      bubbles: true,
-      composed: true
-    }));
+    this.dispatchEvent(new CustomEvent("annotation-export", { bubbles: true, composed: true }));
   }
 
   render() {
@@ -489,12 +386,12 @@ export class PbTifyV2 extends UtBase {
     const showLangSelector = this.availableLanguages.length > 1;
 
     return html`
+      <cp-alert id="alerts"></cp-alert>
       <div class="p-8">
         <div class="flex items-center justify-center gap-4">
           <cp-input-bar class="flex-grow max-w-[60%]" @URLsubmit></cp-input-bar>
           <cp-mimport></cp-mimport>
         </div>
-
         <div class=${isLoaded ? "w-[85%] mx-auto my-8" : "hidden"}>
           <div class="mb-4 border rounded p-2 flex items-center justify-between">
             <div class="flex items-center gap-4">

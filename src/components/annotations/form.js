@@ -48,7 +48,7 @@ export class CpAnForm extends UtBase {
   disconnectedCallback() {
     super.disconnectedCallback();
     document.removeEventListener("coordinates-to-form", this._handleCoordinatesFromFrame.bind(this));
-}
+  }
 
   get imageUrl() {
     const canvas = this.manifestObject?.sequences?.[0]?.canvases?.[this.canvasIndex];
@@ -117,26 +117,51 @@ export class CpAnForm extends UtBase {
     const W = this.imageWidth;
     const H = this.imageHeight;
 
-    if (prop === "x" && intVal <= W) {
-      this.x = intVal;
-      if (this.w > W - intVal) this.w = W - intVal;
+    if (prop === "x") {
+      if (intVal > W) {
+        this.showAlert("warning", "outOfRange", { value: prop, min: 0, max: W });
+        this.x = W;
+      } else {
+        this.x = intVal;
+        if (this.w > W - this.x) this.w = W - this.x;
+      }
     }
-    if (prop === "y" && intVal <= H) {
-      this.y = intVal;
-      if (this.h > H - intVal) this.h = H - intVal;
+
+    if (prop === "y") {
+      if (intVal > H) {
+        this.showAlert("warning", "outOfRange", { value: prop, min: 0, max: H });
+        this.y = H;
+      } else {
+        this.y = intVal;
+        if (this.h > H - this.y) this.h = H - this.y;
+      }
     }
-    if (prop === "w" && intVal <= W - this.x) {
-      this.w = intVal;
+
+    if (prop === "w") {
+      const maxW = W - this.x;
+      if (intVal > maxW) {
+        this.showAlert("warning", "outOfRange", { value: prop, min: 0, max: maxW });
+        this.w = maxW;
+      } else {
+        this.w = intVal;
+      }
     }
-    if (prop === "h" && intVal <= H - this.y) {
-      this.h = intVal;
+
+    if (prop === "h") {
+      const maxH = H - this.y;
+      if (intVal > maxH) {
+        this.showAlert("warning", "outOfRange", { value: prop, min: 0, max: maxH });
+        this.h = maxH;
+      } else {
+        this.h = intVal;
+      }
     }
   }
 
   _handleCoordinatesFromFrame(e) {
     const { x, y, w, h } = e.detail;
     this.x = x;
-    this.y = y; 
+    this.y = y;
     this.w = w;
     this.h = h;
     this.requestUpdate();
@@ -211,7 +236,7 @@ export class CpAnForm extends UtBase {
     }
 
     if (this.mode === "delete") {
-      return html `
+      return html`
         <div class="flex items-center justify-center gap-6 pt-2 border-t border-gray-200">
 
           <button
@@ -219,20 +244,20 @@ export class CpAnForm extends UtBase {
             class="group flex items-center rounded-full shadow-xl transition-all duration-300 px-3 py-2 w-12
                   ${this.confirmDelete ? 'bg-green-600' : 'bg-gray-600'} text-white hover:shadow-md overflow-hidden h-10 hover:w-[150px]"
             @click=${() => {
-              if (!this.confirmDelete) {
-                this.confirmDelete = true;
-                const btn = this.renderRoot.querySelector('#confirm-btn');
-                btn.classList.remove('bg-green-600');
-                btn.classList.add('bg-red-700');
-                setTimeout(() => {
-                  btn.classList.remove('bg-red-700');
-                  btn.classList.add('bg-green-600');
-                  this.requestUpdate();
-                }, 2000);
-              } else {
-                this.confirmDelete = false;
-              }
-            }}
+          if (!this.confirmDelete) {
+            this.confirmDelete = true;
+            const btn = this.renderRoot.querySelector('#confirm-btn');
+            btn.classList.remove('bg-green-600');
+            btn.classList.add('bg-red-700');
+            setTimeout(() => {
+              btn.classList.remove('bg-red-700');
+              btn.classList.add('bg-green-600');
+              this.requestUpdate();
+            }, 2000);
+          } else {
+            this.confirmDelete = false;
+          }
+        }}
             id="confirm-btn"
           >
             <div class="flex items-center justify-center w-full transition-all duration-300 group-hover:justify-start group-hover:gap-2">
@@ -247,14 +272,14 @@ export class CpAnForm extends UtBase {
           </button>
 
           ${makeButton(
-            "Delete",
-            "fa-solid fa-trash",
-            `bg-red-600 ${!this.confirmDelete ? "opacity-50 cursor-not-allowed" : ""}`,
-            this.confirmDelete ? this.deleteAnnotation : () => {}
-          )}
-        </div> ` 
-      
-      }
+          "Delete",
+          "fa-solid fa-trash",
+          `bg-red-600 ${!this.confirmDelete ? "opacity-50 cursor-not-allowed" : ""}`,
+          this.confirmDelete ? this.deleteAnnotation : () => { }
+        )}
+        </div> `
+
+    }
 
     return null;
   }
@@ -336,7 +361,7 @@ export class CpAnForm extends UtBase {
 
   addAnnotation() {
 
-    let prefix = this.motivation == "painting" ? "sc:" : "oa:"; 
+    let prefix = this.motivation == "painting" ? "sc:" : "oa:";
 
     const annotation = {
       "@context": "http://iiif.io/api/presentation/2/context.json",
@@ -377,7 +402,7 @@ export class CpAnForm extends UtBase {
   editAnnotation = () => {
     if (!this.annotationToEdit) return;
 
-    let prefix = this.motivation == "painting" ? "sc:" : "oa:"; 
+    let prefix = this.motivation == "painting" ? "sc:" : "oa:";
 
     const edited = {
       ...this.annotationToEdit,
@@ -404,9 +429,9 @@ export class CpAnForm extends UtBase {
       composed: true
     }));
 
-    this.dispatchEvent(new CustomEvent("hide-all-annotations", { 
-      bubbles: true, 
-      composed: true 
+    this.dispatchEvent(new CustomEvent("hide-all-annotations", {
+      bubbles: true,
+      composed: true
     }));
 
     this._resetForm();
@@ -421,9 +446,9 @@ export class CpAnForm extends UtBase {
       composed: true
     }));
 
-    this.dispatchEvent(new CustomEvent("hide-all-annotations", { 
-      bubbles: true, 
-      composed: true 
+    this.dispatchEvent(new CustomEvent("hide-all-annotations", {
+      bubbles: true,
+      composed: true
     }));
 
     this._resetForm();

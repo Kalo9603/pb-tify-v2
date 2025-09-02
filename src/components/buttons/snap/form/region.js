@@ -33,10 +33,13 @@ export class CpSnapFormRegion extends UtBase {
   _validateRegion() {
     const supports = this.regionData?.supports || [];
     if (this.region === "square" && !supports.includes("regionSquare")) {
+      this.showAlert("warning", "invalidInput", { value: "square region not supported" });
       this.region = "full";
     } else if (this.region === "coordinates" && !supports.includes("regionByPx")) {
+      this.showAlert("warning", "invalidInput", { value: "pixel coordinates not supported" });
       this.region = "full";
     } else if (this.region === "coordinates%" && !supports.includes("regionByPct")) {
+      this.showAlert("warning", "invalidInput", { value: "percent coordinates not supported" });
       this.region = "full";
     }
   }
@@ -58,6 +61,7 @@ export class CpSnapFormRegion extends UtBase {
     this.region = e.target.value;
     if (this.region !== "coordinates" && this.region !== "coordinates%") {
       this.coords = { p1: [0, 0], p2: [0, 0] };
+      this.showAlert("info", "coordinatesClosed");
     }
     this._emitChange();
   }
@@ -65,7 +69,7 @@ export class CpSnapFormRegion extends UtBase {
   onCoordChange(e, point, axis) {
     const newCoords = { ...this.coords };
     newCoords[point][axis] = Number(e.target.value);
-    
+
     const coords = validateCoordinates(
       this.region,
       this.width,
@@ -75,12 +79,21 @@ export class CpSnapFormRegion extends UtBase {
       newCoords.p2[0],
       newCoords.p2[1]
     );
-    
+
+    if (
+      coords.x1 !== newCoords.p1[0] ||
+      coords.y1 !== newCoords.p1[1] ||
+      coords.x2 !== newCoords.p2[0] ||
+      coords.y2 !== newCoords.p2[1]
+    ) {
+      this.showAlert("warning", "coordinatesOutsideBounds");
+    }
+
     this.coords = {
       p1: [coords.x1, coords.y1],
       p2: [coords.x2, coords.y2]
     };
-    
+
     this._emitChange();
   }
 
@@ -117,8 +130,8 @@ export class CpSnapFormRegion extends UtBase {
             focus:outline-none focus:ring-2 focus:ring-blue-600 hover:border-blue-700 transition-colors"
         >
           ${options.map(
-            (opt) => html`<option value="${opt.value}" ?selected="${opt.value === this.region}">${opt.label}</option>`
-          )}
+      (opt) => html`<option value="${opt.value}" ?selected="${opt.value === this.region}">${opt.label}</option>`
+    )}
         </select>
       </div>
 

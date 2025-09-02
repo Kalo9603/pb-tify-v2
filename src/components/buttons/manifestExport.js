@@ -52,6 +52,7 @@ export class CpManifestExport extends UtBase {
 
     if (!this.manifestObject) {
       this.error = "No manifest loaded to export.";
+      this.showAlert("error", "noManifestToExport");
       this.requestUpdate();
       return;
     }
@@ -70,8 +71,13 @@ export class CpManifestExport extends UtBase {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch {
+
+      this.showAlert("success", "manifestExported");
+      this.showAlert("info", "downloadReady", { filename });
+    } catch (err) {
       this.error = "Failed to export manifest.";
+      this.showAlert("error", "manifestExportFailed");
+      this.showAlert("critical", "exportException");
       this.requestUpdate();
     }
   }

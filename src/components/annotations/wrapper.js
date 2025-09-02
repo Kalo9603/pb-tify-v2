@@ -31,7 +31,6 @@ export class CpAnWrapper extends UtBase {
 
     connectedCallback() {
         super.connectedCallback();
-
         this.addEventListener("annotation-import", this._onImportSubmit.bind(this));
         this.addEventListener("annotation-duplicate", this._onDuplicateSubmit.bind(this));
         this.addEventListener("annotation-add", () => this._setMode("add"));
@@ -47,66 +46,51 @@ export class CpAnWrapper extends UtBase {
     _setMode(mode, annotation = null) {
         const oldMode = this.annotationMode;
         this.annotationMode = mode;
-
-        if (mode === "edit" || mode === "delete") {
-            this.annotationToEdit = annotation || null;
-        } else {
-            this.annotationToEdit = null;
-        }
+        if (mode === "edit" || mode === "delete") this.annotationToEdit = annotation || null;
+        else this.annotationToEdit = null;
 
         if (oldMode === "edit" || oldMode === "delete") {
-            if (mode === "") {
-                this.dispatchEvent(
-                    new CustomEvent("show-frame", {
-                        detail: { color: "view" },
-                        bubbles: true,
-                        composed: true,
-                    })
-                );
-            }
+            if (mode === "") this.dispatchEvent(new CustomEvent("show-frame", { detail: { color: "view" }, bubbles: true, composed: true }));
         }
 
         if (mode === "") {
             this.dispatchEvent(new CustomEvent("hide-frame", { bubbles: true, composed: true }));
             this.dispatchEvent(new CustomEvent("deactivate-annotation", { bubbles: true, composed: true }));
+            this.showAlert("info", "annotationModeFlush");
+        } else {
+            this.showAlert("info", "modeActivated", { mode });
         }
 
         this.requestUpdate();
     }
 
     async _onAddSubmit(e) {
-
         const newAnnotation = e.detail.annotation;
         const canvas = this.manifestObject?.sequences?.[0]?.canvases?.[this.canvasIndex];
-        const canvasId = canvas?.["@id"] || `canvas${this.canvasIndex}`;
-        const id = newAnnotation?.["@id"] || `annotation-${Date.now()}`;
-        newAnnotation["@id"] = id;
+        if (!canvas) return this.showAlert("error", "missingManifestObject");
+
+        const canvasId = canvas["@id"] || `canvas${this.canvasIndex}`;
+        newAnnotation["@id"] = newAnnotation?.["@id"] || generateId("annotation");
 
         this.localAnnotations = [...this.localAnnotations, { canvasId, annotation: newAnnotation }];
+        this.showAlert("success", "localAnnotationSaved");
+        this.showAlert("tip", "quickSave");
 
         const isManifestLocal = isLocalUrl(this.manifestUrl);
         const manifestId = this.manifestObject?.["@id"]?.split("/").pop();
-        
         const annotationListUrl = `${config.baseUrl}:${config.ports.existDb}${config.paths.annotations()}/${manifestId}/canvas${this.canvasIndex + 1}.json`;
 
         if (isManifestLocal) {
-            const payload = {
-                annotation: newAnnotation,
-                canvasId,
-                canvasIndex: this.canvasIndex + 1,
-                manifestId,
-                listId: annotationListUrl
-            };
-
+            const payload = { annotation: newAnnotation, canvasId, canvasIndex: this.canvasIndex + 1, manifestId, listId: annotationListUrl };
             const success = await saveToDb(payload, config.componentName);
 
             if (success) {
-                
-                this.localAnnotations = this.localAnnotations.filter(
-                    (entry) => entry.annotation["@id"] !== newAnnotation["@id"]
-                );
-
+                this.localAnnotations = this.localAnnotations.filter(entry => entry.annotation["@id"] !== newAnnotation["@id"]);
                 await refreshAnnotations(this.manifestUrl, this);
+                this.showAlert("success", "remoteAnnotationSaved");
+            } else {
+                this.showAlert("error", "remoteAnnotationSave");
+                this.showAlert("critical", "dbConnectionFailed");
             }
         }
 
@@ -115,86 +99,69 @@ export class CpAnWrapper extends UtBase {
 
     async _onEditSubmit(e) {
         const edited = e.detail.edited;
+        if (!edited) return this.showAlert("error", "invalidInput");
+
         const canvas = this.manifestObject?.sequences?.[0]?.canvases?.[this.canvasIndex];
-        const canvasId = canvas?.["@id"] || `canvas${this.canvasIndex}`;
+        if (!canvas) return this.showAlert("error", "missingManifestObject");
+
+        const canvasId = canvas["@id"] || `canvas${this.canvasIndex}`;
         const annotationListUrl = canvas?.otherContent?.[0]?.["@id"] || "";
         const isManifestLocal = isLocalUrl(this.manifestUrl);
         const manifestId = this.manifestObject?.["@id"]?.split("/").pop();
 
         if (isManifestLocal) {
-            const payload = {
-                annotation: edited,
-                canvasId,
-                canvasIndex: this.canvasIndex + 1,
-                manifestId,
-                listId: annotationListUrl
-            };
-
+            const payload = { annotation: edited, canvasId, canvasIndex: this.canvasIndex + 1, manifestId, listId: annotationListUrl };
             const success = await updateInDb(payload, config.componentName);
 
             if (success) {
-                this.localAnnotations = this.localAnnotations.filter(
-                    (entry) => entry.annotation["@id"] !== edited["@id"]
-                );
-
+                this.localAnnotations = this.localAnnotations.filter(entry => entry.annotation["@id"] !== edited["@id"]);
                 await refreshAnnotations(this.manifestUrl, this);
-            } 
+                this.showAlert("success", "remoteAnnotationSaved");
+            } else {
+                this.showAlert("error", "annotationEditFail");
+                this.showAlert("critical", "dbConnectionFailed");
+            }
         } else {
-            this.localAnnotations = this.localAnnotations.map((entry) => {
-                if (entry.annotation["@id"] === edited["@id"]) {
-                    return { canvasId, annotation: edited };
-                }
-                return entry;
-            });
-
+            this.localAnnotations = this.localAnnotations.map(entry =>
+                entry.annotation["@id"] === edited["@id"] ? { canvasId, annotation: edited } : entry
+            );
             this.dispatchEvent(new CustomEvent("refresh-annotations", { bubbles: true, composed: true }));
+            this.showAlert("success", "annotationEdited");
+            this.showAlert("tip", "quickSave");
         }
 
-        this.activeAnnotations = [{
-            id: edited["@id"],
-            annotation: edited
-        }];
-
+        this.activeAnnotations = [{ id: edited["@id"], annotation: edited }];
         this._setMode("");
     }
 
     async _onDeleteSubmit(e) {
         const { annotation } = e.detail;
-        if (!annotation) return;
+        if (!annotation) return this.showAlert("error", "invalidInput");
 
         const canvas = this.manifestObject?.sequences?.[0]?.canvases?.[this.canvasIndex];
-        const canvasId = canvas?.["@id"] || `canvas${this.canvasIndex}`;
+        if (!canvas) return this.showAlert("error", "missingManifestObject");
+
+        const canvasId = canvas["@id"] || `canvas${this.canvasIndex}`;
         const annotationListUrl = canvas?.otherContent?.[0]?.["@id"] || "";
         const isManifestLocal = isLocalUrl(this.manifestUrl);
         const manifestId = this.manifestObject?.["@id"]?.split("/").pop();
 
         if (isManifestLocal) {
-            const payload = {
-                annotation,
-                canvasId,
-                canvasIndex: this.canvasIndex + 1,
-                manifestId,
-                listId: annotationListUrl
-            };
-
+            const payload = { annotation, canvasId, canvasIndex: this.canvasIndex + 1, manifestId, listId: annotationListUrl };
             const success = await deleteFromDb(payload, config.componentName);
 
             if (success) {
-                this.localAnnotations = this.localAnnotations.filter(
-                    entry => !(entry.annotation["@id"] === annotation["@id"] && entry.canvasId === canvasId)
-                );
-
+                this.localAnnotations = this.localAnnotations.filter(entry => !(entry.annotation["@id"] === annotation["@id"] && entry.canvasId === canvasId));
                 await refreshAnnotations(this.manifestUrl, this);
-                this.activeAnnotations = [];
+                this.showAlert("success", "annotationDeleted");
             } else {
-                console.error("❌ Cancellazione remota fallita");
+                this.showAlert("error", "annotationDeleteFail");
+                this.showAlert("critical", "dbConnectionFailed");
             }
         } else {
-            this.localAnnotations = this.localAnnotations.filter(
-                entry => !(entry.annotation["@id"] === annotation["@id"] && entry.canvasId === canvasId)
-            );
-
+            this.localAnnotations = this.localAnnotations.filter(entry => !(entry.annotation["@id"] === annotation["@id"] && entry.canvasId === canvasId));
             this.dispatchEvent(new CustomEvent("refresh-annotations", { bubbles: true, composed: true }));
+            this.showAlert("success", "annotationDeleted");
         }
 
         this.activeAnnotations = [];
@@ -203,30 +170,43 @@ export class CpAnWrapper extends UtBase {
 
     _onImportSubmit(e) {
         const additions = e.detail.additions;
+        if (!additions || !Array.isArray(additions) || additions.length === 0) return this.showAlert("warning", "invalidInput");
+
         this.localAnnotations = [...this.localAnnotations, ...additions];
         this.dispatchEvent(new CustomEvent("refresh-annotations", { bubbles: true, composed: true }));
+
+        if (additions.length > 20) this.showAlert("warning", "largeAnnotationSet");
+
+        this.showAlert("success", "annotationsImported");
+        this.showAlert("tip", "navigationShortcut");
     }
 
     _onDuplicateSubmit(e) {
         const original = e.detail.annotation;
-        if (!original) return;
+        if (!original) return this.showAlert("error", "invalidInput");
 
-        const canvas = this.manifestObject.sequences[0].canvases[this.canvasIndex];
+        const canvas = this.manifestObject?.sequences?.[0]?.canvases?.[this.canvasIndex];
+        if (!canvas) return this.showAlert("error", "missingManifestObject");
+
         const canvasId = canvas["@id"] || `canvas${this.canvasIndex}`;
         const duplicated = structuredClone(original);
         duplicated["@id"] = generateId("annotation");
-
-        if (duplicated.resource && typeof duplicated.resource === "object" && duplicated.resource.chars) {
-            duplicated.resource.chars += " (copy)";
-        }
+        if (duplicated.resource?.chars) duplicated.resource.chars += " (copy)";
 
         this.localAnnotations = [...this.localAnnotations, { canvasId, annotation: duplicated }];
         this.dispatchEvent(new CustomEvent("refresh-annotations", { bubbles: true, composed: true }));
+
+        this.showAlert("success", "localAnnotationSaved");
+        this.showAlert("tip", "duplicateAnnotation");
     }
 
     _annotationEdit(e) {
-        if (!e.detail || !e.detail.annotation) return;
-        this._setMode("edit", e.detail.annotation);
+        const annotation = e.detail?.annotation;
+        if (!annotation) return this.showAlert("error", "invalidInput");
+
+        this._setMode("edit", annotation);
+        this.showAlert("info", "modeActivated", { mode: "edit" });
+        this.showAlert("tip", "quickSave");
     }
 
     _modeToggle(e) {
@@ -235,8 +215,9 @@ export class CpAnWrapper extends UtBase {
         this._setMode(mode, annotation);
     }
 
-    handleFormClosed() { 
-        this._setMode(""); 
+    handleFormClosed() {
+        this._setMode("");
+        this.showAlert("info", "annotationFormClosed");
     }
 
     render() {
@@ -253,19 +234,19 @@ export class CpAnWrapper extends UtBase {
                 ></cp-annotations>
 
                 ${this.annotationMode
-                    ? html`
-                        <cp-anform
-                            .manifestObject=${this.manifestObject}
-                            .canvasIndex=${this.canvasIndex}
-                            .mode=${this.annotationMode}
-                            .annotationToEdit=${this.annotationToEdit}
-                            .readonly=${this.annotationMode === "delete"}
-                            @add-annotation-submit=${(e) => this._onAddSubmit(e)}
-                            @edit-annotation-submit=${(e) => this._onEditSubmit(e)}
-                            @cancel-edit=${() => this._setMode("")}
-                        ></cp-anform>
-                    `
-                    : null}
+                ? html`
+                    <cp-anform
+                        .manifestObject=${this.manifestObject}
+                        .canvasIndex=${this.canvasIndex}
+                        .mode=${this.annotationMode}
+                        .annotationToEdit=${this.annotationToEdit}
+                        .readonly=${this.annotationMode === "delete"}
+                        @add-annotation-submit=${(e) => this._onAddSubmit(e)}
+                        @edit-annotation-submit=${(e) => this._onEditSubmit(e)}
+                        @cancel-edit=${() => this._setMode("")}
+                    ></cp-anform>
+                  `
+                : null}
             </div>
         `;
     }

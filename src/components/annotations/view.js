@@ -162,12 +162,14 @@ export class CpAnViewer extends UtBase {
   async fetchAnnotations() {
 
     if (!this.manifestObject) {
-      console.warn("No manifest object available.");
       return;
     }
 
     const canvas = this.manifestObject.sequences?.[0]?.canvases?.[this.canvasIndex];
-    if (!canvas) return;
+    if (!canvas) {
+      this.showAlert("error", "invalidCanvasIndex");
+      return;
+    }
 
     const canvasId = canvas["@id"] || `canvas${this.canvasIndex}`;
     const annList = canvas.otherContent?.find(c => c["@type"] === "sc:AnnotationList");
@@ -191,6 +193,7 @@ export class CpAnViewer extends UtBase {
           this.annotationListJson = { resources: [] };
         }
       } catch (err) {
+        this.showAlert("error", "remoteAnnotationSave");
         console.error("❌ Errore fetch annotationList:", err);
         this.annotationListJson = { resources: [] };
       }
