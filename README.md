@@ -1,6 +1,6 @@
 # ex-pb-tify
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/Node.js-%3E=16-green.svg)](https://nodejs.org/)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
 
@@ -11,6 +11,7 @@ It extends the functionalities of **pb-tify** by introducing advanced features f
 
 ## ✨ Features
 
+- **both usable standalone or** via attributes for communicating **with other TEI Publisher components**
 - Enhanced visualization of IIIF manifest **metadata** and **canvas metadata**
 - Extended annotation support:
   - Create, edit, delete annotations
