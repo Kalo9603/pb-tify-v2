@@ -91,7 +91,7 @@ To use **ex-pb-tify** in a TEI Publisher app:
 
 ## 📜 License
 
-This project is released under the [MIT License](LICENSE).
+This project is released under the [GNUv3 License](LICENSE).
 
 ---
 
