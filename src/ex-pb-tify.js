@@ -7,35 +7,32 @@ import { normalizeAnnotation, isValidAnnotation } from "./utilities/lib/parse.js
 import { config } from "./utilities/config.js";
 
 import "./components/ui/alert.js";
-
 import "./components/load/inputBar.js";
 import "./components/load/manifestImport.js";
-
 import "./components/annotations/wrapper.js";
 import "./components/annotations/frame.js";
-
 import "./components/buttons/manifestExport.js";
 import "./components/buttons/manifestURLCopy.js";
 import "./components/buttons/close.js";
 import "./components/buttons/languageSelector.js";
 import "./components/buttons/snap/snapshot.js";
-
 import "./components/viewer/tifyWrapper.js";
 import "./components/viewer/metadata.js";
 import "./components/viewer/pageMetadata.js";
 import "./components/viewer/title.js";
 
-export class PbTifyV2 extends UtBase {
+export class ExPbTify extends UtBase {
 
   static get properties() {
     return {
-      manifestUrl: { type: String },
+      manifest: { type: String, reflect: true },
       manifestObject: { type: Object },
       manifestVersion: { type: String },
       isLocalManifest: { type: Boolean },
       selectedLanguage: { type: String },
       availableLanguages: { type: Array },
       currentCanvasIndex: { type: Number },
+      index: { type: Number, reflect: true },
       frameData: { type: Object },
       annotationMode: { type: String },
       localAnnotations: { type: Array },
@@ -46,7 +43,7 @@ export class PbTifyV2 extends UtBase {
 
   constructor() {
     super();
-    this.manifestUrl = "";
+    this.manifest = "";
     this.manifestObject = null;
     this.manifestVersion = "";
     this.isLocalManifest = false;
@@ -113,8 +110,38 @@ export class PbTifyV2 extends UtBase {
     this.removeEventListener("show-alert", e => this.showMessage(e.detail.type, e.detail.text, e.detail.values));
   }
 
-  showMessage(category, keyOrMessage, values = {}) {
+  updated(changedProps) {
+    super.updated?.(changedProps);
 
+    if (changedProps.has('manifest')) {
+      const url = this.manifest;
+      if (url) {
+        fetch(url)
+          .then(res => res.json())
+          .then(manifest => this.loadManifest(manifest, url, false))
+          .catch(err => {
+            console.error(err);
+            this.showMessage('error', 'manifestLoad');
+          });
+
+        const inputBar = this.renderRoot.querySelector('cp-input-bar');
+        if (inputBar) inputBar.value = url; // aggiorna la barra
+      }
+    }
+
+    if (changedProps.has("index")) {
+      const canvases = this.manifestObject?.sequences?.[0]?.canvases || [];
+      if (canvases.length && this.index >= 0 && this.index < canvases.length) {
+        this.currentCanvasIndex = this.index;
+        this.showMessage("success", "canvasSet", { index: this.index + 1 });
+      } else if (canvases.length) {
+        this.showMessage("error", "invalidCanvasIndex", { index: this.index });
+      }
+    }
+
+  }
+
+  showMessage(category, keyOrMessage, values = {}) {
     const alert = this.renderRoot.querySelector("#alerts");
     if (!alert) return;
 
@@ -125,10 +152,8 @@ export class PbTifyV2 extends UtBase {
 
     const template = config.messages[category]?.[keyOrMessage] ?? keyOrMessage;
     const text = String(template).replace(/\{(\w+)\}/g, (_, key) => values[key] ?? `{${key}}`);
-
     const icon = config.messageIcons?.[category] || "ℹ️";
     const color = config.messageColors?.[category] || null;
-
     alert.show(category, text, { icon, color });
   }
 
@@ -251,18 +276,29 @@ export class PbTifyV2 extends UtBase {
 
     this.manifestObject = processed;
     this.isLocalManifest = isLocal;
-    this.manifestUrl = isLocal ? this.extractFirstId(processed) || "" : url;
+    this.manifest = isLocal ? this.extractFirstId(processed) || "" : url;
 
     const langs = getLanguages(processed);
     this.availableLanguages = langs;
     this.selectedLanguage = langs[0] || "";
     this.currentCanvasIndex = 0;
 
+    if (typeof this.index === "number") {
+      const canvases = this.manifestObject?.sequences?.[0]?.canvases || [];
+      const target = this.index - 1;
+      if (target >= 0 && target < canvases.length) {
+        this.currentCanvasIndex = target;
+        this.showMessage("success", "canvasSet", { index: this.index }); // messaggio rimane one-based
+      } else {
+        this.showMessage("error", "invalidCanvasIndex", { index: this.index });
+      }
+    }
+
     this.dispatchEvent(new CustomEvent("hide-all-annotations", { bubbles: true, composed: true }));
   }
 
   clearManifest() {
-    this.manifestUrl = "";
+    this.manifest = "";
     this.manifestObject = null;
     this.isLocalManifest = false;
     this.availableLanguages = [];
@@ -304,7 +340,7 @@ export class PbTifyV2 extends UtBase {
     if (!canvas) return;
     const canvasId = canvas["@id"] || `canvas${this.currentCanvasIndex}`;
 
-    if (!isValidAnnotation(newAnnotation)) newAnnotation = normalizeAnnotation(newAnnotation, this.manifestUrl, canvasId);
+    if (!isValidAnnotation(newAnnotation)) newAnnotation = normalizeAnnotation(newAnnotation, this.manifest, canvasId);
     if (!isValidAnnotation(newAnnotation)) return;
 
     if (!newAnnotation["@id"]) newAnnotation["@id"] = generateId("annotation");
@@ -312,7 +348,7 @@ export class PbTifyV2 extends UtBase {
 
     this.dispatchEvent(new CustomEvent("refresh-annotations", { bubbles: true, composed: true }));
 
-    if (isLocalUrl(this.manifestUrl)) {
+    if (isLocalUrl(this.manifest)) {
       const manifestId = this.manifestObject["@id"].split("/").pop();
       const canvasShortId = canvasId.split("/").pop();
       const listId = `${config.baseUrl}:${config.ports.existDb}${config.paths.annotations(config.componentName)}/${manifestId}/${canvasShortId}.json`;
@@ -320,11 +356,9 @@ export class PbTifyV2 extends UtBase {
       const payload = { annotation: newAnnotation, listId, manifestId, canvasId: canvasShortId };
       const res = await saveToDb(payload);
     }
-
   }
 
   async _editLocalAnnotation(e) {
-
     const edited = e.detail.edited;
     const canvas = this.manifestObject?.sequences?.[0]?.canvases?.[this.currentCanvasIndex];
     if (!canvas) return;
@@ -335,7 +369,7 @@ export class PbTifyV2 extends UtBase {
 
     this.dispatchEvent(new CustomEvent("refresh-annotations", { bubbles: true, composed: true }));
 
-    if (isLocalUrl(this.manifestUrl)) {
+    if (isLocalUrl(this.manifest)) {
       const manifestId = this.manifestObject["@id"].split("/").pop();
       const canvasShortId = canvasId.split("/").pop();
       const listId = `${config.baseUrl}:${config.ports.existDb}${config.paths.annotations(config.componentName)}/${manifestId}/${canvasShortId}.json`;
@@ -415,7 +449,7 @@ export class PbTifyV2 extends UtBase {
                 </div>
               ` : null}
               <cp-mexport .manifestObject=${this.manifestObject}></cp-mexport>
-              <cp-url-copy .url=${this.manifestUrl}></cp-url-copy>
+              <cp-url-copy .url=${this.manifest}></cp-url-copy>
               <cp-snap .manifestObject=${this.manifestObject} .canvasIndex=${this.currentCanvasIndex}></cp-snap>
             </div>
             <div class="flex items-center gap-4 justify-end">
@@ -446,7 +480,7 @@ export class PbTifyV2 extends UtBase {
 
              <cp-anwrapper
               .activeAnnotations=${this.activeAnnotations}
-              .manifestUrl=${this.manifestUrl}
+              .manifest=${this.manifest}
               .manifestObject=${this.manifestObject}
               .canvasIndex=${this.currentCanvasIndex}
             ></cp-anwrapper>
@@ -479,4 +513,4 @@ export class PbTifyV2 extends UtBase {
   }
 }
 
-customElements.define("pb-tify-v2", PbTifyV2);
+customElements.define("ex-pb-tify", ExPbTify);

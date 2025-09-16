@@ -1,10 +1,10 @@
-# pb-tify-v2
+# ex-pb-tify
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/Node.js-%3E=16-green.svg)](https://nodejs.org/)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
 
-**pb-tify-v2** is a template project based on [`pb-extension-template`](https://github.com/eeditiones/pb-extension-template).  
+**ex-pb-tify** is a template project based on [`pb-extension-template`](https://github.com/eeditiones/pb-extension-template).  
 It extends the functionalities of **pb-tify** by introducing advanced features for IIIF manifest visualization, annotation handling, and user interaction.
 
 ---
@@ -42,7 +42,7 @@ It is developed as an extension of TEI Publisher’s component ecosystem and pro
 
 ### Installation
 
-`git clone https://github.com/Kalo9603/pb-tify-v2.git
+`git clone https://github.com/Kalo9603/ex-pb-tify.git
 npm start`
 
 * `index.html` – demo interface with components
@@ -66,10 +66,10 @@ The bundled files will be placed in the `dist/` directory.
 
 ## 🔗 Integration with TEI Publisher
 
-To use **pb-tify-v2** in a TEI Publisher app:
+To use **ex-pb-tify** in a TEI Publisher app:
 
 1. Add the dependency in your app’s `package.json`:
-   `"pb-tify-v2": "git+https://github.com/Kalo9603/pb-tify-v2.git#master" `
+   `"ex-pb-tify": "git+https://github.com/Kalo9603/ex-pb-tify.git#master" `
 2. In build.properties`, set:
     ` scripts.dir=dist `
 3. In `modules/config.xqm`, ensure:

@@ -1,17 +1,17 @@
 const getBaseUrl = (host = "localhost") => `http://${host}`;
-const getDbMainPath = (component = "pb-tify-v2") => `/exist/apps/${component}`;
+const getDbMainPath = (component = "ex-pb-tify") => `/exist/apps/${component}`;
 
-const getAnnotationsPath = (component = "pb-tify-v2") => `${getDbMainPath(component)}/annotations`;
-const getManifestsPath = (component = "pb-tify-v2") => `${getDbMainPath(component)}/manifest`;
-const getAPIPath = (component = "pb-tify-v2") => `${getDbMainPath(component)}/api`;
+const getAnnotationsPath = (component = "ex-pb-tify") => `${getDbMainPath(component)}/annotations`;
+const getManifestsPath = (component = "ex-pb-tify") => `${getDbMainPath(component)}/manifest`;
+const getAPIPath = (component = "ex-pb-tify") => `${getDbMainPath(component)}/api`;
 
-const getCreateEndpoint = (component = "pb-tify-v2") => `${getAPIPath(component)}/create`;
-const getUpdateEndpoint = (component = "pb-tify-v2") => `${getAPIPath(component)}/edit`;
-const getDeleteEndpoint = (component = "pb-tify-v2") => `${getAPIPath(component)}/delete`;
+const getCreateEndpoint = (component = "ex-pb-tify") => `${getAPIPath(component)}/create`;
+const getUpdateEndpoint = (component = "ex-pb-tify") => `${getAPIPath(component)}/edit`;
+const getDeleteEndpoint = (component = "ex-pb-tify") => `${getAPIPath(component)}/delete`;
 
 export const config = {
 
-  componentName: "pb-tify-v2",
+  componentName: "ex-pb-tify",
   host: "localhost",
 
   get baseUrl() {

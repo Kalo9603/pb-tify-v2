@@ -1,5 +1,5 @@
 
-import './src/pb-tify-v2.js';
+import './src/ex-pb-tify.js';
 
 import "./src/components/load/inputBar.js";
 import "./src/components/load/manifestImport.js";

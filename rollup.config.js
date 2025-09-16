@@ -2,9 +2,9 @@ import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
 
 export default {
-  input: 'src/pb-tify-v2.js',
+  input: 'src/ex-pb-tify.js',
   output: {
-    file: 'dist/pb-tify-v2.js',
+    file: 'dist/ex-pb-tify.js',
     format: 'esm',
   },
   plugins: [

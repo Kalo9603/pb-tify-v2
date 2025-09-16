@@ -41,22 +41,6 @@ export class UtBase extends pbMixin(LitElement) {
             head.appendChild(link);
         }
 
-        if (!document.querySelector("#colors-hex")) {
-            const chex = document.createElement("link");
-            chex.href = "../src/style/colors/colors-hex.css";
-            chex.rel = "stylesheet";
-            chex.id = "colors-hex";
-            head.appendChild(chex);
-        }
-
-        if (!document.querySelector("#colors-rgb")) {
-            const crgb = document.createElement("link");
-            crgb.href = "../src/style/colors/colors-rgba.css";
-            crgb.rel = "stylesheet";
-            crgb.id = "colors-rgb";
-            head.appendChild(crgb);
-        }
-
         if (!document.querySelector('link[data-fontawesome]')) {
             const fa = document.createElement('link');
             fa.rel = 'stylesheet';
