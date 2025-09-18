@@ -70,7 +70,7 @@ export class CpTitle extends UtBase {
 
   render() {
     if (!this.label)
-      return html`<div class="text-gray-500">No title available-</div>`;
+      return html`<div class="text-gray-500">No title available</div>`;
 
     return html`
             <div

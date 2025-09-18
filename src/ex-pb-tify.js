@@ -32,7 +32,7 @@ export class ExPbTify extends UtBase {
       selectedLanguage: { type: String },
       availableLanguages: { type: Array },
       currentCanvasIndex: { type: Number },
-      index: { type: Number, reflect: true },
+      index: { type: Number, reflect: true, attribute: "canvas-index" },
       frameData: { type: Object },
       annotationMode: { type: String },
       localAnnotations: { type: Array },
@@ -125,7 +125,7 @@ export class ExPbTify extends UtBase {
           });
 
         const inputBar = this.renderRoot.querySelector('cp-input-bar');
-        if (inputBar) inputBar.value = url; // aggiorna la barra
+        if (inputBar) inputBar.value = url;
       }
     }
 
@@ -422,10 +422,12 @@ export class ExPbTify extends UtBase {
     return html`
       <cp-alert id="alerts"></cp-alert>
       <div class="p-8">
-        <div class="flex items-center justify-center gap-4">
-          <cp-input-bar class="flex-grow max-w-[60%]" @URLsubmit></cp-input-bar>
-          <cp-mimport></cp-mimport>
-        </div>
+        ${!this.manifest ? html`
+          <div class="flex items-center justify-center gap-4">
+            <cp-input-bar class="flex-grow max-w-[60%]" @URLsubmit></cp-input-bar>
+            <cp-mimport></cp-mimport>
+          </div>
+        ` : null}
         <div class=${isLoaded ? "w-[85%] mx-auto my-8" : "hidden"}>
           <div class="mb-4 border rounded p-2 flex items-center justify-between">
             <div class="flex items-center gap-4">

@@ -7,3 +7,5 @@ https://cdm21059.contentdm.oclc.org/iiif/con-soppressi:5775/manifest.json
 https://e-codices.ch/metadata/iiif/dab-B0004/manifest.json
 https://digi.vatlib.it/iiif/MSS_Urb.lat.365/manifest.json
 https://iiif.lib.harvard.edu/manifests/drs:2586740
+https://teipublisher.com/exist/apps/tei-publisher/api/iiif/test/F-rom.xml
+https://localhost:8080/exist/apps/tei-publisher/api/iiif/test/F-rom.xml
