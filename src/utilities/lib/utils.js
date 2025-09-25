@@ -285,3 +285,38 @@ export function getColorVariant(originalClass, target = "bg", increment = 200) {
 export function generateId(prefix = "annotation") {
   return `${prefix}-${Math.random().toString(36).substring(2, 10)}`;
 }
+
+export function highlightMatches(text, matches = []) {
+  
+  if (!text) return "";
+
+  matches.sort((a, b) => a.indices[0] - b.indices[0]);
+
+  let highlighted = "";
+  let lastIndex = 0;
+
+  matches.forEach(m => {
+    const [start, end] = m.indices;
+
+    highlighted += text.slice(lastIndex, start);
+    const matchText = text.slice(start, end + 1);
+
+    if (m.isFuzzy) {
+      highlighted += `==FUZZY==${matchText}==`; 
+    } else {
+      highlighted += `==EXACT==${matchText}==`;
+    }
+
+    lastIndex = end + 1;
+  });
+
+  highlighted += text.slice(lastIndex);
+
+  let html = marked.parse(highlighted);
+
+  html = html
+    .replace(/==EXACT==(.+?)==/g, '<span class="bg-blue-500 text-white font-bold px-1">$1</span>')
+    .replace(/==FUZZY==(.+?)==/g, '<span class="bg-orange-400/50 font-bold italic px-1">$1</span>');
+
+  return DOMPurify.sanitize(html);
+}

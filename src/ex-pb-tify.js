@@ -133,7 +133,7 @@ export class ExPbTify extends UtBase {
       const canvases = this.manifestObject?.sequences?.[0]?.canvases || [];
       if (canvases.length && this.index >= 0 && this.index < canvases.length) {
         this.currentCanvasIndex = this.index;
-        this.showMessage("success", "canvasSet", { index: this.index + 1 });
+        this.showMessage("info", "canvasChange", { index: this.index });
       } else if (canvases.length) {
         this.showMessage("error", "invalidCanvasIndex", { index: this.index });
       }
@@ -288,7 +288,6 @@ export class ExPbTify extends UtBase {
       const target = this.index - 1;
       if (target >= 0 && target < canvases.length) {
         this.currentCanvasIndex = target;
-        this.showMessage("success", "canvasSet", { index: this.index }); // messaggio rimane one-based
       } else {
         this.showMessage("error", "invalidCanvasIndex", { index: this.index });
       }

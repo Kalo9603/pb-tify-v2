@@ -201,24 +201,25 @@ export class CpAnnotations extends UtBase {
           ${sortedAnnotations?.length > 0 ? html`
           
             <div class="flex gap-2 flex-wrap">
+              ${sortedAnnotations.map((ann, i) => {
+                  const viewer = this.renderRoot.querySelector("cp-anviewer");
+                  const filteredAnn = viewer?.filteredAnnotationsWithIndex.find(fa => fa.ann.full["@id"] === ann.id);
+                  const filteredIndex = filteredAnn?.filteredIndex ?? '—';
+                  
+                  const baseBg = getColorVariant(ann.color, "bg", 100);
+                  const hoverBg = getColorVariant(ann.color, "bg", -100);
+                  const borderClass = getColorVariant(ann.color, "border", 0);
 
-              ${sortedAnnotations.map((ann) => {
-                
-                const originalIndex = this._getOriginalAnnotationIndex(ann);
-                const baseBg = getColorVariant(ann.color, "bg", 100);
-                const hoverBg = getColorVariant(ann.color, "bg", -100);
-                const borderClass = getColorVariant(ann.color, "border", 0);
-
-                return html`
-                  <div
-                    class="flex items-center justify-center rounded-full text-white text-sm font-semibold select-none
-                          w-7 h-7 border-2 cursor-pointer transition-all duration-200 transform ${baseBg} ${borderClass} hover:${hoverBg} hover:shadow-[0_0_12px_3px_rgba(0,0,0,0.15)] hover:scale-105"
-                    @click=${() => this._scrollToAnnotation(ann.id)}
-                  >
-                    ${originalIndex || '—'}
-                  </div>
-                `;
-              })}
+                  return html`
+                    <div
+                      class="flex items-center justify-center rounded-full text-white text-sm font-semibold select-none
+                            w-7 h-7 border-2 cursor-pointer transition-all duration-200 transform ${baseBg} ${borderClass} hover:${hoverBg} hover:shadow-[0_0_12px_3px_rgba(0,0,0,0.15)] hover:scale-105"
+                      @click=${() => this._scrollToAnnotation(ann.id)}
+                    >
+                      ${filteredIndex + 1}
+                    </div>
+                  `;
+                })}
             </div>
           ` : ''}
         </header>

@@ -3,9 +3,10 @@ import { unsafeHTML } from "https://esm.sh/lit-html/directives/unsafe-html.js";
 import { UtBase } from "../../utilities/base.js";
 import {
   getMotivationIcon, generateId, isLocalUrl,
-  parseMarkdownToHtml, sanitizeHTML, getColorVariant
+  parseMarkdownToHtml, getColorVariant, highlightMatches
 } from "../../utilities/lib/utils.js";
 import { config } from "../../utilities/config.js";
+import Fuse from "https://esm.sh/fuse.js@6.6.2";
 import "./buttons/duplicate.js";
 import "./buttons/edit.js";
 import "./buttons/delete.js";
@@ -240,7 +241,7 @@ export class CpAnViewer extends UtBase {
     }
 
     this.dispatchEvent(new CustomEvent("annotations-count", {
-      detail: { count: this.annotations.length },
+      detail: { count: this.filteredAnnotations.length },
       bubbles: true,
       composed: true
     }));
@@ -256,11 +257,9 @@ export class CpAnViewer extends UtBase {
     }));
   }
 
-  toggleAnnotation(index) {
-
-    const ann = this.annotations[index];
-    const annId = ann.full["@id"] || `local-${index}`;
-    const region = ann?.region;
+  toggleAnnotation(annotation) {
+    const annId = annotation.full["@id"] || `local-${this.annotations.indexOf(annotation)}`;
+    const region = annotation.region;
     if (!region) return;
 
     const isAlreadyActive = this.activeAnnotations.find(a => a.id === annId);
@@ -272,13 +271,12 @@ export class CpAnViewer extends UtBase {
       }));
     } else {
       const { x, y, w, h } = this._parseXYWH(region);
-
       this.dispatchEvent(new CustomEvent("show-annotation", {
         detail: {
           id: annId,
           x, y, w, h,
-          chars: ann?.chars || "",
-          motivation: ann?.motivation || ""
+          chars: annotation.chars || "",
+          motivation: annotation.motivation || ""
         },
         bubbles: true, composed: true
       }));
@@ -319,15 +317,70 @@ export class CpAnViewer extends UtBase {
     this.requestUpdate("currentMode");
   }
 
+  get filteredAnnotations() {
+    if (!this.filterQuery?.trim()) {
+      return this.annotations.map(a => ({
+        ...a,
+        matches: []
+      }));
+    }
+
+    const fuse = new Fuse(this.annotations, {
+      keys: ["chars"],
+      includeScore: true,
+      includeMatches: true,
+      threshold: 0.4,
+      distance: 100,
+      minMatchCharLength: 2,
+      ignoreLocation: true
+    });
+
+    const results = fuse.search(this.filterQuery);
+
+    return results.map(r => {
+
+      const allMatches = [];
+
+      (r.matches || []).forEach(m => {
+        m.indices.forEach(([start, end]) => {
+          const matchText = r.item.chars.slice(start, end + 1);
+          const isFuzzy = matchText.toLowerCase() !== this.filterQuery.toLowerCase();
+          allMatches.push({ indices: [start, end], isFuzzy });
+        });
+      });
+
+      allMatches.sort((a, b) => a.indices[0] - b.indices[0]);
+
+      const dedupedMatches = [];
+      let lastEnd = -1;
+      for (const m of allMatches) {
+        const [start, end] = m.indices;
+        if (start > lastEnd) {
+          dedupedMatches.push(m);
+          lastEnd = end;
+        }
+      }
+
+      return {
+        ...r.item,
+        matches: dedupedMatches
+      };
+    });
+  }
+
+  get filteredAnnotationsWithIndex() {
+    return this.filteredAnnotations.map((ann, i) => ({
+      ann,
+      filteredIndex: i
+    }));
+  }
+
   render() {
+
     const multipleActive = this.activeAnnotations.length > 1;
 
-    const filteredAnnotations = this.annotations
-      .map((ann, originalIndex) => ({ ann, originalIndex }))
-      .filter(({ ann }) => {
-        const text = (ann.chars || "").toLowerCase();
-        return !this.filterQuery || text.includes(this.filterQuery);
-      });
+    const filteredAnnotations = this.filteredAnnotations
+      .map((ann, originalIndex) => ({ ann, originalIndex }));
 
     return html`
       ${this.annotations.length === 0
@@ -375,14 +428,14 @@ export class CpAnViewer extends UtBase {
 
                         ${ann.chars ? html`
                           <div class="prose prose-sm pt-1 break-all text-wrap wrap-anywhere hyphens-auto" id="${annId}">
-                            ${unsafeHTML(sanitizeHTML(ann.chars))}
+                            ${unsafeHTML(highlightMatches(ann.chars, ann.matches || []))}
                           </div>
                         ` : null}
                       </div>
 
                       <div class="flex flex-row items-center gap-2">
                         <button
-                          @click=${() => this.toggleAnnotation(originalIndex)}
+                          @click=${() => this.toggleAnnotation(ann)}
                           class="group flex items-center rounded-full shadow-xl transition-all duration-300 px-3 py-2 w-12 hover:w-28 overflow-hidden h-9
                             ${isActive ? "bg-red-600" : "bg-blue-600"} text-white hover:bg-red-800">
                           <div class="flex items-center justify-center w-full transition-all duration-300 group-hover:justify-start group-hover:gap-2">
