@@ -114,19 +114,21 @@ export class ExPbTify extends UtBase {
     super.updated?.(changedProps);
 
     if (changedProps.has('manifest')) {
-      const url = this.manifest;
-      if (url) {
-        fetch(url)
-          .then(res => res.json())
-          .then(manifest => this.loadManifest(manifest, url, false))
-          .catch(err => {
-            console.error(err);
-            this.showMessage('error', 'manifestLoad');
-          });
 
-        const inputBar = this.renderRoot.querySelector('cp-input-bar');
-        if (inputBar) inputBar.value = url;
-      }
+      const url = this.manifest;
+
+    if (!url || this.isLocalManifest) return;
+
+      fetch(url)
+        .then(res => res.json())
+        .then(manifest => this.loadManifest(manifest, url, false))
+        .catch(err => {
+          console.error(err);
+          this.showMessage('error', 'manifestLoad');
+        });
+
+      const inputBar = this.renderRoot.querySelector('cp-input-bar');
+      if (inputBar) inputBar.value = url;
     }
 
     if (changedProps.has("index")) {
